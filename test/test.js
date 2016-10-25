@@ -49,12 +49,12 @@ test('defining a record type', function(t){
 })
 
 test('create instance methods', function(t){
-    
+
     /* eslint-disable */
     const Maybe = Type(
         {Just: [T.Any], Nothing: []}
     );
-    
+
     Maybe.prototype.map = function(fn) {
         return Maybe.case({
             Nothing: () => Maybe.Nothing()
@@ -75,7 +75,7 @@ test('create instance methods', function(t){
 
 
 test('create instance methods declaratively', function(t){
-    
+
     /* eslint-disable */
     const Maybe = Class(
         'Maybe'
@@ -114,10 +114,12 @@ test('Fields can be described in terms of other types', function(t){
         ,Rectangle: [Point, Point]
     })
 
+
+
     const [radius, [x,y]] = Shape.Circle(4, Point.Point(2,3))
-    
+
     t.deepEqual([radius, x, y], [4, 2 ,3])
-    
+
 
     t.end()
 })
@@ -134,7 +136,7 @@ test('The values of a type can also have no fields at all', function(t){
 
 test('If a field value does not match the spec an error is thrown', function(t){
 
-const err = 
+const err =
 `TypeError: Invalid value
 
 Point.Point :: Number -> Number -> { x :: Number, y :: Number }
@@ -162,7 +164,7 @@ The value at position 1 is not a member of ‘Number’.
 
 test('Switching on union types', function(t){
 
-    const Action = 
+    const Action =
         Type(
             { Up: []
             , Right: []
@@ -221,7 +223,7 @@ test('Switch on union types point free', function(t){
 })
 
 test('Pass extra args to case via caseOn', function(t){
-     const Action = 
+     const Action =
         Type(
             { Up: []
             , Right: []
@@ -268,19 +270,19 @@ test('Destructuring assignment to extract values', function(t){
 
 test('Recursive Union Types', function(t){
     /* eslint-disable no-var */
-    var List = 
+    var List =
         Type({Nil: [], Cons: [T.Any, List]});
     /* eslint-enable no-var */
 
-    const toString = 
+    const toString =
         List.case({
             Cons: (head, tail) => head + ' : ' + toString(tail)
             ,Nil: () => 'Nil'
         })
 
-    const list = 
+    const list =
         List.Cons(1, List.Cons(2, List.Cons(3, List.Nil())));
-    
+
     t.equal('1 : 2 : 3 : Nil', toString(list) )
 
     t.end()
@@ -299,7 +301,7 @@ test('Disabling Type Checking', function(t){
     })
 
     const p = Point.Point('foo', 4);
-    
-    t.equal('foo', p.x)    
+
+    t.equal('foo', p.x)
     t.end()
 })
