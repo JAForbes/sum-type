@@ -3,7 +3,7 @@ const UnionType = require('../')
 const R = require('ramda')
 const T = require('sanctuary-def')
 
-const {Anonymous, Named} = UnionType({
+const {Anonymous, Named, Class} = UnionType({
     env: T.env
     ,check: true
 })
@@ -61,6 +61,37 @@ test('create instance methods', function(t){
             , Just: (v) => Maybe.Just(fn(v))
         }, this);
     }
+    /* eslint-enable */
+
+    const just = Maybe.Just(1);
+    const nothing = Maybe.Nothing();
+
+    just.map(R.add(1)); // => Just(2)
+
+    t.equal(nothing.map(R.add(1))._name, 'Nothing')
+    t.equal(Maybe.Just(4)[0], 4)
+    t.end()
+})
+
+
+test('create instance methods declaratively', function(t){
+    
+    /* eslint-disable */
+    const Maybe = Class(
+        'Maybe'
+        ,{ Just: [T.Any]
+        , Nothing: []
+        }
+        ,{
+            map( fn ){
+                return Maybe.case({
+                    Nothing: () => Maybe.Nothing()
+                    , Just: (v) => Maybe.Just(fn(v))
+                }, this)
+            }
+        }
+    );
+
     /* eslint-enable */
 
     const just = Maybe.Just(1);
@@ -141,9 +172,7 @@ test('Switching on union types', function(t){
             }
         );
 
-    /* eslint-disable no-var */
-    var player = {x: 0, y: 0};
-    /* eslint-enable no-var */
+    const player = {x: 0, y: 0};
 
     const advancePlayer = (action, player) =>
         Action.case({
@@ -202,9 +231,7 @@ test('Pass extra args to case via caseOn', function(t){
             }
         );
 
-    /* eslint-disable no-var */
-    var player = {x: 0, y: 0};
-    /* eslint-enable no-var */
+    const player = {x: 0, y: 0};
 
     const advancePlayer =
         Action.caseOn({

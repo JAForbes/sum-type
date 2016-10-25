@@ -101,198 +101,216 @@ function Setup({ check, ENV=T.env }){
             , R.filter(R.has('@@type'))
         )
 
-    const UnionType = 
-        def('UnionType', {}, [T.String, T.StrMap(T.Any), T.Any]
-        ,function Type(typeName, _enums){
-            
-            
-            /* eslint-disable immutable/no-mutation,immutable/no-let */
-            let Type = T.NullaryType(
-                typeName
-                ,a => a && a['@@type'] == typeName
+
+    function Type(typeName, _enums, prototype={}){
+
+        /* eslint-disable immutable/no-mutation,immutable/no-let */
+        let Type = T.NullaryType(
+            typeName
+            ,a => a && a['@@type'] == typeName
+        )
+        /* eslint-enable immutable/no-mutation,immutable/no-let */
+
+        const enums = R.map(
+            R.map(
+                R.pipe(
+                    v => typeof v == 'undefined' 
+                        ? Type
+                        : v
+
+                    , BuiltInType 
+                )
             )
-            /* eslint-enable immutable/no-mutation,immutable/no-let */
+            , _enums
+        )
+        
+        const keys =
+            Object.keys(enums)
+        
+        const placeHolderCase = 
+            T.RecordType({
+                _: T.Function([Type, a])
+            })
 
-            const enums = R.map(
-                R.map(
-                    R.pipe(
-                        v => typeof v == 'undefined' 
-                            ? Type
-                            : v
+        const caseRecordType =
+            CaseRecordType(keys,enums)
+        
+        const caseRecordUnion =
+            caseRecordType
 
-                        , BuiltInType 
-                    )
+        const env = 
+            R.uniq(
+                ENV.concat(
+                    Type
+                    , caseRecordUnion
+                    , caseRecordType
+                    , placeHolderCase
+                    , ...referencedUnions(enums)
                 )
-                , _enums
             )
-            
-            const keys =
-                Object.keys(enums)
-            
-            const placeHolderCase = 
-                T.RecordType({
-                    _: T.Function([Type, a])
-                })
 
-            const caseRecordType =
-                CaseRecordType(keys,enums)
-            
-            const caseRecordUnion =
-                caseRecordType
+        const def = T.create({ checkTypes: check, env })
 
-            const env = 
-                R.uniq(
-                    ENV.concat(
-                        Type
-                        , caseRecordUnion
-                        , caseRecordType
-                        , placeHolderCase
-                        , ...referencedUnions(enums)
-                    )
-                )
+        function boundStaticCase(options){
+            /* eslint-disable immutable/no-this */
+            return staticCase(options, this)
+            /* eslint-enable immutable/no-this */
+        }
 
-            const def = T.create({ checkTypes: check, env })
+        const instanceCaseDef = 
+            def(
+                typeName+'::case'
+                ,{}
+                ,[ caseRecordUnion, a ]
+                ,boundStaticCase
+            )
 
-            function boundStaticCase(options){
-                /* eslint-disable immutable/no-this */
-                return staticCase(options, this)
-                /* eslint-enable immutable/no-this */
-            }
+        const flexibleInstanceCase =
+            R.ifElse(
+                R.has('_')
+                ,boundStaticCase
+                ,instanceCaseDef
+            )
 
-            const instanceCaseDef = 
-                def(
-                    typeName+'::case'
-                    ,{}
-                    ,[ caseRecordUnion, a ]
-                    ,boundStaticCase
-                )
-
-            const flexibleInstanceCase =
-                R.ifElse(
-                    R.has('_')
-                    ,boundStaticCase
-                    ,instanceCaseDef
-                )
-
-            /* eslint-disable immutable/no-mutation */
-            Type.prototype = {
+        /* eslint-disable immutable/no-mutation */
+        Type.prototype = Object.assign(
+            prototype
+            ,{
                 '@@type': typeName
                 ,case: flexibleInstanceCase
                 ,env
             }
+        )
 
-            Type.prototype.case.toString =
-            Type.prototype.case.inspect =
-                instanceCaseDef.toString
-            
-            /* eslint-enable immutable/no-mutation */
-            const staticCaseDef =
-                def(
-                    typeName+'.case'
-                    ,{ }
-                    ,[ caseRecordUnion, Type, a]
-                    ,staticCase
-                )
-            
-            const flexibleStaticCase = 
-                R.ifElse(
-                    R.has('_')
-                    ,staticCase
-                    ,staticCaseDef
-                )
-            
-            /* eslint-disable immutable/no-mutation */
-            Type.case = flexibleStaticCase
-
-            Type.case.toString =
-            Type.case.inspect =
-                staticCaseDef.toString
-
-            // caseOn cannot be strongly typed because it is variadic
-            // if people want to use it they can, but they are on their own
-            // expects at least 4 args
-            Type.caseOn = R.curryN(3, staticCase)
-            /* eslint-enable immutable/no-mutation */
-
-            function objConstructorOf(keys, name){
-                return r => 
-                    Object.assign(
-                        Object.create(Type.prototype)
-                        , r
-                        ,{ _keys: keys 
-                        , _name: name
-                        , [Symbol.iterator]: createIterator 
-                        }
-
-                    )
-            }
-
-            const constructors =
-                keys
-                    .map(function(k){
-
-                        const type = enums[k]
-
-                        const [keys, _types] =  
-                            Array.isArray(type)
-                                ? [ R.range(0, type.length), type ]
-                                : [ R.keys(type), R.values(type) ]
-
-                        const types =
-                            _types.map(
-                                t => typeof t === 'undefined' 
-                                    ? Type
-                                    : t
-                            )
-
-                        const recordType =
-                            T.RecordType(
-                                R.zipObj(keys,types)
-                            )
-
-                        return {
-                            [k+'Of']: 
-                                def(
-                                    typeName+'.'+k+'Of'
-                                    ,{}
-                                    ,[recordType, recordType]
-                                    ,objConstructorOf(keys, k)
-                                )
-                            ,[k]:
-                                def(
-                                    typeName+'.'+k
-                                    ,{}
-                                    ,types.concat(recordType)
-                                    ,R.compose(
-                                        objConstructorOf(keys, k)
-                                        ,R.unapply(R.zipObj(keys))
-                                    )
-                                ) 
-                        }
-                    })
-
-            return Object.assign(
-                Type
-                ,...constructors
+        Type.prototype.case.toString =
+        Type.prototype.case.inspect =
+            instanceCaseDef.toString
+        
+        /* eslint-enable immutable/no-mutation */
+        const staticCaseDef =
+            def(
+                typeName+'.case'
+                ,{ }
+                ,[ caseRecordUnion, Type, a]
+                ,staticCase
             )
-        })
+        
+        const flexibleStaticCase = 
+            R.ifElse(
+                R.has('_')
+                ,staticCase
+                ,staticCaseDef
+            )
+        
+        /* eslint-disable immutable/no-mutation */
+        Type.case = flexibleStaticCase
+
+        Type.case.toString =
+        Type.case.inspect =
+            staticCaseDef.toString
+
+        // caseOn cannot be strongly typed because it is variadic
+        // if people want to use it they can, but they are on their own
+        // expects at least 4 args
+        Type.caseOn = R.curryN(3, staticCase)
+        /* eslint-enable immutable/no-mutation */
+
+        function objConstructorOf(keys, name){
+            return r => 
+                Object.assign(
+                    Object.create(Type.prototype)
+                    , r
+                    ,{ _keys: keys 
+                    , _name: name
+                    , [Symbol.iterator]: createIterator 
+                    }
+
+                )
+        }
+
+        const constructors =
+            keys
+                .map(function(k){
+
+                    const type = enums[k]
+
+                    const [keys, _types] =  
+                        Array.isArray(type)
+                            ? [ R.range(0, type.length), type ]
+                            : [ R.keys(type), R.values(type) ]
+
+                    const types =
+                        _types.map(
+                            t => typeof t === 'undefined' 
+                                ? Type
+                                : t
+                        )
+
+                    const recordType =
+                        T.RecordType(
+                            R.zipObj(keys,types)
+                        )
+
+                    return {
+                        [k+'Of']: 
+                            def(
+                                typeName+'.'+k+'Of'
+                                ,{}
+                                ,[recordType, recordType]
+                                ,objConstructorOf(keys, k)
+                            )
+                        ,[k]:
+                            def(
+                                typeName+'.'+k
+                                ,{}
+                                ,types.concat(recordType)
+                                ,R.compose(
+                                    objConstructorOf(keys, k)
+                                    ,R.unapply(R.zipObj(keys))
+                                )
+                            ) 
+                    }
+                })
+
+        return Object.assign(
+            Type
+            ,...constructors
+        )
+    }
+
+    const Named = 
+        def(
+            'UnionType.Named'
+            , {}
+            , [T.String, T.StrMap(T.Any), T.Any]
+            , Type
+        )
 
     const Anonymous = 
         def(
-            'UnionType'
+            'UnionType.Anonymous'
             ,{}
             ,[T.StrMap(T.Any), T.Any]
             ,function(enums){
-                return UnionType(
+                return Type(
                     '('+Object.keys(enums).join(' | ')+')'
                     , enums
                 )
             }
         )
 
+    const Class = 
+        def(
+            'UnionType.Class'
+            ,{}
+            ,[T.String, T.StrMap(T.Any), T.Object, T.Any]
+            ,Type
+        )
+
     return {
         Anonymous
-        ,Named: UnionType
+        ,Named
+        ,Class
     }
 }
 
