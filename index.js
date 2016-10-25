@@ -1,4 +1,4 @@
-/* global Symbol */
+/* global Symbol,module */
 const T = require('sanctuary-def')
 const R = require('ramda')
 
@@ -48,6 +48,7 @@ function Setup({ check, ENV=T.env }){
     const a = T.TypeVariable('a')
 
     function createIterator() {
+        /* eslint-disable immutable/no-this */
         return {
             idx: 0
             
@@ -60,7 +61,8 @@ function Setup({ check, ENV=T.env }){
                     ? {done: true}
                     : {value: this.val[keys[this.idx++]]};
             }
-        };
+        }
+        /* eslint-enable immutable/no-this */
     }
 
     function staticCase(options, b, ...args){
@@ -102,11 +104,14 @@ function Setup({ check, ENV=T.env }){
     const UnionType = 
         def('UnionType', {}, [T.String, T.StrMap(T.Any), T.Any]
         ,function Type(typeName, _enums){
-
+            
+            
+            /* eslint-disable immutable/no-mutation,immutable/no-let */
             let Type = T.NullaryType(
                 typeName
                 ,a => a && a['@@type'] == typeName
             )
+            /* eslint-enable immutable/no-mutation,immutable/no-let */
 
             const enums = R.map(
                 R.map(
@@ -149,7 +154,9 @@ function Setup({ check, ENV=T.env }){
             const def = T.create({ checkTypes: check, env })
 
             function boundStaticCase(options){
+                /* eslint-disable immutable/no-this */
                 return staticCase(options, this)
+                /* eslint-enable immutable/no-this */
             }
 
             const instanceCaseDef = 
@@ -167,6 +174,7 @@ function Setup({ check, ENV=T.env }){
                     ,instanceCaseDef
                 )
 
+            /* eslint-disable immutable/no-mutation */
             Type.prototype = {
                 '@@type': typeName
                 ,case: flexibleInstanceCase
@@ -177,6 +185,7 @@ function Setup({ check, ENV=T.env }){
             Type.prototype.case.inspect =
                 instanceCaseDef.toString
             
+            /* eslint-enable immutable/no-mutation */
             const staticCaseDef =
                 def(
                     typeName+'.case'
@@ -192,6 +201,7 @@ function Setup({ check, ENV=T.env }){
                     ,staticCaseDef
                 )
             
+            /* eslint-disable immutable/no-mutation */
             Type.case = flexibleStaticCase
 
             Type.case.toString =
@@ -202,6 +212,7 @@ function Setup({ check, ENV=T.env }){
             // if people want to use it they can, but they are on their own
             // expects at least 4 args
             Type.caseOn = R.curryN(3, staticCase)
+            /* eslint-enable immutable/no-mutation */
 
             function objConstructorOf(keys, name){
                 return r => 
@@ -285,4 +296,5 @@ function Setup({ check, ENV=T.env }){
     }
 }
 
+/* eslint-disable immutable/no-mutation */
 module.exports = Setup

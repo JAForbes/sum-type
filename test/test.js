@@ -50,16 +50,18 @@ test('defining a record type', function(t){
 
 test('create instance methods', function(t){
     
+    /* eslint-disable */
     const Maybe = Type(
         {Just: [T.Any], Nothing: []}
     );
-
+    
     Maybe.prototype.map = function(fn) {
         return Maybe.case({
-            Nothing: () => Maybe.Nothing(),
-            Just: (v) => Maybe.Just(fn(v))
+            Nothing: () => Maybe.Nothing()
+            , Just: (v) => Maybe.Just(fn(v))
         }, this);
     }
+    /* eslint-enable */
 
     const just = Maybe.Just(1);
     const nothing = Maybe.Nothing();
@@ -77,8 +79,8 @@ test('Fields can be described in terms of other types', function(t){
     )
 
     const Shape = Type({
-        Circle: [Number, Point],
-        Rectangle: [Point, Point]
+        Circle: [Number, Point]
+        ,Rectangle: [Point, Point]
     })
 
     const [radius, [x,y]] = Shape.Circle(4, Point.Point(2,3))
@@ -99,7 +101,7 @@ test('The values of a type can also have no fields at all', function(t){
     t.end()
 })
 
-test('If a field value does not match the specification an error is thrown', function(t){
+test('If a field value does not match the spec an error is thrown', function(t){
 
 const err = 
 `TypeError: Invalid value
@@ -139,15 +141,17 @@ test('Switching on union types', function(t){
             }
         );
 
+    /* eslint-disable no-var */
     var player = {x: 0, y: 0};
+    /* eslint-enable no-var */
 
     const advancePlayer = (action, player) =>
         Action.case({
-            Up: () => ({x: player.x, y: player.y - 1}),
-            Right: () => ({x: player.x + 1, y: player.y}),
-            Down: () => ({x: player.x, y: player.y + 1}),
-            Left: () => ({x: player.x - 1, y: player.y}),
-            _: () => player
+            Up: () => ({x: player.x, y: player.y - 1})
+            ,Right: () => ({x: player.x + 1, y: player.y})
+            ,Down: () => ({x: player.x, y: player.y + 1})
+            ,Left: () => ({x: player.x - 1, y: player.y})
+            ,_: () => player
         }, action)
 
     t.deepEqual(
@@ -198,14 +202,16 @@ test('Pass extra args to case via caseOn', function(t){
             }
         );
 
+    /* eslint-disable no-var */
     var player = {x: 0, y: 0};
+    /* eslint-enable no-var */
 
     const advancePlayer =
         Action.caseOn({
-            Up: () => ({x: player.x, y: player.y - 1}),
-            Right: () => ({x: player.x + 1, y: player.y}),
-            Down: () => ({x: player.x, y: player.y + 1}),
-            Left: () => ({x: player.x - 1, y: player.y})
+            Up: () => ({x: player.x, y: player.y - 1})
+            , Right: () => ({x: player.x + 1, y: player.y})
+            , Down: () => ({x: player.x, y: player.y + 1})
+            , Left: () => ({x: player.x - 1, y: player.y})
         })
 
     t.deepEqual(
@@ -234,8 +240,10 @@ test('Destructuring assignment to extract values', function(t){
 })
 
 test('Recursive Union Types', function(t){
+    /* eslint-disable no-var */
     var List = 
         Type({Nil: [], Cons: [T.Any, List]});
+    /* eslint-enable no-var */
 
     const toString = 
         List.case({
