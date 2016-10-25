@@ -1,0 +1,21 @@
+{
+  "name": "sanctuary-union-type",
+  "version": "0.0.0",
+  "description": "When two libraries love eachother very much...",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "james.a.forbes@gmail.com <=> (http://james-forbes.com)",
+  "license": "MIT",
+  "devDependencies": {
+    "tape": "^4.6.2"
+  },
+  "dependencies": {
+    "ramda": "^0.22.1",
+    "sanctuary-def": "github:sanctuary-js/sanctuary-def"
+  }
+}
