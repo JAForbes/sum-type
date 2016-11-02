@@ -1,142 +1,160 @@
-const test = require('tape')
-const UnionType = require('../')
-const R = require('ramda')
-const T = require('sanctuary-def')
+const test = require('tape');
+const UnionType = require('../');
+const R = require('ramda');
+const T = require('sanctuary-def');
 
-const {Anonymous, Named, Class} = UnionType({
-    env: T.env
-    ,check: true
-})
+const UT = UnionType({
+  env: T.env,
+  check: true,
+});
 
-const Type = Anonymous
+const Type = UT.Anonymous;
+const Named = UT.Named;
+const Class = UT.Class;
 
-test('defining a union type with predicates', function(t){
-    const Num = n => typeof n == 'number'
+test('defining a union type with predicates', t => {
+  const Num = n => typeof n === 'number';
 
-    const Point = Type(
-        { Point: [Num, Num] }
-    )
+  const Point = Type(
+    {Point: [Num, Num]}
+  );
+  const p = Point.Point(2, 3);
 
-    const [x,y] = Point.Point(2,3)
+  const [x, y] = p;
 
-    t.deepEqual([x,y], [2,3])
-    t.end()
-})
+  t.deepEqual([x, y], [2, 3]);
+  t.end();
+});
 
-test('defining a union type with built ins', function(t){
+test('defining a union type with built ins', t => {
 
-    const Point = Type(
-        {Point: [Number, Number]}
-    )
+  const I = R.identity;
 
-    const [x,y] = Point.Point(2,3)
+  /* eslint-disable comma-dangle */
+  [
+    [2, Number, I],
+    ['2', String, I],
+    [true, Boolean, I],
+    [{a: 1}, Object, I],
+    [[0, 1, 2], Array, I],
+    [() => 1, Function, f => f()]
+  ]
+  /* eslint-enable comma-dangle */
 
-    t.deepEqual([x,y], [2,3])
-    t.end()
-})
+  .forEach(
+    ([expected, T, f]) => {
+      const Class = Type({T: [T]});
+      const instance = Class.T(expected);
+      const actual = instance[0];
 
-test('defining a record type', function(t){
-    const Point = Type(
-        {Point: {x: Number, y: Number}}
-    )
-
-    const [x,y] = Point.Point(2,3)
-
-    const [x1,y1] = Point.PointOf({x: 2, y:3 })
-
-    t.deepEqual([x,y], [x1,y1])
-    t.end()
-})
-
-test('create instance methods', function(t){
-
-    /* eslint-disable */
-    const Maybe = Type(
-        {Just: [T.Any], Nothing: []}
-    );
-
-    Maybe.prototype.map = function(fn) {
-        return Maybe.case({
-            Nothing: () => Maybe.Nothing()
-            , Just: (v) => Maybe.Just(fn(v))
-        }, this);
+      t.deepEqual(f(expected), f(actual));
     }
-    /* eslint-enable */
+  );
 
-    const just = Maybe.Just(1);
-    const nothing = Maybe.Nothing();
+  t.end();
+});
 
-    just.map(R.add(1)); // => Just(2)
+test('defining a record type', t => {
+  const Point = Type(
+    {Point: {x: Number, y: Number}}
+  );
 
-    t.equal(nothing.map(R.add(1))._name, 'Nothing')
-    t.equal(Maybe.Just(4)[0], 4)
-    t.end()
-})
+  const [x, y] = Point.Point(2, 3);
 
+  const [x1, y1] = Point.PointOf({x: 2, y: 3});
 
-test('create instance methods declaratively', function(t){
+  t.deepEqual([x, y], [x1, y1]);
+  t.end();
+});
 
-    /* eslint-disable */
-    const Maybe = Class(
-        'Maybe'
-        ,{ Just: [T.Any]
-        , Nothing: []
-        }
-        ,{
-            map( fn ){
-                return Maybe.case({
-                    Nothing: () => Maybe.Nothing()
-                    , Just: (v) => Maybe.Just(fn(v))
-                }, this)
-            }
-        }
-    );
+test('create instance methods', t => {
 
-    /* eslint-enable */
+  /* eslint-disable */
+  const Maybe = Type({
+    Just: [T.Any]
+    , Nothing: []
+  });
 
-    const just = Maybe.Just(1);
-    const nothing = Maybe.Nothing();
+  Maybe.prototype.map = function(fn) {
+    return Maybe.case({
+      Nothing: () => Maybe.Nothing()
+      , Just: (v) => Maybe.Just(fn(v))
+    }, this);
+  }
+  /* eslint-enable */
 
-    just.map(R.add(1)); // => Just(2)
+  const just = Maybe.Just(1);
+  const nothing = Maybe.Nothing();
+  just.map(R.add(1)); // => Just(2)
 
-    t.equal(nothing.map(R.add(1))._name, 'Nothing')
-    t.equal(Maybe.Just(4)[0], 4)
-    t.end()
-})
-
-test('Fields can be described in terms of other types', function(t){
-    const Point = Type(
-        {Point: {x: Number, y: Number}}
-    )
-
-    const Shape = Type({
-        Circle: [Number, Point]
-        ,Rectangle: [Point, Point]
-    })
+  t.equal(nothing.map(R.add(1))._name, 'Nothing');
+  t.equal(Maybe.Just(4)[0], 4);
+  t.end();
+});
 
 
+test('create instance methods declaratively', t => {
 
-    const [radius, [x,y]] = Shape.Circle(4, Point.Point(2,3))
+  /* eslint-disable */
+  const Maybe = Class(
+    'Maybe'
+    ,{ Just: [T.Any]
+    , Nothing: []
+    }
+    ,{
+      map( fn ){
+        return Maybe.case({
+          Nothing: () => Maybe.Nothing()
+          , Just: (v) => Maybe.Just(fn(v))
+        }, this)
+      }
+    }
+  );
 
-    t.deepEqual([radius, x, y], [4, 2 ,3])
+  /* eslint-enable */
+
+  const just = Maybe.Just(1);
+  const nothing = Maybe.Nothing();
+
+  just.map(R.add(1)); // => Just(2)
+
+  t.equal(nothing.map(R.add(1))._name, 'Nothing');
+  t.equal(Maybe.Just(4)[0], 4);
+  t.end();
+});
+
+test('Fields can be described in terms of other types', t => {
+  const Point = Type(
+    {Point: {x: Number, y: Number}}
+  );
+
+  const Shape = Type({
+    Circle: [Number, Point],
+    Rectangle: [Point, Point],
+  });
 
 
-    t.end()
-})
+  const [radius, [x, y]] = Shape.Circle(4, Point.Point(2, 3));
 
-test('The values of a type can also have no fields at all', function(t){
-    const NotifySetting = Type(
-        {Mute: [], Vibrate: [], Sound: [T.Number]}
-    )
+  t.deepEqual([radius, x, y], [4, 2, 3]);
 
-    t.equal('Mute', NotifySetting.Mute()._name)
 
-    t.end()
-})
+  t.end();
+});
 
-test('If a field value does not match the spec an error is thrown', function(t){
+test('The values of a type can also have no fields at all', t => {
+  const NotifySetting = Type(
+    {Mute: [], Vibrate: [], Sound: [T.Number]}
+  );
 
-const err =
+  t.equal('Mute', NotifySetting.Mute()._name);
+
+  t.end();
+});
+
+test('If a field value does not match the spec an error is thrown', t => {
+
+  const err =
 `TypeError: Invalid value
 
 Point.Point :: Number -> Number -> { x :: Number, y :: Number }
@@ -146,162 +164,241 @@ Point.Point :: Number -> Number -> { x :: Number, y :: Number }
 1)  "foo" :: String
 
 The value at position 1 is not a member of ‘Number’.
-`
+`;
 
-    const Point = Named(
-        'Point'
-        ,{ Point: {x: Number, y: Number} }
-    )
+  const Point = Named(
+    'Point'
+    , {Point: {x: Number, y: Number}}
+  );
 
-    try {
-        Point.Point(4, 'foo');
-    } catch( e ){
-        t.equal(e.toString(), err)
-    }
+  try {
+    Point.Point(4, 'foo');
+  } catch (e){
+    t.equal(err, e.toString());
+  }
 
-    t.end()
-})
+  t.end();
+});
 
-test('Switching on union types', function(t){
+test('Switching on union types', t => {
 
-    const Action =
-        Type(
-            { Up: []
-            , Right: []
-            , Down: []
-            , Left: []
-            , Jump: []
-            }
-        );
+  const Action =
+    Type({
+      Up: [],
+      Right: [],
+      Down: [],
+      Left: [],
+    });
 
-    const player = {x: 0, y: 0};
+  const player = {x: 0, y: 0};
 
-    const advancePlayer = (action, player) =>
-        Action.case({
-            Up: () => ({x: player.x, y: player.y - 1})
-            ,Right: () => ({x: player.x + 1, y: player.y})
-            ,Down: () => ({x: player.x, y: player.y + 1})
-            ,Left: () => ({x: player.x - 1, y: player.y})
-            ,_: () => player
-        }, action)
+  const advancePlayer = (action, player) =>
+    Action.case({
+      Up: () => ({x: player.x, y: player.y - 1}),
+      Right: () => ({x: player.x + 1, y: player.y}),
+      Down: () => ({x: player.x, y: player.y + 1}),
+      Left: () => ({x: player.x - 1, y: player.y}),
+    }, action);
 
-    t.deepEqual(
-        { x: 0, y: -1}
-        ,advancePlayer(Action.Up(), player)
-    )
+  t.deepEqual(
+    {x: 0, y: -1},
+    advancePlayer(Action.Up(), player)
+  );
 
+  t.end();
 
-    t.end()
+});
 
-})
+test('Switch on union types point free', t => {
 
-test('Switch on union types point free', function(t){
+  const Point = Type(
+    {Point: {x: T.Number, y: T.Number}}
+  );
 
-    const Point = Type(
-        { Point: {x: T.Number, y: T.Number}}
-    )
+  const Shape = Type({
+    Circle: [T.Number, Point],
+    Rectangle: [Point, Point],
+  });
 
-    const Shape = Type({
-        Circle: [T.Number, Point]
-        ,Rectangle: [Point, Point]
-    })
+  const p1 = Point.PointOf({x: 0, y: 0});
+  const p2 = Point.PointOf({x: 10, y: 10});
 
+  {
     const area = Shape.case({
-        Circle: (radius, _) => Math.PI * radius * radius
-        ,Rectangle: (p1, p2) => (p2.x - p1.x) * (p2.y - p1.y)
-    })
+      Circle: (radius, _) => Math.PI * radius * radius,
+      Rectangle: (p1, p2) => (p2.x - p1.x) * (p2.y - p1.y),
+    });
 
-    const p1 = Point.PointOf({ x: 0, y: 0 })
-    const p2 = Point.PointOf({ x: 10, y: 10 })
+    const rect = Shape.Rectangle(p1, p2);
 
     t.equal(
-        100
-        , area( Shape.Rectangle(p1,p2) )
-    )
+      100
+      , area(rect)
+    );
+  }
 
-    t.end()
-})
+  {
+    const rect = Shape.Rectangle(p1, p2);
 
-test('Pass extra args to case via caseOn', function(t){
-     const Action =
-        Type(
-            { Up: []
-            , Right: []
-            , Down: []
-            , Left: []
-            , Jump: []
-            }
-        );
+    const area = rect.case({
+      Circle: (radius, _) => Math.PI * radius * radius,
+      Rectangle: (p1, p2) => (p2.x - p1.x) * (p2.y - p1.y),
+    });
+    console.log('after', area);
 
-    const player = {x: 0, y: 0};
+    t.equal(
+      100
+      , area
+    );
 
-    const advancePlayer =
-        Action.caseOn({
-            Up: () => ({x: player.x, y: player.y - 1})
-            , Right: () => ({x: player.x + 1, y: player.y})
-            , Down: () => ({x: player.x, y: player.y + 1})
-            , Left: () => ({x: player.x - 1, y: player.y})
-        })
+  }
+  t.end();
+});
 
-    t.deepEqual(
-        { x: 0, y: -1}
-        ,advancePlayer(Action.Up(), player, 1)
-    )
+test('Pass extra args to case via caseOn', t => {
+  const Action =
+    Type({
+      Up: [],
+      Right: [],
+      Down: [],
+      Left: [],
+    });
 
-    t.end()
-})
+  const player = {x: 0, y: 0};
 
-test('Destructuring assignment to extract values', function(t){
+  const advancePlayer =
+    Action.caseOn({
+      Up: (p, ...extra) => ['Up', p, ...extra],
+      Right: (p, ...extra) => ['Down', p, ...extra],
+      Down: (p, ...extra) => ['Left', p, ...extra],
+      Left: (p, ...extra) => ['Right', p, ...extra],
+    });
 
-    const Point = Type(
-        {Point: { x: Number, y: Number }}
-    )
+  t.deepEqual(
+    ['Up', {x: 0, y: 0}, 1, 2, 3]
+    , advancePlayer(Action.Up(), player, 1, 2, 3)
+  );
 
-    const [x,y] = Point.PointOf({x: 0, y: 0 })
+  t.end();
+});
 
-    t.deepEqual(
-        { x: 0, y: 0}
-        ,{ x, y }
-    )
+test('Destructuring assignment to extract values', t => {
 
-    t.end()
+  const Point = Type(
+    {Point: {x: Number, y: Number}}
+  );
 
-})
+  const [x, y] = Point.PointOf({x: 0, y: 0});
 
-test('Recursive Union Types', function(t){
-    /* eslint-disable no-var */
-    var List =
-        Type({Nil: [], Cons: [T.Any, List]});
-    /* eslint-enable no-var */
+  t.deepEqual(
+    {x: 0, y: 0},
+    {x, y}
+  );
 
-    const toString =
-        List.case({
-            Cons: (head, tail) => head + ' : ' + toString(tail)
-            ,Nil: () => 'Nil'
-        })
+  t.end();
 
-    const list =
-        List.Cons(1, List.Cons(2, List.Cons(3, List.Nil())));
+});
 
-    t.equal('1 : 2 : 3 : Nil', toString(list) )
+test('Recursive Union Types', t => {
+  /* eslint-disable no-var */
+  var List =
+    Type({Nil: [], Cons: [T.Any, List]});
+  /* eslint-enable no-var */
 
-    t.end()
-})
+  const toString =
+    List.case({
+      Cons: (head, tail) => `${head} : ${toString(tail)}`,
+      Nil: () => 'Nil',
+    });
 
-test('Disabling Type Checking', function(t){
+  const list =
+    List.Cons(1, List.Cons(2, List.Cons(3, List.Nil())));
 
-    const Type = UnionType({
-        env: T.env
-        ,check: false
-    })
-        .Anonymous
+  t.equal('1 : 2 : 3 : Nil', toString(list));
 
-    const Point = Type({
-        Point: {x: Number, y: Number}
-    })
+  t.end();
+});
 
-    const p = Point.Point('foo', 4);
+test('Disabling Type Checking', t => {
 
-    t.equal('foo', p.x)
-    t.end()
-})
+  const Type = UnionType({
+    env: T.env,
+    check: false,
+  })
+    .Anonymous;
+
+  const Point = Type({
+    Point: {x: Number, y: Number},
+  });
+
+  const p = Point.Point('foo', 4);
+
+  t.equal('foo', p.x);
+  t.end();
+});
+
+test('Use placeholder for cases without matches', t => {
+  /* eslint-disable no-var */
+  var List =
+    Type({Nil: [], Cons: [T.Any, List]});
+  /* eslint-disable no-var */
+
+  t.equal(
+    'Nil'
+    , List.case({
+      Cons: () => 'Cons',
+      _: () => 'Nil',
+    }, List.Nil())
+  );
+
+  const actual = List.Nil().case({
+    Cons: () => 'Cons',
+    _: () => 'Nil',
+  });
+
+  t.equal('Nil', actual);
+
+  t.end();
+
+});
+
+test('caseOn throws an error when not all cases are covered', t => {
+
+  const NotifySetting = Type(
+    {Mute: [], Vibrate: [], Sound: [T.Number]}
+  );
+
+  try {
+
+    NotifySetting.caseOn({
+      Vibrate: () => 'Mute',
+    }, NotifySetting.Mute(), 1, 2);
+  } catch (e) {
+    t.equal(e.toString(), 'TypeError: Non exhaustive case statement');
+  }
+
+  t.end();
+
+});
+
+test('Create a Type with no cases', t => {
+  Type({});
+
+  t.end();
+});
+
+test('Can iterate through a instance\'s values', t => {
+  const T = Type({
+    Values: [Number, Number, Number],
+  });
+
+  const instance = T.Values(1, 2, 3);
+
+  t.plan(3);
+
+  for (const v of instance){
+    t.ok(v);
+  }
+
+  t.end();
+});

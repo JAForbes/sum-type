@@ -1,17 +1,25 @@
 {
   "name": "sanctuary-union-type",
   "version": "0.0.0",
-  "description": "When two libraries love eachother very much...",
+  "description": "Descendant of paldepind/union-type with more descriptive error messages",
   "main": "index.js",
   "directories": {
     "test": "test"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "npm run test:test && npm run test:lint",
+    "test:test": "istanbul cover test/test.js",
+    "test:lint": "eslint -c .eslintrc ."
   },
-  "author": "james.a.forbes@gmail.com <=> (http://james-forbes.com)",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/sanctuary-js/sanctuary-union-type.git"
+  },
   "license": "MIT",
   "devDependencies": {
+    "eslint": "^3.9.0",
+    "eslint-plugin-immutable": "*",
+    "istanbul": "^0.4.5",
     "tape": "^4.6.2"
   },
   "dependencies": {

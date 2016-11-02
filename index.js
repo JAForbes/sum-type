@@ -16,7 +16,7 @@ function mapConstrToFn(constr) {
     : constr === Object
         ? T.Object
     : constr === Array
-        ? T.Array
+        ? T.Array(T.Any)
     : constr === Function
         ? T.AnyFunction
     : constr
@@ -219,12 +219,16 @@ function Setup({ check, ENV=T.env }){
                 ,boundStaticCase
             )
 
-        const flexibleInstanceCase =
-            R.ifElse(
-                R.has('_')
-                ,boundStaticCase
-                ,instanceCaseDef
-            )
+        const flexibleInstanceCase = function(o, ...args){
+          if (o._){
+
+            //eslint-disable-next-line immutable/no-this
+            return boundStaticCase.apply(this, [o, ...args]);
+          } else {
+            //eslint-disable-next-line immutable/no-this
+            return instanceCaseDef.apply(this, [o, ...args]);
+          }
+        };
 
         /* eslint-disable immutable/no-mutation */
         Type.prototype = Object.assign(
@@ -249,12 +253,15 @@ function Setup({ check, ENV=T.env }){
                 ,staticCase
             )
 
-        const flexibleStaticCase =
-            R.ifElse(
-                R.has('_')
-                ,staticCase
-                ,staticCaseDef
-            )
+        function flexibleStaticCase(o, ...args){
+          if (o._){
+            //eslint-disable-next-line immutable/no-this
+            return R.curryN(2, staticCase).apply(this, [o, ...args]);
+          } else {
+            //eslint-disable-next-line immutable/no-this
+            return staticCaseDef.apply(this, [o, ...args]);
+          }
+        };
 
         /* eslint-disable immutable/no-mutation */
         Type.case = flexibleStaticCase
