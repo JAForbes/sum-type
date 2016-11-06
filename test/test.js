@@ -4,8 +4,7 @@ const R = require('ramda');
 const T = require('sanctuary-def');
 
 const UT = UnionType({
-  env: T.env
-  ,check: true
+  check: true
 });
 
 const Type = UT.Anonymous;
@@ -131,6 +130,11 @@ test('Fields can be described in terms of other types', t => {
     ,Rectangle: [Point, Point]
   });
 
+
+  Shape.case({
+    Circle: () => Point.Point(2,2)
+    ,Rectangle: () => Point.Point(2,2)
+  }, Shape.Circle(4, Point.Point(2,3) ))
 
   const [radius, [x, y]] = Shape.Circle(4, Point.Point(2, 3));
 
@@ -319,8 +323,7 @@ test('Recursive Union Types', t => {
 test('Disabling Type Checking', t => {
 
   const Type = UnionType({
-    env: T.env
-    ,check: false
+    check: false
   })
     .Anonymous
 

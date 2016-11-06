@@ -2,6 +2,8 @@
 const T = require('sanctuary-def')
 const R = require('ramda')
 
+const env = T.env.slice()
+
 function AutoPredicate
     (f) { return T.NullaryType('['+f.toString()+']', f) }
 
@@ -168,12 +170,14 @@ function boundStaticCase(options){
     /* eslint-enable immutable/no-this */
 }
 
-function Setup({ check, ENV=T.env }){
+function Setup({ check , _env=[] }){
+
+    env.push(..._env)
 
     const def =
         T.create({
             checkTypes: check
-            ,env: ENV
+            ,env
         })
 
 
@@ -189,8 +193,7 @@ function Setup({ check, ENV=T.env }){
         const keys =
             Object.keys(rawCases)
 
-        const env =
-            ENV.concat( Type )
+        env.push(Type)
 
         const def = T.create({ checkTypes: check, env })
 
