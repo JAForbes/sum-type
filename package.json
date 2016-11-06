@@ -7,9 +7,10 @@
     "test": "test"
   },
   "scripts": {
+    "prepublish": "npm test",
     "test": "npm run test:test && npm run test:lint",
     "test:test": "istanbul cover test/test.js",
-    "test:lint": "eslint -c .eslintrc ."
+    "test:lint": "eslint -c .eslintrc index.js test"
   },
   "repository": {
     "type": "git",

@@ -4,8 +4,8 @@ const R = require('ramda');
 const T = require('sanctuary-def');
 
 const UT = UnionType({
-  env: T.env,
-  check: true,
+  env: T.env
+  ,check: true
 });
 
 const Type = UT.Anonymous;
@@ -30,16 +30,14 @@ test('defining a union type with built ins', t => {
 
   const I = R.identity;
 
-  /* eslint-disable comma-dangle */
   [
-    [2, Number, I],
-    ['2', String, I],
-    [true, Boolean, I],
-    [{a: 1}, Object, I],
-    [[0, 1, 2], Array, I],
-    [() => 1, Function, f => f()]
+    [2, Number, I]
+    ,['2', String, I]
+    ,[true, Boolean, I]
+    ,[{a: 1}, Object, I]
+    ,[[0, 1, 2], Array, I]
+    ,[() => 1, Function, f => f()]
   ]
-  /* eslint-enable comma-dangle */
 
   .forEach(
     ([expected, T, f]) => {
@@ -129,8 +127,8 @@ test('Fields can be described in terms of other types', t => {
   );
 
   const Shape = Type({
-    Circle: [Number, Point],
-    Rectangle: [Point, Point],
+    Circle: [Number, Point]
+    ,Rectangle: [Point, Point]
   });
 
 
@@ -184,20 +182,20 @@ test('Switching on union types', t => {
 
   const Action =
     Type({
-      Up: [],
-      Right: [],
-      Down: [],
-      Left: [],
+      Up: []
+      ,Right: []
+      ,Down: []
+      ,Left: []
     });
 
   const player = {x: 0, y: 0};
 
   const advancePlayer = (action, player) =>
     Action.case({
-      Up: () => ({x: player.x, y: player.y - 1}),
-      Right: () => ({x: player.x + 1, y: player.y}),
-      Down: () => ({x: player.x, y: player.y + 1}),
-      Left: () => ({x: player.x - 1, y: player.y}),
+      Up: () => ({x: player.x, y: player.y - 1})
+      , Right: () => ({x: player.x + 1, y: player.y})
+      , Down: () => ({x: player.x, y: player.y + 1})
+      , Left: () => ({x: player.x - 1, y: player.y})
     }, action);
 
   t.deepEqual(
@@ -216,8 +214,8 @@ test('Switch on union types point free', t => {
   );
 
   const Shape = Type({
-    Circle: [T.Number, Point],
-    Rectangle: [Point, Point],
+    Circle: [T.Number, Point]
+    ,Rectangle: [Point, Point]
   });
 
   const p1 = Point.PointOf({x: 0, y: 0});
@@ -225,8 +223,8 @@ test('Switch on union types point free', t => {
 
   {
     const area = Shape.case({
-      Circle: (radius, _) => Math.PI * radius * radius,
-      Rectangle: (p1, p2) => (p2.x - p1.x) * (p2.y - p1.y),
+      Circle: (radius, _) => Math.PI * radius * radius
+      ,Rectangle: (p1, p2) => (p2.x - p1.x) * (p2.y - p1.y)
     });
 
     const rect = Shape.Rectangle(p1, p2);
@@ -238,18 +236,17 @@ test('Switch on union types point free', t => {
   }
 
   {
-    const rect = Shape.Rectangle(p1, p2);
+    const rect = Shape.Rectangle(p1, p2)
 
     const area = rect.case({
-      Circle: (radius, _) => Math.PI * radius * radius,
-      Rectangle: (p1, p2) => (p2.x - p1.x) * (p2.y - p1.y),
-    });
-    console.log('after', area);
+      Circle: (radius, _) => Math.PI * radius * radius
+      ,Rectangle: (p1, p2) => (p2.x - p1.x) * (p2.y - p1.y)
+    })
 
     t.equal(
       100
       , area
-    );
+    )
 
   }
   t.end();
@@ -258,20 +255,20 @@ test('Switch on union types point free', t => {
 test('Pass extra args to case via caseOn', t => {
   const Action =
     Type({
-      Up: [],
-      Right: [],
-      Down: [],
-      Left: [],
+      Up: []
+      ,Right: []
+      ,Down: []
+      ,Left: []
     });
 
   const player = {x: 0, y: 0};
 
   const advancePlayer =
     Action.caseOn({
-      Up: (p, ...extra) => ['Up', p, ...extra],
-      Right: (p, ...extra) => ['Down', p, ...extra],
-      Down: (p, ...extra) => ['Left', p, ...extra],
-      Left: (p, ...extra) => ['Right', p, ...extra],
+      Up: (p, ...extra) => ['Up', p, ...extra]
+      , Right: (p, ...extra) => ['Down', p, ...extra]
+      , Down: (p, ...extra) => ['Left', p, ...extra]
+      , Left: (p, ...extra) => ['Right', p, ...extra]
     });
 
   t.deepEqual(
@@ -291,8 +288,8 @@ test('Destructuring assignment to extract values', t => {
   const [x, y] = Point.PointOf({x: 0, y: 0});
 
   t.deepEqual(
-    {x: 0, y: 0},
-    {x, y}
+    {x: 0, y: 0}
+    ,{x, y}
   );
 
   t.end();
@@ -307,8 +304,8 @@ test('Recursive Union Types', t => {
 
   const toString =
     List.case({
-      Cons: (head, tail) => `${head} : ${toString(tail)}`,
-      Nil: () => 'Nil',
+      Cons: (head, tail) => `${head} : ${toString(tail)}`
+      ,Nil: () => 'Nil'
     });
 
   const list =
@@ -322,10 +319,10 @@ test('Recursive Union Types', t => {
 test('Disabling Type Checking', t => {
 
   const Type = UnionType({
-    env: T.env,
-    check: false,
+    env: T.env
+    ,check: false
   })
-    .Anonymous;
+    .Anonymous
 
   const Point = Type({
     Point: {x: Number, y: Number},
@@ -346,14 +343,14 @@ test('Use placeholder for cases without matches', t => {
   t.equal(
     'Nil'
     , List.case({
-      Cons: () => 'Cons',
-      _: () => 'Nil',
+        Cons: () => 'Cons'
+      , _: () => 'Nil'
     }, List.Nil())
   );
 
   const actual = List.Nil().case({
-    Cons: () => 'Cons',
-    _: () => 'Nil',
+    Cons: () => 'Cons'
+    ,_: () => 'Nil'
   });
 
   t.equal('Nil', actual);
