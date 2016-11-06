@@ -12,10 +12,11 @@ A sum-type library greatly inspired by paldepind's union-type
 `npm install sum-type --save`
 
 ```js
-const Type = require('sum-type')
+
+const Type = require('sum-type')({ check: true })
 
 const User =
-    Type({
+    Type.Named('User', {
         Guest: {}
 
         ,Registered:
