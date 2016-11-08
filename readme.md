@@ -51,5 +51,5 @@ renderWelcomeMessage(guest)
 
 #### Credits
 
-- API Design credit goes to [github.com/paldepind/union-type]()
-- Run time type checking thanks to [github.com/sanctuary-js/sanctuary-def]()
+- API Design credit goes to [paldepind/union-type](https://github.com/paldepind/union-type)
+- Run time type checking thanks to [sanctuary-js/sanctuary-def](https://github.com/sanctuary-js/sanctuary-def)
