@@ -362,6 +362,57 @@ test('Use placeholder for cases without matches', t => {
 
 });
 
+test('static case method throws if not all cases are covered', function(t){
+  const ISO8601 =
+    Named('ISO8601', {
+      mm: [Number]
+      ,ss: [Number]
+      ,hh: [Number]
+      ,ms: [Number]
+    })
+
+  const to = {
+    ms: ISO8601.case({
+      ms: n => n
+      ,ss: n => to.ms(ISO8601.ms(n/1000))
+      ,mm: n => to.ms(ISO8601.ss(n/60))
+      //missing case
+    })
+  }
+
+  t.throws(function(){
+    to.ms(ISO8601.mm(5))
+  }, /The value at position 1 is not a member of/)
+
+  t.end()
+})
+
+
+test('instance case method throws if not all cases are covered', function(t){
+  const ISO8601 =
+    Named('ISO8601', {
+      mm: [Number]
+      ,ss: [Number]
+      ,hh: [Number]
+      ,ms: [Number]
+    })
+
+  const to = {
+    ms: (v) => v.case({
+      ms: n => n
+      ,ss: n => to.ms(ISO8601.ms(n/1000))
+      ,mm: n => to.ms(ISO8601.ss(n/60))
+      //missing case
+    })
+  }
+
+  t.throws(function(){
+    to.ms(ISO8601.mm(5))
+  }, /The value at position 1 is not a member of/)
+
+  t.end()
+})
+
 test('caseOn throws an error when not all cases are covered', t => {
 
   const NotifySetting = Type(

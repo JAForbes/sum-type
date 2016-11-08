@@ -267,7 +267,7 @@ function Setup({ check , _env=[] }){
         };
 
         /* eslint-disable immutable/no-mutation */
-        Type.case = flexibleStaticCase
+        Type.case = R.curryN(2, flexibleStaticCase)
 
         Type.case.toString =
         Type.case.inspect =
