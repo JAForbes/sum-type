@@ -38,7 +38,7 @@ function BuiltInType(t){
     }
 }
 
-const a = T.TypeVariable('a')
+const a = T.Any
 
 function createIterator() {
     /* eslint-disable immutable/no-this */
