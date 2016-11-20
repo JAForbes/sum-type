@@ -26,6 +26,6 @@
   },
   "dependencies": {
     "ramda": "^0.22.1",
-    "sanctuary-def": "github:sanctuary-js/sanctuary-def"
+    "sanctuary-def": "^0.7.0"
   }
 }
