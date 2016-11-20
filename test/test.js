@@ -362,6 +362,36 @@ test('Use placeholder for cases without matches', t => {
 
 });
 
+test('case throws if receives a value that isnt a subtype', function(t){
+
+
+  const ScheduleTask =
+   Named('Task', {
+    Task: { task_message: String }
+  })
+
+  const Response =
+    Named('Response', {
+      Task: { task: ScheduleTask }
+      ,TaskStarted: { task: ScheduleTask }
+    })
+
+    const response = { task_message: 'Hello' }
+
+  t.throws(function(){
+    Response.caseOn({
+      Task: () => t.fail(
+        'case should have thrown before executing'
+      )
+      ,TaskStarted: () => t.fail(
+        'case should have thrown before executing'
+      )
+    }, response , 1)
+  }, /The value at position 1 is not a member of/)
+
+  t.end()
+})
+
 test('static case method throws if not all cases are covered', function(t){
   const ISO8601 =
     Named('ISO8601', {
@@ -419,14 +449,12 @@ test('caseOn throws an error when not all cases are covered', t => {
     {Mute: [], Vibrate: [], Sound: [T.Number]}
   );
 
-  try {
-
+  t.throws(function(){
     NotifySetting.caseOn({
       Vibrate: () => 'Mute',
     }, NotifySetting.Mute(), 1, 2);
-  } catch (e) {
-    t.equal(e.toString(), 'TypeError: Non exhaustive case statement');
-  }
+
+  },/TypeError: Non exhaustive case statement/)
 
   t.end();
 

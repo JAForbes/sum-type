@@ -67,11 +67,19 @@ function staticCase(options, b, ...args){
 
     } else if (options._) {
         return options._(b)
+    } else if ( b && !b._name ) {
+        throw new TypeError(
+            'Value was not created using UnionType constructor'
+            +' Value: '+R.toString(b)
+            +' Cases: '+Object.keys(options).join(' | ')
+        )
     } else {
         // caseOn is untyped
         // so this is possible
         throw new TypeError(
-            'Non exhaustive case statement'
+            'Non exhaustive case statement Found: '
+                + Object.keys(options)
+                +'  Needed: '+b._name
         )
     }
 }
