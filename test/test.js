@@ -387,7 +387,7 @@ test('case throws if receives a value that isnt a subtype', function(t){
         'case should have thrown before executing'
       )
     }, response , 1)
-  }, /The value at position 1 is not a member of/)
+  }, /Value was not created using UnionType/)
 
   t.end()
 })
