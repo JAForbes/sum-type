@@ -1,5 +1,5 @@
 const test = require('tape');
-const UnionType = require('../');
+const UnionType = require('../lib');
 const R = require('ramda');
 const T = require('sanctuary-def');
 

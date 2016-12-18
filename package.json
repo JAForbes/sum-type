@@ -3,11 +3,11 @@
   "version": "0.4.3",
   "description": "Descendant of paldepind/union-type with more descriptive error messages",
   "main": "index.js",
-  "directories": {
-    "test": "test"
-  },
+  "module": "lib/index.js",
+  "jsnext:main": "lib/index.js",
   "scripts": {
-    "prepublish": "npm test",
+    "compile": "buble lib/index.js > index.js",
+    "prepublish": "npm run compile && npm test",
     "test": "npm run test:test && npm run test:coverage && npm run test:lint",
     "test:test": "istanbul cover test/test.js",
     "test:coverage": "istanbul check-coverage --statements 100 --functions 100 --lines 100 --branches 100",
@@ -19,6 +19,7 @@
   },
   "license": "MIT",
   "devDependencies": {
+    "buble": "^0.15.1",
     "eslint": "^3.9.0",
     "eslint-plugin-immutable": "*",
     "istanbul": "^0.4.5",
