@@ -3,8 +3,9 @@ const UnionType = require('../lib');
 const R = require('ramda');
 const T = require('sanctuary-def');
 
-const UT = UnionType({
-  check: true
+const UT = UnionType(T, {
+  checkTypes: true
+  ,env: T.env
 });
 
 const Type = UT.Anonymous;
@@ -156,17 +157,6 @@ test('The values of a type can also have no fields at all', t => {
 
 test('If a field value does not match the spec an error is thrown', t => {
 
-  const err =
-`TypeError: Invalid value
-
-Point.Point :: Number -> Number -> { x :: Number, y :: Number }
-                         ^^^^^^
-                           1
-
-1)  "foo" :: String
-
-The value at position 1 is not a member of ‘Number’.
-`;
 
   const Point = Named(
     'Point'
@@ -176,7 +166,9 @@ The value at position 1 is not a member of ‘Number’.
   try {
     Point.Point(4, 'foo');
   } catch (e){
-    t.equal(err, e.toString());
+    t.ok(
+      e.toString().match('The value at position 1 is not a member of ‘Number’')
+    )
   }
 
   t.end();
@@ -322,8 +314,8 @@ test('Recursive Union Types', t => {
 
 test('Disabling Type Checking', t => {
 
-  const Type = UnionType({
-    check: false
+  const Type = UnionType(T, {
+    checkTypes: false
   })
     .Anonymous
 

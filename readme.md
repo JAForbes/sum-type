@@ -13,7 +13,8 @@ A sum-type library greatly inspired by paldepind's union-type
 
 ```js
 
-const Type = require('sum-type')({ check: true })
+const $ = require('sanctuary-def')
+const Type = require('sum-type')($, { check: true, env: $.env })
 
 const User =
     Type.Named('User', {
