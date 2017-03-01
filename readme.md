@@ -12,8 +12,8 @@ A sum-type library greatly inspired by paldepind's union-type
 `npm install sum-type --save`
 
 ```js
-
-const Type = require('sum-type')({ check: true })
+const $ = require('sanctuary-def')
+const Type = require('sum-type')($, { checkTypes: true, env: $.env })
 
 const User =
     Type.Named('User', {
