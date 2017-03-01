@@ -5,7 +5,7 @@ var R = require('ramda')
 var env = T.env.slice()
 
 function AutoPredicate
-    (f) { return T.NullaryType('['+f.toString()+']', f) }
+    (f) { return T.NullaryType('['+f.toString()+']','', f) }
 
 function mapConstrToFn(constr) {
   return (
@@ -179,8 +179,8 @@ function boundStaticCase(options){
     /* eslint-enable immutable/no-this */
 }
 
-function Setup(ref){
-    var check = ref.check;
+function Setup(T, ref){
+    var checkTypes = ref.checkTypes;
     var _env = ref._env; if ( _env === void 0 ) _env = [];
 
 
@@ -188,7 +188,7 @@ function Setup(ref){
 
     var def =
         T.create({
-            checkTypes: check
+            checkTypes: checkTypes
             ,env: env
         })
 
@@ -200,6 +200,7 @@ function Setup(ref){
         /* eslint-disable immutable/no-mutation,immutable/no-let */
         var Type = T.NullaryType(
             typeName
+            ,''
             ,function (a) { return a && a['@@type'] == typeName; }
         )
         /* eslint-enable immutable/no-mutation,immutable/no-let */
@@ -209,7 +210,7 @@ function Setup(ref){
 
         env.push(Type)
 
-        var def = T.create({ checkTypes: check, env: env })
+        var def = T.create({ checkTypes: checkTypes, env: env })
 
         var cases =
             processRawCases(Type,rawCases)

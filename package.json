@@ -15,7 +15,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/sanctuary-js/sanctuary-union-type.git"
+    "url": "git://github.com/JAForbes/sum-type.git"
   },
   "license": "MIT",
   "devDependencies": {
