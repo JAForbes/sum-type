@@ -15,6 +15,7 @@ A sum-type library greatly inspired by paldepind's union-type
 const $ = require('sanctuary-def')
 const Type = require('sum-type')($, { checkTypes: true, env: $.env })
 
+
 const User =
     Type.Named('User', {
         Guest: {}
