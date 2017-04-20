@@ -8,8 +8,9 @@ function Setup(T, ref){
 
     var env = T.env.slice()
 
-    function AutoPredicate
-        (f) { return T.NullaryType('['+f.toString()+']','', f) }
+    function AutoPredicate(f) {
+        return T.NullaryType('['+f.toString()+']','', f)
+    }
 
     function mapConstrToFn(constr) {
     return (
@@ -200,7 +201,7 @@ function Setup(T, ref){
         var Type = T.NullaryType(
             typeName
             ,''
-            ,function (a) { return a && a['@@type'] == typeName; }
+            ,function (a) { return a != null && a['@@type'] == typeName; }
         )
         /* eslint-enable immutable/no-mutation,immutable/no-let */
 

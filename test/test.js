@@ -12,6 +12,22 @@ const Type = UT.Anonymous;
 const Named = UT.Named;
 const Class = UT.Class;
 
+test('inject a type into sanctuary\'s env', t => {
+
+  const Identity =
+    Named('Identity', {
+      Identity:
+        { value: T.Number }
+    });
+
+  const {create,env} = require('sanctuary')
+  const S = create({ checkTypes: true, env: env.concat([Identity]) })
+
+  S.map(S.inc, S.Just(1));
+
+  t.end()
+})
+
 test('defining a union type with predicates', t => {
   const Num = n => typeof n === 'number';
 
