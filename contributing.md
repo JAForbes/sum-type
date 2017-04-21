@@ -9,6 +9,15 @@ Feel free to open issues to ask questions, float ideas.
 
 If an issue already exists and you'd like to become the assignee, bring it up in the issue, to avoid duplication of work etc.
 
+Once the work has been discussed assigned etc, proceed to Pull Requests
+
+Pull Request
+============
+
+Create a feature branch for your work, you can name it anything you like.
+
+Open a PR and reference the issue in the PR.  No need to reference the issue in commits.
+
 Quick Start
 ===========
 
