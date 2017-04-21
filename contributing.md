@@ -5,7 +5,7 @@ Issues
 
 To avoid wasting your time, and misunderstandings - it's a good idea to open an issue before starting any work.
 
-Feel free to open issues to ask questions, float ideas.
+Feel free to open issues to ask questions / propose changes.
 
 If an issue already exists and you'd like to become the assignee, bring it up in the issue, to avoid duplication of work etc.
 
@@ -84,6 +84,12 @@ const b =
   , 3
   , 4
   ]
+  
+compose(
+  f
+  ,g
+  ,h
+)
 ```
 
 Don't:
@@ -97,6 +103,8 @@ const a = {
 const b = { c: 3,  d: 3}
 
 const c = [1,2,3,4,5,6]
+
+compose(f,g,h)
 ```
 
 What we're doing here is optimizing for easy merges and easier re-ordering as opposed to lines of code.
@@ -126,7 +134,7 @@ The idea is, if the line grows, the formatting doesn't need to change.
 
 Feel free to use arrow functions, function statements, function expressions, whatever helps you solve the problem.
 
-If the function arguments span over the 80 char limit, follow the line break, comma first rules from objects/lists ( above ).
+If the function arguments span over the 80 char limit, follow the line break / comma first rules from objects/lists ( above ).
 
 #### Variable names
 
