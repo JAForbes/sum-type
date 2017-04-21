@@ -3,7 +3,7 @@ Contributions are very welcome.  Here's some guidelines to ensure a painless PR 
 Issues
 ======
 
-To avoid wasting your time, and misunderstandings - it's a good idea to open an issue before starting any work.
+To avoid misunderstandings - it's a good idea to open an issue before starting any work.
 
 Feel free to open issues to ask questions / propose changes.
 
