@@ -2,4 +2,5 @@ node_modules
 .vscode
 /coverage/
 *log*
-/index.js
+index.js
+index.min.js
