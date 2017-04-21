@@ -18,6 +18,10 @@ Create a feature branch for your work, you can name it anything you like.
 
 Open a PR and reference the issue in the PR.  No need to reference the issue in commits.
 
+Whenever you run `npm test` you'll get a print out of test results, code coverage and linting errors.
+
+We want to maintain 100% code coverage, all tests passing and 0 linting errors.
+
 Quick Start
 ===========
 
