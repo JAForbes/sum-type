@@ -154,7 +154,7 @@ const xs [{ a: 1 }, { a: 2 }]
 
 Not as good:
 
-```
+```js
 const ys = [1,2,3]
 // different type
 const y = { a: 1 }
