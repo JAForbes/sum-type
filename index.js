@@ -1,5 +1,19 @@
 /* global Symbol,module */
-var R = require('ramda')
+// const R = require('ramda')
+
+var R = {
+    toString: require('ramda/src/toString')
+    ,keys: require('ramda/src/keys')
+    ,mergeAll: require('ramda/src/mergeAll')
+    ,map: require('ramda/src/map')
+    ,values: require('ramda/src/values')
+    ,pipe: require('ramda/src/pipe')
+    ,range: require('ramda/src/range')
+    ,zipObj: require('ramda/src/zipObj')
+    ,compose: require('ramda/src/compose')
+    ,unapply: require('ramda/src/unapply')
+    ,curryN: require('ramda/src/curryN')
+}
 
 
 function Setup(T, ref){
@@ -36,7 +50,7 @@ function Setup(T, ref){
 
         if(mapped != t){
             return mapped
-        } else if( R.type(t) === 'Function' ) {
+        } else if( typeof t == 'function') {
             return AutoPredicate(t)
         } else {
             return t
@@ -78,7 +92,7 @@ function Setup(T, ref){
         } else if ( b && !b._name ) {
             throw new TypeError(
                 'Value was not created using UnionType constructor'
-                +' Value: '+R.toString(b)
+                +' Value: '+toString(b)
                 +' Cases: '+Object.keys(options).join(' | ')
             )
         } else {
