@@ -8,7 +8,8 @@
   "scripts": {
     "compile": "buble lib/index.js > index.js",
     "prepublish": "npm run compile && npm test",
-    "test": "npm run test:test && npm run test:coverage && npm run test:lint",
+    "test": "run-s test:**",
+    "test:compile": "npm run compile",
     "test:test": "istanbul cover test/test.js",
     "test:coverage": "istanbul check-coverage --statements 100 --functions 100 --lines 100 --branches 100",
     "test:lint": "eslint --max-warnings 0 -c .eslintrc lib/index.js test"
@@ -23,6 +24,7 @@
     "eslint": "^3.9.0",
     "eslint-plugin-immutable": "*",
     "istanbul": "^0.4.5",
+    "npm-run-all": "^4.0.2",
     "sanctuary": "^0.12.2",
     "sanctuary-def": "^0.9.0",
     "tape": "^4.6.2"
