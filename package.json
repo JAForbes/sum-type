@@ -13,7 +13,9 @@
     "test:test": "istanbul cover test/test.js",
     "test:coverage": "istanbul check-coverage --statements 100 --functions 100 --lines 100 --branches 100",
     "test:lint": "eslint --max-warnings 0 -c .eslintrc lib/index.js test",
-    "dist": "browserify index.js | uglifyjs -mc > index.min.js"
+    "dist": "run-s dist:**",
+    "dist:index": "browserify index.js --standalone SumType | uglifyjs -mc > index.min.js",
+    "dist:all": "browserify all.js --standalone SumType | uglifyjs -mc > all.min.js"
   },
   "repository": {
     "type": "git",
