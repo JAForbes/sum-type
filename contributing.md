@@ -139,7 +139,28 @@ If the function arguments span over the 80 char limit, follow the line break / c
 #### Variable names
 
 I prefer names like `x` `xs` `a` etc.  It's nice if the names mimic type variables.  
-So if an `ys` is a list of objects, then `y` should be the same type of record that `ys` contains.
+So if `ys` is a list of objects, then `y` should be the same type of record that `ys` contains.
+
+When I say "type" I mean in it in a very hand wavey sense.  And there's really no issue if you don't follow this rule to the letter.
+
+Prefer:
+
+```js
+const ys = [1,2,3]
+const y = 4
+const x = { a: 1 }
+const xs [{ a: 1 }, { a: 2 }]
+```
+
+Not as good:
+
+```
+const ys = [1,2,3]
+// different type
+const y = { a: 1 }
+```
+
+The idea here is, by reusing the same short variable names, we're more likely to identify common patterns.  This can lead to easier refactors.
 
 But, sometimes more verbose names are helpful.  So totally up to you.
 
