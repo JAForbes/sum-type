@@ -1,6 +1,10 @@
 Sum-Type
 ========
 
+[![Build Status](https://travis-ci.org/JAForbes/sum-type.svg?branch=master)](https://travis-ci.org/JAForbes/sum-type)
+
+[![npm version](https://badge.fury.io/js/sum-type.svg)](https://badge.fury.io/js/sum-type)
+
 A sum-type library greatly inspired by paldepind's union-type
 
 - Better run time type checking powered by sanctuary-def
