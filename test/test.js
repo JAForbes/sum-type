@@ -12,6 +12,18 @@ const Type = UT.Anonymous;
 const Named = UT.Named;
 const Class = UT.Class;
 
+test('_name and .keys should now appear in Object.keys(instance)', t => {
+  const Identity =
+    Named('Identity', {
+      Identity:
+        { value: T.Number }
+    });
+
+  t.ok(Identity.Identity(1).keys, '.keys is on the prototype')
+  t.ok(Identity.Identity(1)._name, '._name is on the prototype')
+  t.deepEqual( Object.keys(Identity.Identity(1)), ['value'])
+})
+
 test('inject a type into sanctuary\'s env', t => {
 
   const Identity =
