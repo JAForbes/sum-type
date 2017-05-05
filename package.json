@@ -25,6 +25,7 @@
   "devDependencies": {
     "browserify": "^14.3.0",
     "buble": "^0.15.1",
+    "coveralls": "^2.13.1",
     "eslint": "^3.9.0",
     "eslint-plugin-immutable": "*",
     "istanbul": "^0.4.5",
