@@ -12,6 +12,79 @@ const Type = UT.Anonymous;
 const Named = UT.Named;
 const Class = UT.Class;
 
+test('static sum.case supports multiple types', t => {
+
+  const User =
+    UT.Named('JAForbes/User', {
+      Id: { id: T.Number }
+      ,Loaded: { id: T.Number, name: T.String }
+      ,New: { name: T.String }
+    })
+
+  const Organization =
+    UT.Named('JAForbes/Organization', {
+      Id: { id: T.Number }
+      ,Loaded: { id: T.Number, name: T.String }
+      ,New: { name: T.String }
+    })
+
+  const
+    [ getUserName
+    , getOrganizationName
+    ] =
+    [ [User, 'User']
+    , [Organization, 'Organization']
+    ]
+    .map(
+      ([$T, name]) => UT.case(
+        'JAForbes/get'+name+'Name'
+        ,{}
+        ,[$T, T.String]
+        ,{ Id: () => 'Loading'
+        , New: ({ name }) => name
+        , Loaded: ({ name }) => name
+        }
+      )
+    )
+
+    t.equals(
+      getUserName( User.Id(123) )
+      , 'Loading'
+      , 'Sum.case supports user'
+    )
+
+    t.equals(
+      getOrganizationName( Organization.NewOf({ name: 'fantasy-land' }) )
+      , 'fantasy-land'
+      , 'Sum.case supports user'
+    )
+
+    t.end()
+
+})
+
+test('static sum.case supports explicit constraints',
+  t => {t.fail(); t.end()}
+)
+test('static sum.case supports implicit constraints',
+  t => {t.fail(); t.end()}
+)
+test('static sum.case throws on placeholder',
+  t => {t.fail(); t.end()}
+)
+test('static sum.case throws if return type is wrong',
+  t => {t.fail(); t.end()}
+)
+test('static sum.case is discriminated',
+  t => {t.fail(); t.end()}
+)
+test('static sum.case passe the entire object to each case',
+  t => {t.fail(); t.end()}
+)
+test('static sum.case throws when passed too many args',
+  t => {t.fail(); t.end()}
+)
+
 test('_name and .keys should now appear in Object.keys(instance)', t => {
   const Identity =
     Named('Identity', {
