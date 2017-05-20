@@ -411,6 +411,16 @@ test('case throws if receives a value that isnt a subtype', function(t){
     }, response , 1)
   }, /Value was not created using UnionType/)
 
+  t.throws(function(){
+
+    Response.case({
+      _: () => t.fail(
+        'case should have thrown before executing'
+      )
+    }, response )
+
+  }, /Value was not created using UnionType/, 'Placeholder requires subtype')
+
   t.end()
 })
 
