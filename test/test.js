@@ -409,7 +409,7 @@ test('case throws if receives a value that isnt a subtype', function(t){
         'case should have thrown before executing'
       )
     }, response , 1)
-  }, /Value was not created using UnionType/)
+  }, /is not of type:/)
 
   t.throws(function(){
 
@@ -419,7 +419,7 @@ test('case throws if receives a value that isnt a subtype', function(t){
       )
     }, response )
 
-  }, /Value was not created using UnionType/, 'Placeholder requires subtype')
+  }, /is not of type:/, 'Placeholder requires subtype')
 
   t.throws(function(){
 
@@ -429,7 +429,7 @@ test('case throws if receives a value that isnt a subtype', function(t){
       )
     }, ScheduleTask.Task('Hey hey') )
 
-  }, /Value was not created using UnionType/, 'Placeholder requires subtype')
+  }, /is not of type:/, 'Placeholder requires subtype')
 
 
 
