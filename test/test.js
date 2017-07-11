@@ -151,6 +151,26 @@ test('create instance methods declaratively', t => {
   t.end();
 });
 
+test('expose one RecordType per case', t => {
+
+  const id = { name: 'Identity', strMap: { value: T.String } }
+  /* eslint-disable */
+  const Identity =
+    Named( id.name
+         , { [ id.name ]: id.strMap }
+  );
+  const recordType = Identity[ id.name + 'RecordType' ]
+
+  /* eslint-enable */
+
+  t.equal( typeof recordType, 'object' )
+  t.equal( recordType.type, 'RECORD' );
+  t.deepEqual( recordType.keys
+             , T.RecordType( id.strMap ).keys
+             );
+  t.end();
+});
+
 test('Fields can be described in terms of other types', t => {
   const Point = Type(
     {Point: {x: Number, y: Number}}
