@@ -234,7 +234,7 @@ const Either = {
 }
 
 const Either$map = f =>
-    fold(Either, {
+    fold(Either)({
         Left(value){
             return Either.Left(value)
         }
