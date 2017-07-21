@@ -74,6 +74,66 @@ class StaticSumTypeError {
     }
 }
 
+var ErrMessageCases = 
+    { TooManyCases: function TooManyCases({T, cases, extraKeys}){
+        return (
+            [ 'Too Many Cases!'
+            , 'Your case function must have exactly the same number of'
+            , ' keys as the type: '+T.name+'. ' 
+            , 'The following cases should not have been present:'
+            , extraKeys.join(', ') 
+            ].join(' ')
+        )
+    }
+
+    ,TooFewCases: function TooFewCases({T, cases, extraKeys}){
+        return (
+            [ 'Too Few Cases!'
+            , 'Your case function must have exactly the same number of' 
+            , 'keys as the type: ' + T.name + '. The following keys were'
+            , 'missing:'
+            , missingKeys.join(', ') 
+            ]
+        )
+        .join(' ')
+    }
+
+    ,InstanceNull: function InstanceNull({T, cases, x}){
+        return (
+            'null is not a valid member of the type '+T.name
+        )
+    }
+
+    ,InstanceWrongType: function InstanceWrongType({T, cases, x}){
+        return (
+            [ toString(x)+' is not a valid member of the type'
+            , T.name
+            , 'which expects the following cases'
+            , Object.keys(cases).join(' | ')
+            ]
+        )
+        .join(' ')
+    }
+
+    ,InstanceShapeInvalid: function InstanceShapeInvalid({T, cases, x}){
+        return (
+            [ toString(x)+ ' is a member of the type'
+            , T.name
+            , 'but ' + toString(x) + ' has a case that does not'
+            , 'belong to '+ T.name + '. ' 
+            , 'Please review the definition of '+T.name
+            ]
+            .join(' ')
+        )
+    }
+
+    ,TooManyArguments: function TooManyArguments(args){
+        return 'fold accepts 1 argument at a time but received'
+            + ' '+args.length+'.'
+            + '  Received: '+args.map(toString).join(' ')
+    }
+    }
+
 module.exports = function Dev(handleError){
 
     var Err = StaticSumTypeError
@@ -169,66 +229,7 @@ module.exports = function Dev(handleError){
     }
 
     var errMessage = 
-        fold(StaticSumTypeError)({
-
-            TooManyCases: function TooManyCases({T, cases, extraKeys}){
-                return (
-                    [ 'Too Many Cases!'
-                    , 'Your case function must have exactly the same number of'
-                    , ' keys as the type: '+T.name+'. ' 
-                    , 'The following cases should not have been present:'
-                    , extraKeys.join(', ') 
-                    ].join(' ')
-                )
-            }
-
-            ,TooFewCases: function TooFewCases({T, cases, extraKeys}){
-                return (
-                    [ 'Too Few Cases!'
-                    , 'Your case function must have exactly the same number of' 
-                    , 'keys as the type: ' + T.name + '. The following keys were'
-                    , 'missing:'
-                    , missingKeys.join(', ') 
-                    ]
-                )
-                .join(' ')
-            }
-
-            ,InstanceNull: function InstanceNull({T, cases, x}){
-                return (
-                    'null is not a valid member of the type '+T.name
-                )
-            }
-
-            ,InstanceWrongType: function InstanceWrongType({T, cases, x}){
-                return (
-                    [ toString(x)+' is not a valid member of the type'
-                    , T.name
-                    , 'which expects the following cases'
-                    , Object.keys(cases).join(' | ')
-                    ]
-                )
-                .join(' ')
-            }
-
-            ,InstanceShapeInvalid: function InstanceShapeInvalid({T, cases, x}){
-                return (
-                    [ toString(x)+ ' is a member of the type'
-                    , T.name
-                    , 'but ' + toString(x) + ' has a case that does not'
-                    , 'belong to '+ T.name + '. ' 
-                    , 'Please review the definition of '+T.name
-                    ]
-                    .join(' ')
-                )
-            }
-
-            ,TooManyArguments: function TooManyArguments(args){
-                return 'fold accepts 1 argument at a time but received'
-                    + ' '+args.length+'.'
-                    + '  Received: '+args.map(toString).join(' ')
-            }
-        })
+        fold(StaticSumTypeError)(ErrMessageCases)
 
     return {
         fold
