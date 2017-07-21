@@ -1,0 +1,14 @@
+image: node:7.9.0
+
+cache:
+  paths:
+  - node_modules/
+
+stages:
+  - test
+
+test:
+  stage: test
+  script:
+   - npm install
+   - node test/test.js
