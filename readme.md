@@ -4,7 +4,7 @@ static-sum-type
 A simple library for complex logic.
 -----------------------------------
 
-Logic is hard.  There are so many permuations.  Covering all the cases accurately would require some n dimensional tables.  We'd like to handle all the cases correctly but often its hard to know what they all are.
+Logic is hard.  There are so many permuations.  Covering all the cases accurately would require some n dimensional tables.  We'd like to handle all the cases correctly but often it's hard to know what they all are.
 
 Sum types are a great way to represent the complete possibility space.  And because they compose you can enforce that all possible cases are checked in order to access that delicious nougat centre of data.
 
@@ -395,7 +395,7 @@ Caution though, we never instantiate our classes, we're just piggy backing on th
 
 Classes in Javascript are basically wasted syntax for functional programmers who tend to favour composition of static functions.  We're not using `new` at all and `instanceof` checks are intentionally avoided to favour easy serialization.  Essentially this library is just taking advantage of some syntax for its own needs.
 
-Its also completely opt in.  The specification is wide open.  So even something like this (below) is completely valid:
+It's also completely opt in.  The specification is wide open.  So even something like this (below) is completely valid:
 
 ```js
 function Maybe(){
