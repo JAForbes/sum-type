@@ -6,7 +6,7 @@ A simple library for complex logic.
 
 Logic is hard.  There are so many permuations.  Covering all the cases accurately would require some n dimensional tables.  We'd like to handle all the cases correctly but often its hard to know what they all are.
 
-Sum types are a great way to represent the completely possibility space.  And because they compose you can enforce that all possible cases are checked in order to access that delicious nougat centre of data.
+Sum types are a great way to represent the complete possibility space.  And because they compose you can enforce that all possible cases are checked in order to access that delicious nougat centre of data.
 
 Here's an example of 3 types: `Loadable`, `Validatable` and `Selectable`.  We're simulating some complex logic in a UI.
 
@@ -15,7 +15,10 @@ Observe we are forced to handle all potential cases.
 
 ```js
 
-const { fold } = require('static-sum-type/dev') 
+const { fold, errMessage } = require('static-sum-type/dev')(function(err){
+    throw new TypeError( errMessage(err))
+})
+
 const h = require('hyperscript') // or whatever
 
 class Loadable {
@@ -46,7 +49,7 @@ class Validatable {
     static Invalid(value){
         return {
             type: Validatable
-            ,case: Validatable.Valid
+            ,case: Validatable.Invalid
             ,value
         }
     }
@@ -56,7 +59,7 @@ class Selectable {
     static Selected(value){
         return {
             type: Selectable
-            ,case: Selectable.Deselected
+            ,case: Selectable.Selected
             ,value
         }
     }
@@ -103,9 +106,9 @@ const z =
 
 
 const renderBandMembers = 
-    fold( Selectable, {
-        Selected: fold( Loadable, {
-            Loaded: fold( Validatable, {
+    fold( Selectable)({
+        Selected: fold( Loadable)({
+            Loaded: fold( Validatable)({
                 Valid({ 
                     name
                     , instrument
@@ -173,7 +176,7 @@ This design has come from working with JS algebraic type libraries on production
 - Paste the following into the file
 
 ```js
-const { fold } = require('static-sum-type/dev')
+const { fold } = require('static-sum-type/prod')()
 
 class Maybe {
     static Just(x){
@@ -192,7 +195,7 @@ class Maybe {
 }
 
 // Maybe Number -> String
-const NumToFixed = fold(Maybe, {
+const NumToFixed = fold(Maybe)({
     Just(x){
         return x.toFixed(2)
     }
@@ -214,7 +217,7 @@ You should see `"4.12"` and `"0.00"` log to the console.
 #### Give me a different syntax example
 
 ```js
-const { fold } = require('static-sum-type/prod')
+const { fold } = require('static-sum-type/prod')()
 
 const Either = {
     name: 'Either'
@@ -257,8 +260,12 @@ doubleEither(
 
 - 0 Dependencies 
 - Statically Analyzable
+    - Nice editor experience in VSCode or tern.js
+    - Easy interop with TS/Flow
+    - Less magic
+
 - Represent types for raw values (like Numbers)
-- Serializable types
+- Serializable types (for sending typed data over the wire)
 - Small for Frontend usage
 - Convenient base abstraction for higher abstraction libraries to build on top of
 - Convenient API to be used directly by users
@@ -297,6 +304,10 @@ Both functions are tiny (especially prod), but the idea is, you should design
 your app to not have runtime exceptions in production, so why pay the cost
 of error handling and introspection if you're confident you don't need it in
 production.
+
+Dev accepts a function that controls how the library responds to errors.
+
+Prod ignores whatever you pass to it.  It's designed to have the same interface as dev without any type checking.  It's just 11 lines of super verbose es5 code.
 
 #### What's a "Type"
 
@@ -412,10 +423,6 @@ Because just like `class`, function's also have an auto generated `name` propert
 
 Yes, while this API deliberately does not encourage that style, it will not interfere with `fold`'s behaviour.
 
-#### Show me how to use methods?
-
-That would be encouraging that style now wouldn't it.
-
 #### How do I let my types contain more than one value?
 
 Just use arrays or objects as your `value` property.  The specification does not dictate how your constructors work at all.  So *if* you want, you can do stuff like this:
@@ -437,8 +444,8 @@ Thanks to Kurt Milam for this brilliant idea / approach.
 
 #### Why is the source code ES5?
 
-So many problems are solved by just using ES5 for librarie source code.
+So many problems are solved by just using ES5 for library source code.  When things settle down that may change.
 
 #### Why is this library on GitLab?
 
-GitLab is open source, it has built in CI.  It's got a better UI and UX.  The real question I have, is why is your code not on GitLab?
+GitLab is open source, it has built in CI.  It's got a better UI and UX.  I always hope other libraries move to GitLab so I thought why not make the move myself.
