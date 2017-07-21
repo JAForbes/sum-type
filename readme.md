@@ -383,7 +383,7 @@ You can definitely use sanctuary-def with this library, it was designed for that
 sanctuary-def is a runtime type system for Javascript as a library.  The type system is very similar to Haskell's.  sum-type uses sanctuary-def to provide
 automatic runtime type checking.
 
-This library has 0 dependencies but has been designed to be compatible with and decorator library (like sanctuary-def).
+This library has 0 dependencies but has been designed to be compatible with any decorator library (like sanctuary-def).
 
 #### How do I use this library with TypeScript / Flow
 
