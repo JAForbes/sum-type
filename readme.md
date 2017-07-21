@@ -361,6 +361,7 @@ A class has an automatically generated property `name`.
 
 #### Show me some examples of some valid cases.
 
+```js
 { name: 'Case1'
 , type: TypeName1 //references above
 }
@@ -369,6 +370,7 @@ A class has an automatically generated property `name`.
 , type: { name: 'TypeName1' } // has same name as above which is also OK
 , value: 'this is a value'
 }
+```
 
 #### How do I use this library with sanctuary-def?
 
@@ -387,7 +389,7 @@ This library has 0 dependencies but has been designed to be compatible with and 
 
 Create some interfaces for your cases, and annotations to your constructors and your done.  Type systems like Flow and Typescript will be able to statically analyze the structure of your sum types as long as you aren't generating them dynamically, so you'll get code completion and some free type checks.
 
-Caution though, we never instantiate our classes, we're just piggy backing on the syntax.  And there's other syntaxes you can use, includes pojos, named functions, method syntax on objects.  As long as it meets the specification.
+Caution though, we never instantiate our classes, we're just piggy backing on the syntax.  And there's other syntaxes you can use, including pojos, named functions, method syntax on objects.  As long as it meets the specification.
 
 #### Why are you misusing Classes?
 
@@ -415,7 +417,7 @@ Maybe.Nothing = function(){
 }
 ```
 
-Because just like `class`, function's also have an auto generated `name` property.  
+Because just like `class`, named function's also have an auto generated `name` property.  
 
 > The fact classes have a name property is actually just because classes are syntactic sugar on top of constructor functions.
 
