@@ -259,6 +259,7 @@ doubleEither(
 #### Project Goals and Motivations
 
 - 0 Dependencies 
+- Tiny for frontend usage ( prod is 11 LOC, ~200B )
 - Statically Analyzable
     - Nice editor experience in VSCode or tern.js
     - Easy interop with TS/Flow
@@ -266,7 +267,6 @@ doubleEither(
 
 - Represent types for raw values (like Numbers)
 - Serializable types (for sending typed data over the wire)
-- Small for Frontend usage
 - Convenient base abstraction for higher abstraction libraries to build on top of
 - Convenient API to be used directly by users
 - Opt in everything:
