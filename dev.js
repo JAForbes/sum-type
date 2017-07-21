@@ -137,7 +137,6 @@ var ErrMessageCases =
 module.exports = function Dev(handleError){
 
     var Err = StaticSumTypeError
-    var errMessage = console.error
     
     function fold(T){
         
