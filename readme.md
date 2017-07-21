@@ -189,7 +189,7 @@ class Maybe {
     static Nothing(){
         return {
             , type: Maybe
-            , case: Maybe.Just
+            , case: Maybe.Nothing
         }
     }
 }
