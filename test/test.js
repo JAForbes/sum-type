@@ -1,13 +1,15 @@
 const test = require('tape')
+const $ = require('sanctuary-def')
 const { 
-  fold: devCata
-  , errMessage
+  fold: devFold
   , StaticSumTypeError 
-} = require('../dev')(function(e){
+} = require('../fold/dev')(function(e){
   return e
 })
 
-const { fold: prodCata } = require('../prod')()
+const PredicatedLib = require('../predicated/dev')
+
+const { fold: prodCata } = require('../fold/prod')()
 
 class Maybe {
   static Just(x) {
@@ -69,7 +71,7 @@ var y = Loadable.Loaded(x)
 
 
 test('static-sum-type', function(t){
-  const foldMaybe = devCata(Maybe)
+  const foldMaybe = devFold(Maybe)
 
   var maybeToNum = foldMaybe({
     Just: () => 1
@@ -95,19 +97,19 @@ test('static-sum-type', function(t){
   )
 
   t.equals(
-    devCata(Maybe, 0).case
+    devFold(Maybe, 0).case
     ,StaticSumTypeError.TooManyArguments
     ,'fold identifies when there are too many arguments level:0'
   )
 
   t.equals(
-    devCata(Maybe)({ Just: () => 1, Nothing: () => 0 }, 1).case
+    devFold(Maybe)({ Just: () => 1, Nothing: () => 0 }, 1).case
     ,StaticSumTypeError.TooManyArguments
     ,'fold identifies when there are too many arguments level:1'
   )
 
   t.equals(
-    devCata(Maybe)({ Just: () => 1, Nothing: () => 0 })( Maybe.Just(1), 1 ).case
+    devFold(Maybe)({ Just: () => 1, Nothing: () => 0 })( Maybe.Just(1), 1 ).case
     ,StaticSumTypeError.TooManyArguments
     ,'fold identifies when there are too many arguments level:2'
   )
@@ -157,5 +159,36 @@ test('static-sum-type', function(t){
     ,1
     ,'prodCata ignores errors and blindy tries to do its job'
   )
+
+  const SumTypePred = PredicatedLib( 
+    x => x != null && x.toString() 
+    , e => {
+      throw new Error(e.message)
+    }
+  )
+
+  const Shape = SumTypePred('Shape', {
+    Rectangle: $.test([], $.RecordType({
+      w: $.Number
+      ,h: $.Number
+    }))
+    ,Triangle: $.test([], $.RecordType({
+      w: $.Number
+      ,h: $.Number
+    }))
+    ,Circle: x => typeof x == 'number'
+  })
+
+  const c = Shape.Circle(2)
+
+  var r = devFold(Shape)({
+    Circle: x => x * 2
+    ,Rectangle: x => x * 2
+    ,Triangle: x => x * 2
+  })(
+    c
+  )
+  console.log(r)
+  
   t.end()
 })

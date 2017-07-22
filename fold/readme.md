@@ -15,9 +15,12 @@ Observe we are forced to handle all potential cases.
 
 ```js
 
-const { fold, errMessage } = require('static-sum-type/dev')(function(err){
-    throw new TypeError( errMessage(err))
-})
+
+const { fold, errMessage } = require('static-sum-type/fold/dev')(
+    function handleError(err){
+        throw new TypeError( errMessage(err))
+    }
+)
 
 const h = require('hyperscript') // or whatever
 
@@ -36,7 +39,6 @@ class Loadable {
         }
     }
 }
-
 
 class Validatable {
     static Valid(value){
@@ -176,7 +178,7 @@ This design has come from working with JS algebraic type libraries on production
 - Paste the following into the file
 
 ```js
-const { fold } = require('static-sum-type/prod')()
+const { fold } = require('static-sum-type/fold/prod')()
 
 class Maybe {
     static Just(x){
@@ -217,7 +219,7 @@ You should see `"4.12"` and `"0.00"` log to the console.
 #### Give me a different syntax example
 
 ```js
-const { fold } = require('static-sum-type/prod')()
+const { fold } = require('static-sum-type/fold/prod')()
 
 const Either = {
     name: 'Either'
@@ -291,7 +293,7 @@ doubleEither(
 If the case has a `value` property, it is passed into the provided function.
 
 
-#### What are static-sum-type/dev and static-sum-type/prod?
+#### What are static-sum-type/fold/dev and static-sum-type/fold/prod?
 
 These are different versions of the same function.  
 

@@ -182,14 +182,14 @@ module.exports = function Dev(handleError){
                             Err.TooManyArguments(arguments)
                         )
                     }
-                    if( extraKeys.length > 0 ){
-                        return handleError(
-                            Err.TooManyCases(T, cases, extraKeys) 
-                        ) 
-                    } else if (missingKeys.length > 0){
+                    if( missingKeys.length > 0 ){
                         return handleError(
                             Err.TooFewCases(T, cases, missingKeys) 
                         )
+                    } else if (extraKeys.length > 0){
+                        return handleError(
+                            Err.TooManyCases(T, cases, extraKeys) 
+                        ) 
                     } else {
                         return function(x){
                             

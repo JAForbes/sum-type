@@ -18,6 +18,7 @@
   "license": "MIT",
   "devDependencies": {
     "eslint": "^4.2.0",
+    "sanctuary-def": "^0.13.0",
     "tape": "^4.7.0"
   }
 }
