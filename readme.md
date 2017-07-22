@@ -36,7 +36,7 @@ fold(Maybe)({
 
 The design of the spec allows for a variety of other statically analyzable syntaxes which can be viewed at [static-sum-type/fold](./fold/readme.md).  But its also possible to generate types dynamically far more succintly.
 
-The predicated module is an example of a type generator that is spec compliant but also checks if values meet a predicate.  This can be seen as a low level type checking system when you don't want to pay the filesize cost of a more completely type checking library like sanctuary-def.
+The predicated module is an example of a type generator that is spec compliant but also checks if values meet a predicate.  This can be seen as a low level type checking system when you don't want to pay the filesize cost of a more complete type checking library like sanctuary-def.
 
 ```js
 const Maybe = Predicated('Maybe', {
