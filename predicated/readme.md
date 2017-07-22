@@ -54,7 +54,7 @@ const BandMember = Predicated('Validatable', {
         'name', 'instrument', 'band'
     ])
     ,Invalid: StrRecord([
-        'name', 'instrument', 'band', 'validationMessage
+        'name', 'instrument', 'band', 'validationMessage'
     ])
 })
 
