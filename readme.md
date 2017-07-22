@@ -9,7 +9,7 @@ A simple library for complex logic.
 
 This library is a series of tiny composeable modules designed to make working with sum-types more flexible without losing any power.
 
-Each module interops with every other module because they all share a base specification.  That specification is defined in [static-sum-type/fold](./fold/readme.md) because all behaviour we need can be defined in terms of `fold`.
+Each module interops with every other module because they all share a base specification.  That specification is defined in [static-sum-type/fold](./fold) because all behaviour we need can be defined in terms of `fold`.
 
 `fold` requires a data structure that can be written manually using a variety of syntax.  The interface was designed to piggy back on some default behaviours of Javascript types (like functions and classes) to avoid manual typing.  But its completely possible (albeit verbose) to define a type as a simple pojo.
 
@@ -34,7 +34,7 @@ fold(Maybe)({
 })(just) //=> 4
 ```
 
-The design of the spec allows for a variety of other statically analyzable syntaxes which can be viewed at [static-sum-type/fold](./fold/readme.md).  But its also possible to generate types dynamically far more succintly.
+The design of the spec allows for a variety of other statically analyzable syntaxes which can be viewed at [static-sum-type/fold](./fold).  But its also possible to generate types dynamically far more succintly.
 
 The predicated module is an example of a type generator that is spec compliant but also checks if values meet a predicate.  This can be seen as a low level type checking system when you don't want to pay the filesize cost of a more complete type checking library like sanctuary-def.
 
@@ -52,7 +52,7 @@ fold(Maybe)({
 })(just) //=> 3
 ```
 
-Check out the [predicated module here](./predicated/readme.md)
+Check out the [predicated module here](./predicated)
 
 The plan is to build several tiny modules that cover specific use cases.  A sanctuary-def module, a typescript module etc.
 
