@@ -74,9 +74,9 @@ class Selectable {
 }
 
 const w = 
-    Selected(
-        Loaded(
-            Invalid({
+    Selectable.Selected(
+        Loadable.Loaded(
+            Validatable.Invalid({
                 name: 'kym theel'
                 ,instrument: null
                 ,band: 'Audioslave'
@@ -90,9 +90,9 @@ const w =
     )
 
 const x = 
-    Selected(
-        Loaded(
-            Valid({
+    Selectable.Selected(
+        Loadable.Loaded(
+            Validatable.Valid({
                 name: 'Kim Thayil'
                 ,instrument: 'Guitar'
                 ,band: 'Soundgarden'
@@ -101,10 +101,10 @@ const x =
     )
 
 const y = 
-    Deselected()
+    Selectable.Deselected()
 
 const z = 
-    Selected( Loading() )
+    Selectable.Selected( Loadable.Loading() )
 
 
 const renderBandMembers = 
@@ -155,12 +155,12 @@ renderBandMembers(z) //=> 'Loading'
 
 
 var typeError = 
-    Valid(
-        Loading()
+    Validatable.Valid(
+        Loadable.Loading()
     )
 
 renderBandMembers(typeError) 
-//=> helpful type error
+//=> helpful type error because the structure does not match the `fold`
 ```
 
 #### Differences from SumType and UnionType
