@@ -94,4 +94,4 @@ Each module will always have a production counterpart that assumes types are 100
 
 #### Error Handling
 
-The fold funciton defines (as a spec compliant sum type) all the possible errors it will emit.  You can provide a custom handler that can handle that data type in whatever way makes the most sense for your application.  A typical case may be to simply throw an error.  There's a provided `errMessage` function on the [fold](./fold) module tha will turn the err object into a dev friendly string.
+The fold funciton defines (as a spec compliant sum type) all the possible errors it will emit.  You can provide a custom handler that can handle that data type in whatever way makes the most sense for your application.  A typical case may be to simply throw an error.  There's a provided `errMessage` function on the [fold](./fold) module that will turn the err object into a dev friendly string.
