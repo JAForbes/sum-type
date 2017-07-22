@@ -5,7 +5,6 @@ var Skip = {
 }
 
 function toString(x){
-    console.log('toString', x)
   if( x == null ){
     return 'null'
   } else if( x.type && x.case ){
