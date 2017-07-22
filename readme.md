@@ -85,3 +85,13 @@ Each module will always have a production counterpart that assumes types are 100
     - No placeholder cases (like sum-type/union-type)
     - No auto spreading of values (like sum-type/union-type)
     - No auto curried constructors (like sum-type/union-type)
+
+#### Modules
+
+- [fold](./fold) A function that traverses every case of a union.  The dev version has a variety of built in verification steps.  The prod version just executes immediately.
+
+- [predicated](./predicated) A function that generates spec compliant unions while also allowing you to specify a predicate that the value must satisfy in order for an error to not be handled.
+
+#### Error Handling
+
+The fold funciton defines (as a spec compliant sum type) all the possible errors it will emit.  You can provide a custom handler that can handle that data type in whatever way makes the most sense for your application.  A typical case may be to simple throw an error.  There's a provided `errMessage` function on the [fold](./fold) module tha will turn the err object into a dev friendly string.
