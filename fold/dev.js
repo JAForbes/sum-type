@@ -74,53 +74,53 @@ class StaticSumTypeError {
 }
 
 var ErrMessageCases = 
-    { TooManyCases: function TooManyCases({T, cases, extraKeys}){
+    { TooManyCases: function TooManyCases(o){
         return (
             [ 'Too Many Cases!'
             , 'Your case function must have exactly the same number of'
-            , ' keys as the type: '+T.name+'. ' 
+            , ' keys as the type: '+o.T.name+'. ' 
             , 'The following cases should not have been present:'
-            , extraKeys.join(', ') 
+            , o.extraKeys.join(', ') 
             ].join(' ')
         )
     }
 
-    ,TooFewCases: function TooFewCases({T, cases, extraKeys}){
+    ,TooFewCases: function TooFewCases(o){
         return (
             [ 'Too Few Cases!'
             , 'Your case function must have exactly the same number of' 
-            , 'keys as the type: ' + T.name + '. The following keys were'
+            , 'keys as the type: ' + o.T.name + '. The following keys were'
             , 'missing:'
-            , missingKeys.join(', ') 
+            , o.missingKeys.join(', ') 
             ]
         )
         .join(' ')
     }
 
-    ,InstanceNull: function InstanceNull({T, cases, x}){
+    ,InstanceNull: function InstanceNull(){
         return (
-            'null is not a valid member of the type '+T.name
+            'null is not a valid member of the type '+o.name
         )
     }
 
-    ,InstanceWrongType: function InstanceWrongType({T, cases, x}){
+    ,InstanceWrongType: function InstanceWrongType(o){
         return (
-            [ toString(x)+' is not a valid member of the type'
-            , T.name
+            [ toString(o.x)+' is not a valid member of the type'
+            , o.T.name
             , 'which expects the following cases'
-            , Object.keys(cases).join(' | ')
+            , Object.keys(o.cases).join(' | ')
             ]
         )
         .join(' ')
     }
 
-    ,InstanceShapeInvalid: function InstanceShapeInvalid({T, cases, x}){
+    ,InstanceShapeInvalid: function InstanceShapeInvalid(o){
         return (
-            [ toString(x)+ ' is a member of the type'
-            , T.name
-            , 'but ' + toString(x) + ' has a case that does not'
-            , 'belong to '+ T.name + '. ' 
-            , 'Please review the definition of '+T.name
+            [ toString(o.x)+ ' is a member of the type'
+            , o.T.name
+            , 'but ' + toString(o.x) + ' has a case that does not'
+            , 'belong to '+ o.T.name + '. ' 
+            , 'Please review the definition of '+o.T.name
             ]
             .join(' ')
         )
