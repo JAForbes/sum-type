@@ -284,6 +284,7 @@ doubleEither(
 
     - No placeholder cases (like sum-type/union-type)
     - No auto spreading of values (like sum-type/union-type)
+    - No auto curried constructors (like sum-type/union-type)
 
 
 #### What's fold do?

@@ -219,6 +219,7 @@ You should see `"4.12"` and `"0.00"` log to the console.
 
     - No placeholder cases (like sum-type/union-type)
     - No auto spreading of values (like sum-type/union-type)
+    - No auto curried constructors (like sum-type/union-type)
 
 
 #### What's fold do?
