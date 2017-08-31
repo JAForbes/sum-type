@@ -2,7 +2,7 @@
   "name": "static-sum-type",
   "version": "0.0.0",
   "description": "An underlying format for algebraic types that can be used directly or composed with other libraries.",
-  "main": "dev.js",
+  "main": "fold/dev.js",
   "scripts": {
     "test": "node test/test.js"
   },
