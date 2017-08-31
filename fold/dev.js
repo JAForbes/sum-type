@@ -11,11 +11,11 @@ function toString(x){
     return x.case.name
       +'('
         + (
-          'value' in x 
+          'value' in x
           ? toString(x.value)
           : x.toString()
         )
-        
+
       +')::'
       +x.type.name
   } else {
@@ -32,11 +32,11 @@ class StaticSumTypeError {
         }
     }
 
-    static TooFewCases(T, cases, extraKeys){
+    static TooFewCases(T, cases, missingKeys){
         return {
             case: StaticSumTypeError.TooFewCases
             ,type: StaticSumTypeError
-            ,value: { T, cases, extraKeys }
+            ,value: { T, cases, missingKeys }
         }
     }
 
@@ -73,14 +73,14 @@ class StaticSumTypeError {
     }
 }
 
-var ErrMessageCases = 
+var ErrMessageCases =
     { TooManyCases: function TooManyCases(o){
         return (
             [ 'Too Many Cases!'
             , 'Your case function must have exactly the same number of'
-            , ' keys as the type: '+o.T.name+'. ' 
+            , ' keys as the type: '+o.T.name+'. '
             , 'The following cases should not have been present:'
-            , o.extraKeys.join(', ') 
+            , o.extraKeys.join(', ')
             ].join(' ')
         )
     }
@@ -88,10 +88,10 @@ var ErrMessageCases =
     ,TooFewCases: function TooFewCases(o){
         return (
             [ 'Too Few Cases!'
-            , 'Your case function must have exactly the same number of' 
+            , 'Your case function must have exactly the same number of'
             , 'keys as the type: ' + o.T.name + '. The following keys were'
             , 'missing:'
-            , o.missingKeys.join(', ') 
+            , o.missingKeys.join(', ')
             ]
         )
         .join(' ')
@@ -119,7 +119,7 @@ var ErrMessageCases =
             [ toString(o.x)+ ' is a member of the type'
             , o.T.name
             , 'but ' + toString(o.x) + ' has a case that does not'
-            , 'belong to '+ o.T.name + '. ' 
+            , 'belong to '+ o.T.name + '. '
             , 'Please review the definition of '+o.T.name
             ]
             .join(' ')
@@ -136,9 +136,9 @@ var ErrMessageCases =
 module.exports = function Dev(handleError){
 
     var Err = StaticSumTypeError
-    
+
     function fold(T){
-        
+
         if( arguments.length > 1 ){
             return handleError(
                 Err.TooManyArguments(arguments)
@@ -151,16 +151,16 @@ module.exports = function Dev(handleError){
                         Err.TooManyArguments(arguments)
                     )
                 } else {
-                    
-                    var caseKeys = 
+
+                    var caseKeys =
                         Object.keys(cases)
-                        
-                    var tKeys = 
+
+                    var tKeys =
                         Object.getOwnPropertyNames(T)
                         .filter(function(x){
                             return !(x in Skip)
                         })
-                        
+
                     var xKeys = [
                         [caseKeys, T]
                         ,[tKeys, cases]
@@ -176,7 +176,7 @@ module.exports = function Dev(handleError){
                     var extraKeys = xKeys[0]
                     var missingKeys = xKeys[1]
 
-            
+
                     if( arguments.length > 1 ){
                         return handleError(
                             Err.TooManyArguments(arguments)
@@ -184,15 +184,15 @@ module.exports = function Dev(handleError){
                     }
                     if( missingKeys.length > 0 ){
                         return handleError(
-                            Err.TooFewCases(T, cases, missingKeys) 
+                            Err.TooFewCases(T, cases, missingKeys)
                         )
                     } else if (extraKeys.length > 0){
                         return handleError(
-                            Err.TooManyCases(T, cases, extraKeys) 
-                        ) 
+                            Err.TooManyCases(T, cases, extraKeys)
+                        )
                     } else {
                         return function(x){
-                            
+
                             return (
                                 arguments.length > 1
                                 ? handleError(
@@ -226,7 +226,7 @@ module.exports = function Dev(handleError){
         }
     }
 
-    var errMessage = 
+    var errMessage =
         fold(StaticSumTypeError)(ErrMessageCases)
 
     return {
