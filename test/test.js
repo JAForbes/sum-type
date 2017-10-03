@@ -7,6 +7,8 @@ const {
   return e
 })
 
+const yslashn = require('../yslashn')
+
 const PredicatedLib = require('../predicated/dev')
 
 const { fold: prodCata } = require('../fold/prod')()
@@ -186,6 +188,8 @@ test('static-sum-type', function(t){
     ,Circle: x => typeof x == 'number'
   })
 
+
+
   const c = Shape.Circle(2)
 
   var r = devFold(Shape)({
@@ -196,6 +200,102 @@ test('static-sum-type', function(t){
     c
   )
   console.log(r)
+
+  t.end()
+})
+
+test('yslashn', function(t){
+
+  const YNMaybe = yslashn.maybe('Maybe')
+
+  const fromMaybe = (otherwise, f) =>
+      devFold( YNMaybe )({
+          Y: f
+          ,N: () => otherwise
+      })
+
+  const y = YNMaybe.Y(10)
+  const n = YNMaybe.N()
+
+  t.equals(
+    fromMaybe(0, x => x * x ) ( y )
+    , 100
+  )
+  // => 100
+
+  t.equals(
+    fromMaybe(0, x => x * x)( n )
+    , 0
+  )
+
+  // Selected = Y a | N
+  const Selected = yslashn.maybe('Selected')
+
+  // Loaded = Y a | N b
+  const Loaded = yslashn.either()
+
+  // 50% loaded
+  const loading =
+      Loaded.N( 50 )
+
+  const complete =
+      Loaded.Y( 'hello world' )
+
+  // not selected
+  const deselected =
+    Selected.N()
+
+  const f =
+      devFold ( Selected ) ({
+          Y: devFold ( Loaded ) ({
+              Y: x => x.toUpperCase()
+              ,N: x => x + '% complete'
+          })
+          ,N: () => 'Please select a thingy'
+      })
+
+  t.equals(
+    f( loading ).case.name
+    ,'InstanceWrongType'
+  )
+
+  t.equals(
+
+    f(
+        Selected.Y(
+            loading
+        )
+      )
+    ,'50% complete'
+  )
+
+  t.equals(
+    f(
+      Selected.Y(
+          complete
+      )
+    )
+    , 'HELLO WORLD'
+  )
+
+  t.equals(
+    f(
+        deselected
+    )
+    ,'Please select a thingy'
+  )
+
+  const Credit = yslashn.nFold('Credit', ['Recharge', 'Normal', 'Insufficient'])
+
+  t.equals(
+    devFold( Credit )({
+      Normal: n => n * n
+      ,Recharge: () => 0
+      ,Insufficient: () => 0
+    })( Credit.Normal(5) )
+    ,25
+  )
+
 
   t.end()
 })

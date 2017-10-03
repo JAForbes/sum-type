@@ -19,7 +19,7 @@ const Maybe = yslashn.maybe('Maybe')
 const fromMaybe = (otherwise, f)
     fold( Maybe )({
         Y: f
-        N: () => otherwise
+        ,N: () => otherwise
     })
 
 const y = Maybe.Y(10)
@@ -45,7 +45,7 @@ This library gives you the ability to define new types with extreme brevity but 
 const Selected = yslashn.maybe('Selected')
 
 // Loaded = Y a | N b
-const Loaded = yshlash.either()
+const Loaded = yslashn.either()
 
 // 50% loaded
 const loading =
@@ -61,7 +61,7 @@ const f =
     fold ( Selected ) ({
         Y: fold ( Loaded ) ({
             Y: x => x.toUpperCase()
-            N: x => x + '% complete'
+            ,N: x => x + '% complete'
         })
         ,N: () => 'Please select a thingy'
     })
