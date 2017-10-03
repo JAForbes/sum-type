@@ -1,8 +1,8 @@
 const test = require('tape')
 const $ = require('sanctuary-def')
-const { 
+const {
   fold: devFold
-  , StaticSumTypeError 
+  , StaticSumTypeError
 } = require('../fold/dev')(function(e){
   return e
 })
@@ -13,17 +13,17 @@ const { fold: prodCata } = require('../fold/prod')()
 
 class Maybe {
   static Just(x) {
-    return { 
+    return {
       value: x
-      , case: Maybe.Just
-      , type: Maybe
-    } 
+      , case: Maybe.Just.name
+      , type: Maybe.name
+    }
   }
-  static Nothing() { 
-    return { 
-      case: Maybe.Nothing 
-      , type: Maybe
-    } 
+  static Nothing() {
+    return {
+      case: Maybe.Nothing.name
+      , type: Maybe.name
+    }
   }
 }
 
@@ -31,37 +31,37 @@ class Loadable {
   static Loaded(x) {
     return {
       value: x
-      , case: Loadable.Loaded
-      , type: Loadable
+      , case: Loadable.Loaded.name
+      , type: Loadable.name
       , toString(){
         return 'Loaded('+x+')'
       }
-    } 
+    }
   }
-  static Loading() { 
-    return { 
-      of: Loadable.Loading
-      , type: Loadable
+  static Loading() {
+    return {
+      of: Loadable.Loading.name
+      , type: Loadable.name
       , toString(){
         return 'Loading()'
       }
-    } 
+    }
   }
 }
 
 var Maybe2 ={
   name: 'Maybe'
   ,Just(x){
-    return { 
+    return {
       value: x
-      , case: Maybe2.Just
-      , type: Maybe2
+      , case: Maybe2.Just.name
+      , type: Maybe2.name
     }
   }
   ,Nothing(){
-    return { 
-      case: Maybe2.Nothing
-      , type: Maybe2
+    return {
+      case: Maybe2.Nothing.name
+      , type: Maybe2.name
     }
   }
 }
@@ -78,9 +78,9 @@ test('static-sum-type', function(t){
     ,Nothing: () => 0
   })
 
-  t.equals( 
+  t.equals(
     maybeToNum(Maybe.Just('hi'))
-    , 1 
+    , 1
     ,'fold can fold valid types'
   )
 
@@ -122,8 +122,8 @@ test('static-sum-type', function(t){
 
   t.equals(
     maybeToNum({
-      type: Maybe
-      ,case: Loadable.Loaded
+      type: Maybe.name
+      ,case: Loadable.Loaded.name
       ,value: 1
     }).case
     ,StaticSumTypeError.InstanceShapeInvalid
@@ -160,8 +160,8 @@ test('static-sum-type', function(t){
     ,'prodCata ignores errors and blindy tries to do its job'
   )
 
-  const SumTypePred = PredicatedLib( 
-    x => x != null && x.toString() 
+  const SumTypePred = PredicatedLib(
+    x => x != null && x.toString()
     , e => {
       throw new Error(e.message)
     }
@@ -189,6 +189,6 @@ test('static-sum-type', function(t){
     c
   )
   console.log(r)
-  
+
   t.end()
 })

@@ -8,7 +8,7 @@ function toString(x){
   if( x == null ){
     return 'null'
   } else if( x.type && x.case ){
-    return x.case.name
+    return x.case
       +'('
         + (
           'value' in x
@@ -17,7 +17,7 @@ function toString(x){
         )
 
       +')::'
-      +x.type.name
+      +x.type
   } else {
     return x.toString()
   }
@@ -204,19 +204,19 @@ module.exports = function Dev(handleError){
                                             T, cases, x
                                         )
                                     )
-                                : x.type.name !== T.name
+                                : x.type !== T.name
                                     ? handleError(
                                         Err.InstanceWrongType(
                                             T, cases, x
                                         )
                                     )
-                                : !( x.case.name in T )
+                                : !( x.case in T )
                                     ? handleError(
                                         Err.InstanceShapeInvalid(
                                             T, cases, x
                                         )
                                     )
-                                    : cases[x.case.name](x.value)
+                                    : cases[x.case](x.value)
                             )
                         }
                     }

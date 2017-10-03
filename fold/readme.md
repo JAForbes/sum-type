@@ -27,15 +27,15 @@ const h = require('hyperscript') // or whatever
 class Loadable {
     static Loaded(value){
         return {
-            type: Loadable
-            ,case: Loadable.Loaded
+            type: Loadable.name
+            ,case: Loadable.Loaded.name
             ,value
         }
     }
     static Loading(){
         return {
-            type: Loadable
-            ,case: Loadable.Loading
+            type: Loadable.name
+            ,case: Loadable.Loading.name
         }
     }
 }
@@ -43,15 +43,15 @@ class Loadable {
 class Validatable {
     static Valid(value){
         return {
-            type: Validatable
-            ,case: Validatable.Valid
+            type: Validatable.name
+            ,case: Validatable.Valid.name
             ,value
         }
     }
     static Invalid(value){
         return {
-            type: Validatable
-            ,case: Validatable.Invalid
+            type: Validatable.name
+            ,case: Validatable.Invalid.name
             ,value
         }
     }
@@ -60,27 +60,27 @@ class Validatable {
 class Selectable {
     static Selected(value){
         return {
-            type: Selectable
-            ,case: Selectable.Selected
+            type: Selectable.name
+            ,case: Selectable.Selected.name
             ,value
         }
     }
     static Deselected(){
         return {
-            type: Deselected
-            ,case: Selectable.Deselected
+            type: Deselected.name
+            ,case: Selectable.Deselected.name
         }
     }
 }
 
-const w = 
+const w =
     Selectable.Selected(
         Loadable.Loaded(
             Validatable.Invalid({
                 name: 'kym theel'
                 ,instrument: null
                 ,band: 'Audioslave'
-                ,validationMessage: 
+                ,validationMessage:
                     [ 'Wrong band, no instrument, wrong spelling.'
                     , 'You can do this!'
                     ]
@@ -89,7 +89,7 @@ const w =
         )
     )
 
-const x = 
+const x =
     Selectable.Selected(
         Loadable.Loaded(
             Validatable.Valid({
@@ -100,21 +100,21 @@ const x =
         )
     )
 
-const y = 
+const y =
     Selectable.Deselected()
 
-const z = 
+const z =
     Selectable.Selected( Loadable.Loading() )
 
 
-const renderBandMembers = 
+const renderBandMembers =
     fold( Selectable)({
         Selected: fold( Loadable)({
             Loaded: fold( Validatable)({
-                Valid({ 
+                Valid({
                     name
                     , instrument
-                    , band 
+                    , band
                 }){
                     return h('form.valid', [
                         h(
@@ -127,11 +127,11 @@ const renderBandMembers =
                         ,saveButton({ disabled: false })
                     ])
                 }
-                ,Invalid({ 
+                ,Invalid({
                     name
                     , instrument
                     , band
-                    , validationMessage 
+                    , validationMessage
                 }){
                     return h('form.invalid', [
                         h('div.warning', validationMessage)
@@ -144,7 +144,7 @@ const renderBandMembers =
             })
             ,Loading: () => 'Loading...'
         })
-        ,Deselected: 
+        ,Deselected:
             () => 'Please select a band member'
     })
 
@@ -154,12 +154,12 @@ renderBandMembers(y) //=> 'Please select a band member'
 renderBandMembers(z) //=> 'Loading'
 
 
-var typeError = 
+var typeError =
     Validatable.Valid(
         Loadable.Loading()
     )
 
-renderBandMembers(typeError) 
+renderBandMembers(typeError)
 //=> helpful type error because the structure does not match the `fold`
 ```
 
@@ -184,14 +184,14 @@ class Maybe {
     static Just(x){
         return {
             value: x
-            , type: Maybe
-            , case: Maybe.Just
+            , type: Maybe.name
+            , case: Maybe.Just.name
         }
     }
     static Nothing(){
         return {
-            , type: Maybe
-            , case: Maybe.Nothing
+            , type: Maybe.name
+            , case: Maybe.Nothing.name
         }
     }
 }
@@ -225,14 +225,14 @@ const Either = {
     name: 'Either'
     Left: (value) => ({
         value
-        ,type: Either
-        ,of: Either.Left
-    }) 
+        ,type: Either.name
+        ,case: Either.Left.name
+    })
     ,Right: (value) => ({
         value
-        ,type: Either
-        ,of: Either.Right
-    }) 
+        ,type: Either.name
+        ,case: Either.Right.name
+    })
 }
 
 const Either$map = f =>
@@ -260,7 +260,7 @@ doubleEither(
 
 #### Project Goals and Motivations
 
-- 0 Dependencies 
+- 0 Dependencies
 - Tiny for frontend usage ( prod is 11 LOC, ~200B )
 - Statically Analyzable
     - Nice editor experience in VSCode or tern.js
@@ -296,9 +296,9 @@ If the case has a `value` property, it is passed into the provided function.
 
 #### What are static-sum-type/fold/dev and static-sum-type/fold/prod?
 
-These are different versions of the same function.  
+These are different versions of the same function.
 
-Dev will check a variety of things before creating your function and before 
+Dev will check a variety of things before creating your function and before
 applying it.
 
 Prod will just try to execute immediately.
@@ -319,40 +319,42 @@ A type is a struct with a name property and as many keys as there are cases.
 A Maybe type looks like this
 
 ```
-{ name :: String
+{ name :: UppercaseString
 , Just :: Any
 , Nothing :: Any
 }
 ```
 
-Keep in mind every property other than `name` is considered the name of a `Case` of that `Type`.  If you want your type to have functions, either put them on a separate (higher) namespace, or put them on the `Type`'s prototype chain.  
+Keep in mind lowercase properties other than `name` are ignored.  If you want your type to have static functions or other data you can safely do so as long as the property is a `LowercaseString`
 
-> Any keys in a call to `getOwnPropertyNames(Type)` will be treated as a case.
+> Any upper case keys in a call to `getOwnPropertyNames(Type)` will be treated as a case.
 
 #### What is a "Case"
 
 ```
 { name :: String
-, type :: Type
-, case :: { name :: String }
+, type :: UppercaseString
+, case :: UppercaseString
 , value? :: a
 }
 ```
 
-A `Case` is a struct with a `type`, `case` and an optional `value` property.
-The type property must be a `Type` which includes a key with same value as the `name` property of this case.  The `case` property must have a `name` property of it's own that has the same `name` value as the object it lives on.
+- A `Case` is a struct with a `type`, `case` and an optional `value` property.
+- The type and case property must be an `UppercaseString`.
+- The `case` property must correspond to a matching key on a type object.
+- The matching type object must include a property that matches the cases `case` property.
 
 A case *can* have a `value` property.  But it is optional.  The `value` property can be of any type.
 
 #### Show me some examples of some valid types.
 
 ```js
-class TypeName1 {
+class Type1 {
     static Case1(){}
     static Case2(){}
 }
 
-{ name: 'TypeName2'
+{ name: 'Type2'
 , 'Case1': true
 , 'Case2': true
 }
@@ -360,17 +362,17 @@ class TypeName1 {
 
 Yes the above specification is compatible with Javascript classes.  Here's why:
 
-A class has an automatically generated property `name`.  
+A class has an automatically generated property `name`.
 
 #### Show me some examples of some valid cases.
 
 ```js
-{ name: 'Case1'
-, type: TypeName1 //references above
+{ case: 'Case1'
+, type: Type1.name //references above
 }
 
-{ name: 'Case2'
-, type: { name: 'TypeName1' } // has same name as above which is also OK
+{ case: 'Case2'
+, type: 'Type1' // has same name as above which is also OK
 , value: 'this is a value'
 }
 ```
@@ -406,21 +408,21 @@ function Maybe(){
 }
 Maybe.Just = function(value){
     return {
-        type: Maybe
-        ,case: Maybe.Just
+        type: Maybe.name
+        ,case: Maybe.Just.name
         ,value
     }
 }
 Maybe.Nothing = function(){
     return {
-        type: Maybe
-        ,case: Maybe.Nothing
+        type: Maybe.name
+        ,case: Maybe.Nothing.name
         ,value
     }
 }
 ```
 
-Because just like `class`, named function's also have an auto generated `name` property.  
+Because just like `class`, named function's also have an auto generated `name` property.
 
 > The fact classes have a name property is actually just because classes are syntactic sugar on top of constructor functions.
 
@@ -436,9 +438,9 @@ Just use arrays or objects as your `value` property.  The specification does not
 class List {
     static NonEmpty(...value){
         return {
-            type: List
+            type: List.name
             ,value: value
-            ,case: List.NonEmpty
+            ,case: List.NonEmpty.name
         }
     }
 
