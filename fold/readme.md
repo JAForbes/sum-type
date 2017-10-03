@@ -319,7 +319,7 @@ A type is a struct with a name property and as many keys as there are cases.
 A Maybe type looks like this
 
 ```
-{ name :: UppercaseString
+{ name :: TitlecaseString
 , Just :: Any
 , Nothing :: Any
 }
@@ -327,20 +327,20 @@ A Maybe type looks like this
 
 Keep in mind lowercase properties other than `name` are ignored.  If you want your type to have static functions or other data you can safely do so as long as the property is a `LowercaseString`
 
-> Any upper case keys in a call to `getOwnPropertyNames(Type)` will be treated as a case.
+> Any keys in a call to `getOwnPropertyNames(Type)` where `key[0] == key[0].toUpperCase()` will be treated as a case.
 
 #### What is a "Case"
 
 ```
 { name :: String
-, type :: UppercaseString
-, case :: UppercaseString
+, type :: TitlecaseString
+, case :: TitlecaseString
 , value? :: a
 }
 ```
 
 - A `Case` is a struct with a `type`, `case` and an optional `value` property.
-- The type and case property must be an `UppercaseString`.
+- The type and case property must be an `TitlecaseString`.
 - The `case` property must correspond to a matching key on a type object.
 - The matching type object must include a property that matches the cases `case` property.
 

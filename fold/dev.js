@@ -4,6 +4,16 @@ var Skip = {
   ,name: true
 }
 
+function getCases(T){
+    return Object.getOwnPropertyNames(T)
+        .filter(
+            o => o[0] == o[0].toUpperCase()
+        )
+        .filter(function(x){
+            return !(x in Skip)
+        })
+}
+
 function toString(x){
   if( x == null ){
     return 'null'
@@ -108,7 +118,7 @@ var ErrMessageCases =
             [ toString(o.x)+' is not a valid member of the type'
             , o.T.name
             , 'which expects the following cases'
-            , Object.keys(o.cases).join(' | ')
+            , getCases(t).join(' | ')
             ]
         )
         .join(' ')
@@ -153,13 +163,11 @@ module.exports = function Dev(handleError){
                 } else {
 
                     var caseKeys =
-                        Object.keys(cases)
+                        getCases(cases)
 
                     var tKeys =
-                        Object.getOwnPropertyNames(T)
-                        .filter(function(x){
-                            return !(x in Skip)
-                        })
+                        getCases(T)
+
 
                     var xKeys = [
                         [caseKeys, T]
@@ -175,7 +183,6 @@ module.exports = function Dev(handleError){
 
                     var extraKeys = xKeys[0]
                     var missingKeys = xKeys[1]
-
 
                     if( arguments.length > 1 ){
                         return handleError(
