@@ -127,5 +127,5 @@ This library encourages a naming convention `Y/N` which isn't a valid identifier
 Who is Scott Wlaschin?
 -----------------------
 
-Scott Wlaschin is most well known for his book / blog F# for fun and profit.  He's especially well known for evangelizing static sum types to encoude business logic at the type level.  Something this project attempts to simulate in Javascript.
+Scott Wlaschin is most well known for his book / blog F# for fun and profit.  He's especially well known for evangelizing sum types to encode business logic at the type level.  Something this project attempts to simulate in Javascript.
 
