@@ -25,6 +25,13 @@ class Maybe {
       , type: Maybe.name
     }
   }
+
+  static map(f){
+    return o => devFold(Maybe) ({
+      Just: a => Maybe.Just(f(a))
+      ,Nothing: () => Maybe.Nothing()
+    })
+  }
 }
 
 class Loadable {
