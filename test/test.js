@@ -2,6 +2,7 @@ const test = require('tape')
 const $ = require('sanctuary-def')
 const {
   fold: devFold
+  , map: devMap
   , StaticSumTypeError
 } = require('../fold/dev')(function(e){
   return e
@@ -11,7 +12,7 @@ const yslashn = require('../yslashn')
 
 const PredicatedLib = require('../predicated/dev')
 
-const { fold: prodCata } = require('../fold/prod')()
+const { fold: prodCata, map: prodMap } = require('../fold/prod')()
 
 class Maybe {
   static Just(x) {
@@ -32,7 +33,7 @@ class Maybe {
     return o => devFold(Maybe) ({
       Just: a => Maybe.Just(f(a))
       ,Nothing: () => Maybe.Nothing()
-    })
+    })(o)
   }
 }
 
@@ -74,10 +75,6 @@ var Maybe2 ={
     }
   }
 }
-
-var x = Maybe.Just(2)
-var y = Loadable.Loaded(x)
-
 
 test('static-sum-type', function(t){
   const foldMaybe = devFold(Maybe)
@@ -298,4 +295,27 @@ test('yslashn', function(t){
 
 
   t.end()
+})
+
+test('bifold, bimap, map', function(t){
+  const Maybe = yslashn.maybe('Maybe')
+
+  // map is defined in terms of bimap which is defined in terms of bifold
+  t.equals(
+    devMap (Maybe) ( x => x * x ) ( Maybe.Y(10) ).value
+    , 100
+  )
+
+  t.equals(
+    prodMap (Maybe) ( x => x * x ) ( Maybe.Y(10) ).value
+    , 100
+  )
+
+  t.equals(
+    prodMap (Maybe) ( x => x * x ) ( Maybe.N() ).case
+    , 'N'
+  )
+
+  t.end()
+
 })

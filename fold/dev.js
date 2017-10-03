@@ -4,6 +4,10 @@ var Skip = {
   ,name: true
 }
 
+function I(a){
+    return a
+}
+
 function getCases(T){
     return Object.getOwnPropertyNames(T)
         .filter(
@@ -107,7 +111,7 @@ var ErrMessageCases =
         .join(' ')
     }
 
-    ,InstanceNull: function InstanceNull(){
+    ,InstanceNull: function InstanceNull(o){
         return (
             'null is not a valid member of the type '+o.name
         )
@@ -118,7 +122,7 @@ var ErrMessageCases =
             [ toString(o.x)+' is not a valid member of the type'
             , o.T.name
             , 'which expects the following cases'
-            , getCases(t).join(' | ')
+            , getCases(o.T).join(' | ')
             ]
         )
         .join(' ')
@@ -236,8 +240,51 @@ module.exports = function Dev(handleError){
     var errMessage =
         fold(StaticSumTypeError)(ErrMessageCases)
 
+
+    function bifold(T){
+        return function bifold$T(fb, fa){
+            var caseNames =
+                getCases(T)
+
+            if( caseNames.length != 2 ){
+                throw new TypeError(
+                    `You can only bifold when a Type's case count=2`
+                    +` but ${T.name} has ${caseNames.length}: `
+                    + caseNames.join(' | ')
+                )
+            }
+
+            // reverse because its customary to fold the failure first
+            var ks = caseNames.slice().reverse()
+            var kb = ks[0]
+            var ka = ks[1]
+
+            return fold (T) ({ [ka]: fa, [kb]: fb })
+        }
+    }
+
+    function bimap(T){
+        return function bimap$T(fb, fa){
+            return function(Ta){
+                return bifold (T)(
+                    b => T[Ta.case]( fb(b) )
+                    ,a => T[Ta.case]( fa(a) )
+                )(Ta)
+            }
+        }
+    }
+
+    function map(T){
+        return function bimap$T(fa){
+            return bimap (T) (I, fa)
+        }
+    }
+
     return {
         fold
+        ,bifold
+        ,bimap
+        ,map
         ,handleError
         ,errMessage
         ,StaticSumTypeError
