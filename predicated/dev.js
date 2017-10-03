@@ -1,11 +1,11 @@
 function PredicatedLibDev(toString, handleError){
 
     function SumType(name, cases){
-      
-      var type = 
+
+      var type =
         Object.keys(cases)
           .reduce(function(p, k){
-            var predicate = 
+            var predicate =
               cases[k]
 
             p[k] = function(value){
@@ -26,8 +26,8 @@ function PredicatedLibDev(toString, handleError){
                   return name+'.'+k+'('+ (value) +')'
                 }
                 return {
-                  type: { name }
-                  ,case: { name: k }
+                  type: name
+                  ,case: k
                   ,value: value
                   ,toString: instance$toString
                   ,inspect: instance$toString
