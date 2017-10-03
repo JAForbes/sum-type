@@ -91,13 +91,15 @@ f(
 
 ### API
 
+> All `ylashn` functions return a static-sum-type spec compliant `static-sum-type` algebraic type!
+
 `yslashn.maybe = string -> Y a | N`
 
 Provide the name of a type, and `yslashn.maybe` will give you a type that mimics the structure of a `Maybe`.  `Y` is an alias for the word "yes" and corresponds to the traditionally named `Maybe.Just` which usually represents the happy path in a computation.
 
 `N` is an alias for the word "no" and corresponds to what is tradtionally named `Maybe.Nothing`.
 
-`Y` can contain a value, and `N` cannot.  There is no value level type checking, but you certainly annotate your generated types using typescript, flow, et al, or sanctuary-def or whatever approach you fancy.
+`Y` can contain a value, and `N` cannot.
 
 `ylashn` returns a spec compliant `static-sum-type` so you can type against that structure.
 
@@ -107,9 +109,7 @@ Provide the name of a type, and `yslashn.either` will give you a type that mimic
 
 `N` is an alias for the word "no" and corresponds to what is tradtionally named `Either.Left`.
 
-Both `Y` and `N` can contain values.  There is no value level type checking, but you certainly annotate your generated types using typescript, flow, et al, or sanctuary-def or whatever approach you fancy.
-
-`ylashn` returns a spec compliant `static-sum-type` so you can type against that structure.
+Both `Y` and `N` can contain values.
 
 
 `yslashn.nFold = (string, string[]) -> A a | B b ... | Z z `
