@@ -49,7 +49,7 @@ This library gives you the ability to define new types with extreme brevity but 
 const Selected = yslashn.maybe('Selected')
 
 // Loaded = Y a | N b
-const Loaded = yslashn.either()
+const Loaded = yslashn.either('Loaded')
 
 // 50% loaded
 const loading =
