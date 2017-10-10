@@ -44,13 +44,16 @@ module.exports = function(){
                 return out.fold (T) (cases)
             }
         }
-
         ,bimap: function bimap(T){
             return function bimap$T(fb, fa){
                 return function(Ta){
                     return out.bifold (T)(
-                        function(b){ return T[Ta.case]( fb(b) )}
-                        ,function(a){ return T[Ta.case]( fa(a) ) } 
+                        function(b){ 
+                            return { case: Ta.case, type: T.name, value: fb(b) }
+                        }
+                        ,function(a){ 
+                            return { case: Ta.case, type: T.name, value: fa(a) }
+                        } 
                     )(Ta)
                 }
             }
