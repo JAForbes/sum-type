@@ -4,15 +4,15 @@ const {
   fold: devFold
   , map: devMap
   , StaticSumTypeError
-} = require('../fold/dev')(function(e){
+} = require('../modules/fold/dev')(function(e){
   return e
 })
 
-const yslashn = require('../yslashn')
+const yslashn = require('../modules/yslashn')
 
-const PredicatedLib = require('../predicated/dev')
+const PredicatedLib = require('../modules/predicated/dev')
 
-const { fold: prodCata, map: prodMap } = require('../fold/prod')()
+const { fold: prodCata, map: prodMap } = require('../modules/fold/prod')()
 
 class Maybe {
   static Just(x) {
@@ -98,31 +98,31 @@ test('static-sum-type', function(t){
 
   t.equals(
     maybeToNum(Loadable.Loaded('whatever')).case
-    ,StaticSumTypeError.InstanceWrongType
+    ,'InstanceWrongType'
     ,'Fold identifies when a value is of the wrong type'
   )
 
   t.equals(
     devFold(Maybe, 0).case
-    ,StaticSumTypeError.TooManyArguments
+    ,'TooManyArguments'
     ,'fold identifies when there are too many arguments level:0'
   )
 
   t.equals(
     devFold(Maybe)({ Just: () => 1, Nothing: () => 0 }, 1).case
-    ,StaticSumTypeError.TooManyArguments
+    ,'TooManyArguments'
     ,'fold identifies when there are too many arguments level:1'
   )
 
   t.equals(
     devFold(Maybe)({ Just: () => 1, Nothing: () => 0 })( Maybe.Just(1), 1 ).case
-    ,StaticSumTypeError.TooManyArguments
+    ,'TooManyArguments'
     ,'fold identifies when there are too many arguments level:2'
   )
 
   t.equals(
     maybeToNum( null ).case
-    ,StaticSumTypeError.InstanceNull
+    ,'InstanceNull'
     ,'fold identifies when a value is null'
   )
 
@@ -132,7 +132,7 @@ test('static-sum-type', function(t){
       ,case: Loadable.Loaded.name
       ,value: 1
     }).case
-    ,StaticSumTypeError.InstanceShapeInvalid
+    ,'InstanceShapeInvalid'
     ,'fold identifies when a instance has the wrong case key'
   )
 
@@ -140,7 +140,7 @@ test('static-sum-type', function(t){
     foldMaybe({
       Just: () => 1
     }).case
-    ,StaticSumTypeError.TooFewCases
+    ,'TooFewCases'
     ,'fold detects when there are too few cases provided'
   )
 
@@ -150,7 +150,7 @@ test('static-sum-type', function(t){
       ,Nothing: () => 1
       ,Left: () => 1
     }).case
-    ,StaticSumTypeError.TooManyCases
+    ,'TooManyCases'
     ,'fold detects when there are too few many provided'
   )
 
@@ -252,7 +252,7 @@ test('yslashn', function(t){
       })
 
   t.equals(
-    f( loading ).case.name
+    f( loading ).case
     ,'InstanceWrongType'
   )
 
