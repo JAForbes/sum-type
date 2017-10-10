@@ -10,16 +10,16 @@ function I(a){
 
 function getCases(T){
     return Object.getOwnPropertyNames(T)
-        .filter(
-            o => o[0] == o[0].toUpperCase()
-        )
+        .filter(function(o){
+            return o[0] == o[0].toUpperCase()
+        })
         .filter(function(x){
             return !(x in Skip)
         })
 }
 
 module.exports = function(){
-    const out = {
+    var out = {
         fold: function prodFold(){
             return function prodFold$T(cases){
                 return function prodFold$T$cases(x){
@@ -38,7 +38,10 @@ module.exports = function(){
                 var kb = ks[0]
                 var ka = ks[1]
 
-                return out.fold (T) ({ [ka]: fa, [kb]: fb })
+                var cases = {}
+                cases[ka] = fa
+                cases[kb] = fb
+                return out.fold (T) (cases)
             }
         }
 
@@ -46,8 +49,8 @@ module.exports = function(){
             return function bimap$T(fb, fa){
                 return function(Ta){
                     return out.bifold (T)(
-                        b => T[Ta.case]( fb(b) )
-                        ,a => T[Ta.case]( fa(a) )
+                        function(b){ return T[Ta.case]( fb(b) )}
+                        ,function(a){ return T[Ta.case]( fa(a) ) } 
                     )(Ta)
                 }
             }

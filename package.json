@@ -2,9 +2,28 @@
   "name": "static-sum-type",
   "version": "0.7.0",
   "description": "An underlying format for algebraic types that can be used directly or composed with other libraries.",
-  "main": "fold/dev.js",
+  "main": "modules/fold/dev.js",
+  "files": [
+    "dist",
+    "modules"
+  ],
   "scripts": {
-    "test": "node test/test.js"
+    "test": "npm-run-all test:*",
+    "test:dist": "npm run dist",
+    "test:test": "nyc --reporter=lcov tape \"./test/*.js\" | tap-spec",
+    "test:check-coverage": "nyc check-coverage --statements 100 --branches 100 --functions 100 --lines 100",
+    "test:report-coverage": "nyc report",
+    "dist:dev-fold-throw": "browserify configs/dev/foldThrow.js --standalone sst | uglifyjs -mc > dist/fold.dev.throw.min.js",
+    "dist:prod-fold-throw": "browserify configs/prod/foldThrow.js --standalone sst | uglifyjs -mc > dist/fold.prod.throw.min.js",
+    "dist:dev-fold": "browserify modules/fold/dev.js --standalone sst.Fold > dist/fold.dev.js",
+    "dist:prod-fold": "browserify modules/fold/prod.js --standalone sst.Fold > dist/fold.prod.js",
+    "dist:yslashn": "browserify modules/yslashn/index.js --standalone sst.yslashn > dist/yslashn.js",
+    "dist:predicated-dev": "browserify modules/predicated/dev.js --standalone sst.predicated > dist/predicated.dev.js",
+    "dist:predicated-prod": "browserify modules/predicated/prod.js --standalone sst.predicated > dist/predicated.prod.js",
+    "dist": "npm-run-all dist:*",
+    "release": "git push && npm version minor && npm publish",
+    "preversion": "npm test",
+    "predist": "rm -fr dist && mkdir dist"
   },
   "keywords": [
     "fp",
@@ -17,7 +36,9 @@
   "author": "JAForbes",
   "license": "MIT",
   "devDependencies": {
+    "browserify": "^14.4.0",
     "eslint": "^4.2.0",
+    "npm-run-all": "^4.1.1",
     "sanctuary-def": "^0.13.0",
     "tape": "^4.7.0"
   }

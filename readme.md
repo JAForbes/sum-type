@@ -34,7 +34,7 @@ fold(Maybe)({
 })(just) //=> 4
 ```
 
-The design of the spec allows for a variety of other statically analyzable syntaxes which can be viewed at [static-sum-type/fold](https://gitlab.com/JAForbes/static-sum-type/tree/master/fold).  But its also possible to generate types dynamically far more succintly.
+The design of the spec allows for a variety of other statically analyzable syntaxes which can be viewed at [static-sum-type/fold](https://gitlab.com/JAForbes/static-sum-type/tree/master/modules/fold).  But its also possible to generate types dynamically far more succintly.
 
 The predicated module is an example of a type generator that is spec compliant but also checks if values meet a predicate.  This can be seen as a low level type checking system when you don't want to pay the filesize cost of a more complete type checking library like sanctuary-def.
 
@@ -52,7 +52,7 @@ fold(Maybe)({
 })(just) //=> 3
 ```
 
-Check out the [predicated module here](./predicated)
+Check out the [predicated module here](https://gitlab.com/JAForbes/static-sum-type/tree/master/modules/predicated)
 
 The plan is to build several tiny modules that cover specific use cases.  A sanctuary-def module, a typescript module etc.
 
@@ -88,13 +88,13 @@ Each module will always have a production counterpart that assumes types are 100
 
 #### Modules
 
-- [fold](https://gitlab.com/JAForbes/static-sum-type/tree/master/fold) A function that traverses every case of a union.  The dev version has a variety of built in verification steps.  The prod version just executes immediately.
+- [fold](https://gitlab.com/JAForbes/static-sum-type/tree/master/modules/fold) A function that traverses every case of a union.  The dev version has a variety of built in verification steps.  The prod version just executes immediately.
 
-- [predicated](https://gitlab.com/JAForbes/static-sum-type/tree/master/predicated) A function that generates spec compliant unions while also allowing you to specify a predicate that the value must satisfy in order for an error to not be handled.
+- [predicated](https://gitlab.com/JAForbes/static-sum-type/tree/master/modules/predicated) A function that generates spec compliant unions while also allowing you to specify a predicate that the value must satisfy in order for an error to not be handled.
 
 
-- [yslashn](https://gitlab.com/JAForbes/static-sum-type/tree/master/yslashn) A function that generates spec compliant unions that mimic well known types like maybe and either with a terse Y/N naming convention.
+- [yslashn](https://gitlab.com/JAForbes/static-sum-type/tree/master/modules/yslashn) A function that generates spec compliant unions that mimic well known types like maybe and either with a terse Y/N naming convention.
 
 #### Error Handling
 
-The fold funciton defines (as a spec compliant sum type) all the possible errors it will emit.  You can provide a custom handler that can handle that data type in whatever way makes the most sense for your application.  A typical case may be to simply throw an error.  There's a provided `errMessage` function on the [fold](https://gitlab.com/JAForbes/static-sum-type/tree/master/fold) module that will turn the err object into a dev friendly string.
+The fold funciton defines (as a spec compliant sum type) all the possible errors it will emit.  You can provide a custom handler that can handle that data type in whatever way makes the most sense for your application.  A typical case may be to simply throw an error.  There's a provided `errMessage` function on the [fold](https://gitlab.com/JAForbes/static-sum-type/tree/master/modules/fold) module that will turn the err object into a dev friendly string.

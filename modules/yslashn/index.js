@@ -2,10 +2,10 @@ function either(type){
 	return {
 		name: type
 		,Y: function Y(value){
-			return { type, case: 'Y', value }
+			return { type: type, case: 'Y', value: value }
 		}
 		,N: function N(value){
-			return { type, case: 'N', value }
+			return { type: type, case: 'N', value: value }
 		}
 	}
 }
@@ -14,7 +14,7 @@ function maybe(type){
 	return {
 		name: type
 		,Y: function Y(value){
-			return { type: type, case: 'Y', value }
+			return { type: type, case: 'Y', value: value }
 		}
 		,N: function N(){
 			return { type: type, case: 'N' }

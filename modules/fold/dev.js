@@ -1,3 +1,4 @@
+var nFold = require('../yslashn/index.js').nFold
 var Skip = {
   length: true
   ,prototype: true
@@ -10,9 +11,9 @@ function I(a){
 
 function getCases(T){
     return Object.getOwnPropertyNames(T)
-        .filter(
-            o => o[0] == o[0].toUpperCase()
-        )
+        .filter(function(o){
+            return o[0] == o[0].toUpperCase()
+        })
         .filter(function(x){
             return !(x in Skip)
         })
@@ -37,55 +38,14 @@ function toString(x){
   }
 }
 
-class StaticSumTypeError {
-    static TooManyCases(T, cases, extraKeys){
-        return {
-            case: StaticSumTypeError.TooManyCases
-            ,type: StaticSumTypeError
-            ,value: { T, cases, extraKeys }
-        }
-    }
-
-    static TooFewCases(T, cases, missingKeys){
-        return {
-            case: StaticSumTypeError.TooFewCases
-            ,type: StaticSumTypeError
-            ,value: { T, cases, missingKeys }
-        }
-    }
-
-    static InstanceNull(T, cases, x){
-        return {
-            case: StaticSumTypeError.InstanceNull
-            ,type: StaticSumTypeError
-            ,value: { x, cases, T }
-        }
-    }
-
-    static InstanceWrongType(T, cases, x){
-        return {
-            case: StaticSumTypeError.InstanceWrongType
-            ,type: StaticSumTypeError
-            ,value: { x, cases, T }
-        }
-    }
-
-    static InstanceShapeInvalid(T, cases, x){
-        return {
-            case: StaticSumTypeError.InstanceShapeInvalid
-            ,type: StaticSumTypeError
-            ,value: { x, cases, T }
-        }
-    }
-
-    static TooManyArguments(args){
-        return {
-            case: StaticSumTypeError.TooManyArguments
-            ,type: StaticSumTypeError
-            ,value: args
-        }
-    }
-}
+var StaticSumTypeError = nFold('StaticSumTypeError', [
+    'TooManyCases'
+    ,'TooFewCases'
+    ,'InstanceNull'
+    ,'InstanceWrongType'
+    ,'InstanceShapeInvalid'
+    ,'TooManyArguments'
+])
 
 var ErrMessageCases =
     { TooManyCases: function TooManyCases(o){
@@ -178,7 +138,9 @@ module.exports = function Dev(handleError){
                         ,[tKeys, cases]
                     ]
                     .map(
-                        function([xs, index]){
+                        function(t){
+                            var xs = t[0]
+                            var index = t[1]
                             return xs.filter(function(x){
                                 return !(x in index)
                             })
@@ -195,11 +157,11 @@ module.exports = function Dev(handleError){
                     }
                     if( missingKeys.length > 0 ){
                         return handleError(
-                            Err.TooFewCases(T, cases, missingKeys)
+                            Err.TooFewCases({T:T, cases:cases, missingKeys: missingKeys})
                         )
                     } else if (extraKeys.length > 0){
                         return handleError(
-                            Err.TooManyCases(T, cases, extraKeys)
+                            Err.TooManyCases({T:T, cases:cases, extraKeys:extraKeys})
                         )
                     } else {
                         return function(x){
@@ -207,25 +169,25 @@ module.exports = function Dev(handleError){
                             return (
                                 arguments.length > 1
                                 ? handleError(
-                                    Err.TooManyArguments()
+                                    Err.TooManyArguments(arguments)
                                 )
                                 : x == null
                                     ? handleError(
-                                        Err.InstanceNull(
-                                            T, cases, x
-                                        )
+                                        Err.InstanceNull({
+                                            T:T, cases:cases, x:x
+                                        })
                                     )
                                 : x.type !== T.name
                                     ? handleError(
-                                        Err.InstanceWrongType(
-                                            T, cases, x
-                                        )
+                                        Err.InstanceWrongType({
+                                            T:T, cases:cases, x:x
+                                        })
                                     )
                                 : !( x.case in T )
                                     ? handleError(
-                                        Err.InstanceShapeInvalid(
-                                            T, cases, x
-                                        )
+                                        Err.InstanceShapeInvalid({
+                                            T:T, cases:cases, x:x
+                                        })
                                     )
                                     : cases[x.case](x.value)
                             )
@@ -248,8 +210,8 @@ module.exports = function Dev(handleError){
 
             if( caseNames.length != 2 ){
                 throw new TypeError(
-                    `You can only bifold when a Type's case count=2`
-                    +` but ${T.name} has ${caseNames.length}: `
+                    'You can only bifold when a Type\'s case count=2'
+                    +' but '+T.name+' has '+caseNames.length+': '
                     + caseNames.join(' | ')
                 )
             }
@@ -259,7 +221,10 @@ module.exports = function Dev(handleError){
             var kb = ks[0]
             var ka = ks[1]
 
-            return fold (T) ({ [ka]: fa, [kb]: fb })
+            var cases = {}
+            cases[ka] = fa
+            cases[kb] = fb
+            return fold (T) (cases)
         }
     }
 
@@ -267,8 +232,8 @@ module.exports = function Dev(handleError){
         return function bimap$T(fb, fa){
             return function(Ta){
                 return bifold (T)(
-                    b => T[Ta.case]( fb(b) )
-                    ,a => T[Ta.case]( fa(a) )
+                    function(b){ return T[Ta.case]( fb(b) )}
+                    ,function(a){ return T[Ta.case]( fa(a) ) } 
                 )(Ta)
             }
         }
@@ -281,12 +246,12 @@ module.exports = function Dev(handleError){
     }
 
     return {
-        fold
-        ,bifold
-        ,bimap
-        ,map
-        ,handleError
-        ,errMessage
-        ,StaticSumTypeError
+        fold: fold
+        ,bifold: bifold
+        ,bimap: bimap
+        ,map: map
+        ,handleError: handleError
+        ,errMessage: errMessage
+        ,StaticSumTypeError: StaticSumTypeError
     }
 }
