@@ -1,6 +1,10 @@
 static-sum-type
 ===============
 
+[![pipeline status](https://gitlab.com/JAForbes/static-sum-type/badges/master/pipeline.svg)](https://gitlab.com/JAForbes/static-sum-type/commits/master)
+
+[![coverage report](https://gitlab.com/JAForbes/static-sum-type/badges/master/coverage.svg)](https://gitlab.com/JAForbes/static-sum-type/commits/master)
+
 A simple library for complex logic.
 -----------------------------------
 
