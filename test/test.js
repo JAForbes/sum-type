@@ -2,8 +2,9 @@ const test = require('tape')
 const $ = require('sanctuary-def')
 const {
   fold: devFold
+  , bifold
   , map: devMap
-  , StaticSumTypeError
+  , errMessage
 } = require('../modules/fold/dev')(function(e){
   return e
 })
@@ -185,18 +186,101 @@ test('static-sum-type', function(t){
     ,Circle: x => typeof x == 'number'
   })
 
-
-
   const c = Shape.Circle(2)
 
-  var r = devFold(Shape)({
+  var f = devFold(Shape) ({
     Circle: x => x * 2
     ,Rectangle: x => x * 2
     ,Triangle: x => x * 2
-  })(
-    c
+  }) 
+
+  t.equals( f(c), 4 )
+
+  t.equals(
+    String( c), 'Shape.Circle(2)'
   )
-  console.log(r)
+
+  t.throws(function(){
+    Shape.Triangle({x:'0', y:'2'})
+  },/did not satisfy the constraint for Shape.Triangle/)
+
+  t.end()
+})
+
+test('errors', function(t){
+  const YNMaybe = yslashn.maybe('Maybe')
+  
+  const fromMaybe = (otherwise, f) =>
+    devFold( YNMaybe )({
+        Y: f
+        ,N: () => otherwise
+    })
+
+  const TooManyCases =
+    devFold( YNMaybe )({
+        Y: () => ''
+        ,N: () => ''
+        ,A: () => ''
+    })
+
+  const TooFewCases =
+    devFold( YNMaybe )({
+        Y: () => ''
+    })
+
+  t.equals(
+    'Too Many Cases! Your case function must have exactly the same number of  keys as the type: Maybe.  The following cases should not have been present: A'
+    ,errMessage(TooManyCases)
+  )
+
+
+  t.equals(
+    'Too Few Cases! Your case function must have exactly the same number of keys as the type: Maybe. The following keys were missing: N'
+    ,errMessage(TooFewCases)
+  )
+
+  t.equals(
+    errMessage(fromMaybe(0, x => x )(null))
+    ,'Null is not a valid member of the type Maybe'
+  )
+
+  t.equals(
+    errMessage(fromMaybe(0, x=>x)( { type: 'Maybe', case: 'Unknown' }))
+    ,'Unknown()::Maybe is not a valid Member of the type: Maybe.  Please review the definition of Maybe'
+  )
+
+  t.equals(
+    errMessage( devFold(YNMaybe,1,2,3) )
+    ,'Too Many Arguments! fold accepts 1 argument at a time but received 4.  Received: [object Object] 1 2 3'
+  )
+
+  t.equals(
+    errMessage( devFold(YNMaybe) ( { Y: () => 1, N: () => 2 }, 4, 5, 6)  )
+    ,'Too Many Arguments! fold accepts 1 argument at a time but received 4.  Received: [object Object] 4 5 6'
+  )
+
+  t.equals(
+    errMessage( bifold( yslashn.nFold('X', ['A', 'B', 'C'])) )
+    ,'BifoldNotInferrable: You can only bifold when a Type\'s case count=2 but X has 3: A | B | C'
+  )
+
+  const {N:L} = yslashn.either('Either')
+  
+  t.equals(
+    errMessage(fromMaybe(0, x => x * x)(L(10)))
+    ,'N(10)::Either is not a valid member of the type Maybe which expects the following cases Y | N'
+  )
+
+  t.equals(
+    errMessage(fromMaybe(0, x => x * x)(L({ toString(){ return 'hello' } })))
+    ,'N(hello)::Either is not a valid member of the type Maybe which expects the following cases Y | N'
+  )
+  
+  t.equals(
+    errMessage(fromMaybe(0, x => x * x)(L(null)))
+    ,'N(null)::Either is not a valid member of the type Maybe which expects the following cases Y | N'
+  )
+
 
   t.end()
 })
@@ -304,6 +388,11 @@ test('bifold, bimap, map', function(t){
   t.equals(
     devMap (Maybe) ( x => x * x ) ( Maybe.Y(10) ).value
     , 100
+  )
+
+  t.equals(
+    devMap (Maybe) ( x => x * x ) ( Maybe.N() ).case
+    , 'N'
   )
 
   t.equals(

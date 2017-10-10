@@ -28,7 +28,7 @@ function toString(x){
         + (
           'value' in x
           ? toString(x.value)
-          : x.toString()
+          : ''
         )
 
       +')::'
@@ -45,6 +45,7 @@ var StaticSumTypeError = nFold('StaticSumTypeError', [
     ,'InstanceWrongType'
     ,'InstanceShapeInvalid'
     ,'TooManyArguments'
+    ,'BifoldNotInferrable'
 ])
 
 var ErrMessageCases =
@@ -58,7 +59,14 @@ var ErrMessageCases =
             ].join(' ')
         )
     }
-
+    ,BifoldNotInferrable: function(o){
+        return (
+            'BifoldNotInferrable: '
+            + 'You can only bifold when a Type\'s case count=2'
+            +' but '+o.T.name+' has '+getCases(o.T).length+': '
+            + getCases(o.T).join(' | ')
+        )
+    }
     ,TooFewCases: function TooFewCases(o){
         return (
             [ 'Too Few Cases!'
@@ -73,7 +81,7 @@ var ErrMessageCases =
 
     ,InstanceNull: function InstanceNull(o){
         return (
-            'null is not a valid member of the type '+o.name
+            'Null is not a valid member of the type '+o.T.name
         )
     }
 
@@ -89,21 +97,19 @@ var ErrMessageCases =
     }
 
     ,InstanceShapeInvalid: function InstanceShapeInvalid(o){
-        return (
-            [ toString(o.x)+ ' is a member of the type'
-            , o.T.name
-            , 'but ' + toString(o.x) + ' has a case that does not'
-            , 'belong to '+ o.T.name + '. '
-            , 'Please review the definition of '+o.T.name
-            ]
-            .join(' ')
-        )
+        return [
+            toString(o.x)
+            , 'is not a valid Member of the type:'
+            , o.T.name+'. '
+            ,'Please review the definition of '+o.T.name
+        ]
+        .join(' ')
     }
 
     ,TooManyArguments: function TooManyArguments(args){
-        return 'fold accepts 1 argument at a time but received'
+        return 'Too Many Arguments! fold accepts 1 argument at a time but received'
             + ' '+args.length+'.'
-            + '  Received: '+args.map(toString).join(' ')
+            + '  Received: '+Array.from(args).map(toString).join(' ')
     }
     }
 
@@ -150,11 +156,6 @@ module.exports = function Dev(handleError){
                     var extraKeys = xKeys[0]
                     var missingKeys = xKeys[1]
 
-                    if( arguments.length > 1 ){
-                        return handleError(
-                            Err.TooManyArguments(arguments)
-                        )
-                    }
                     if( missingKeys.length > 0 ){
                         return handleError(
                             Err.TooFewCases({T:T, cases:cases, missingKeys: missingKeys})
@@ -204,17 +205,18 @@ module.exports = function Dev(handleError){
 
 
     function bifold(T){
-        return function bifold$T(fb, fa){
-            var caseNames =
-                getCases(T)
+        var caseNames =
+            getCases(T)
+        
+        if( caseNames.length != 2 ){
+            return handleError(   
+                Err.BifoldNotInferrable({
+                    T: T
+                })
+            )
+        }
 
-            if( caseNames.length != 2 ){
-                throw new TypeError(
-                    'You can only bifold when a Type\'s case count=2'
-                    +' but '+T.name+' has '+caseNames.length+': '
-                    + caseNames.join(' | ')
-                )
-            }
+        return function bifold$T(fb, fa){
 
             // reverse because its customary to fold the failure first
             var ks = caseNames.slice().reverse()
