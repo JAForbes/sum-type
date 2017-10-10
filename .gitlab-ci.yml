@@ -11,4 +11,4 @@ test:
   stage: test
   script:
    - npm install
-   - node test/test.js
+   - npm test
