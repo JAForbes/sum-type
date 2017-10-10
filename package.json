@@ -5,7 +5,8 @@
   "main": "modules/fold/dev.js",
   "files": [
     "dist",
-    "modules"
+    "modules",
+    "configs"
   ],
   "scripts": {
     "test": "npm-run-all test:*",
