@@ -39,6 +39,6 @@
     "sanctuary-def": "^0.9.0"
   },
   "dependencies": {
-    "ramda": "^0.22.1"
+    "ramda": "^0.25.0"
   }
 }
