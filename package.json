@@ -2,7 +2,7 @@
   "name": "sum-type",
   "version": "0.11.1",
   "description": "Descendant of paldepind/union-type with more descriptive error messages",
-  "main": "index.js",
+  "main": "lib/simple.js",
   "module": "lib/index.js",
   "jsnext:main": "lib/index.js",
   "scripts": {

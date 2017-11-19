@@ -1,13 +1,6 @@
 const test = require('tape');
-const UnionType = require('../lib');
-
-const $ = require('sanctuary-def');
-
-const T = UnionType($, {
-  checkTypes: true
-  ,env: $.env
-})
-
+const T = require('..');
+const $ = T.$
 const J = o => JSON.parse(JSON.stringify(o))
 
 test('type, case and value should now appear on a serialized instance', t => {
@@ -223,7 +216,7 @@ test('Recursive Union Types', t => {
 
 test('Disabling Type Checking', t => {
 
-  const T = UnionType($, {
+  const T = require('../lib')($, {
     checkTypes: false
   })
 
