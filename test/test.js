@@ -85,7 +85,7 @@ test('The values of a type can also have no fields at all', t => {
   
   const NotifySetting = T.Value(
     'NotifySetting'
-    ,{ Mute: T.b.Unit, Vibrate: $.Any, Sound: $.Number }
+    ,{ Mute: T.Unit, Vibrate: $.Any, Sound: $.Number }
   )
 
   t.deepEqual('Mute', NotifySetting.Mute().case )
@@ -118,10 +118,10 @@ test('Switching on union types', t => {
 
   const Action =
     T.Value('Action', {
-      Up: T.b.Unit
-      ,Right: T.b.Unit
-      ,Down: T.b.Unit
-      ,Left: T.b.Unit
+      Up: T.Unit
+      ,Right: T.Unit
+      ,Down: T.Unit
+      ,Left: T.Unit
     });
 
   const player = {x: 0, y: 0};
@@ -199,22 +199,22 @@ test('Destructuring assignment to extract values', t => {
 test('Recursive Union Types', t => {
   
   const List =
-    T.Context('List', $T => ({
-      Nil: T.b.Unit
-      ,Cons: $.RecordType({ head: $.Any, tail: $T })
+    T.Recursive('List', $T => ({
+      Nil: T.Unit
+      ,Cons: $.Pair( $.Any, $T )
     }))
 
   const toString =
     List.case({
-      Cons: ({ head, tail }) => `${head} : ${toString(tail)}`
+      Cons: ([head, tail]) => `${head} : ${toString(tail)}`
       ,Nil: () => 'Nil'
     })
 
-  const cons = (head, tail) => List.Cons({ head, tail })
+  const cons = List.Cons
   const nil = List.Nil
 
   const list =
-    cons(1, cons(2, cons(3, nil())))
+    cons([1, cons([2, cons([3, nil()])])])
 
   t.equal('1 : 2 : 3 : Nil', toString(list))
 
