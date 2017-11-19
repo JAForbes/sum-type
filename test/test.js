@@ -2,6 +2,8 @@ const test = require('tape');
 const T = require('..');
 const $ = T.$
 const J = o => JSON.parse(JSON.stringify(o))
+const sst = require('static-sum-type/configs/dev/foldThrow')
+const yslashn = require('static-sum-type/modules/yslashn')
 
 test('type, case and value should now appear on a serialized instance', t => {
   const Identity =
@@ -10,7 +12,6 @@ test('type, case and value should now appear on a serialized instance', t => {
     });
 
   const I = x => Identity.Identity(x)
-
 
   t.ok(J(I(1)).case, '.case is on the instance')
   t.ok(J(I(1)).type, '.type is on the instance')
@@ -295,6 +296,39 @@ test('static case method throws if not all cases are covered', function(t){
         })
       }
   }, /The value at position 1 is not a member of/)
+
+  t.end()
+})
+
+test('Predicates!', function(t){
+
+  const Num = T.Value('Num', {
+    Even: T.Predicate(x => x % 2 == 0)
+  })
+
+  const two = Num.Even( 2 )
+
+  t.equals( two.value, 2 )
+
+  t.throws(function(){
+    Num.Even(3)
+  }, /not a member of ‘Predicate :: x => x % 2 == 0’/)
+
+  t.end()
+})
+
+test('static-sum-type', function(t){
+  const Registered = yslashn.maybe('Registered')
+  
+  const User = T.Value('User', {
+    User: T.SST(Registered)
+  })
+
+  User.User( Registered.Y('hi') )
+  
+  t.throws(function(){
+    User.User( 'hi' )
+  },/not a member of ‘Registered’/)
 
   t.end()
 })

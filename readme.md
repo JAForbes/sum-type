@@ -72,6 +72,63 @@ What is this library's interpretation of sum types?
 
 This library is a highly opinionated take on sum-types.  It eschews a lot of complexity by adhering to static functions only.  Type signature's are simple and variadics are avoided wherever possible.  sum-type takes advantage of a powerful Haskell like type system by using the module sanctuary-def behind the scenes.
 
+Interop with static-sum-type
+----------------------------
+
+sum-type's are compatible with static-sum-type for free.  That means you can pass a sum-type you've created into a static-sum-type functions or within a type definition.  
+
+However, if you want to use a static-sum-type in a sum-type definition you'll need to convert the type into a sanctuary-def Nullary type using `T.SST`.
+
+Here's a little demo:
+
+```js
+// A helper for generating common sum-types
+const yslashn = 
+    require('static-sum-type/modules/yslashn')
+
+// Functions that work on static-sum-types
+const { fold, map, bimap } = 
+    require('static-sum-type/configs/dev/foldThrow')
+
+// Create a type: Registered with a maybe-like structure
+const Registered = yslashn.maybe('Registered')
+
+// Create a Maybe
+const Maybe = yslashn.maybe('Maybe')
+
+const User = T.Value('User', {
+    User: T.SST(Registered)
+})
+
+User.User (
+    Registered.Y( Date.now() )
+)
+
+fold ( User ) ({
+    User: fold( Registered ) ({
+        Y: (when) => 'User registered at: ' + when
+        N: () => 'User is a guest'
+    })
+})
+
+const signupDate =
+    fold ( User ) ({
+        User: bifold( Registered ) (
+            Maybe.N
+            mwhen => Maybe.Y( new Date( when ) )
+        )
+    })
+
+
+signupDate ( User.User( Registered.Y (Date.now()) ) )
+//=> Maybe.Y( DateObject )
+
+signupDate ( User.User( Registered.N () ) )
+//=> Maybe.N
+```
+
+You can read more about static-sum-type here: gitlab.com/JAForbes/static-sum-type.  static-sum-type is an evolving project, utilities and modules built on top of it are constantly changing: but the specification itself can be considered stable.
+
 Initialization
 --------------
 
@@ -259,6 +316,56 @@ A reference to the underlying sanctuary-def module.
 
 Please refer to the sanctuary-def [documentation](https://github.com/sanctuary-js/sanctuary-def) for reference
 
+#### T.Predicate
+
+Create a Nullary type from a predicate function.
+
+```js
+const isUUID = require('is-uuid')
+
+T.$.UUID = T.Predicate(
+    ,x => isUUID.v4(x)
+)
+
+const ID = T.Value('ID', {
+    Sequence: T.$.Number
+    ,UUID: T.$.UUID
+})
+```
+
+#### T.SST
+
+Convert a static-sum-type union into a sanctuary-def Nullary type.
+
+```js
+const yslashn = require('static-sum-type/modules/yslashn')
+const Registered = yslashn.maybe('Registered')
+const { fold, map } = require('static-sum-type/configs/dev/foldThrow')
+
+const User = T.Value('User', {
+    User: T.SST(Registered)
+})
+
+User.User (
+    Registered.Y( Date.now() )
+)
+
+fold ( User ) ({
+    User: fold( Registered ) ({
+        Y: (when) => 'User registered at: ' + when
+        N: () => 'User is a guest'
+    })
+})
+
+const signupDate =
+    map ( User ) (
+        map( Registered ) (
+            when => new Date( when )
+        )
+    )
+
+```
+
 FAQ
 ---
 
@@ -330,25 +437,6 @@ It's not advisable as it makes for worse type signatures, but you can easily avo
 I'm happy to be proven wrong here, but I think this library is used more for internal business logic and not as predefined types you can export.  The URL feature makes a lot of sense if your types themselves have end users.  It makes sense for sanctuary-def to include a url property so that sanctuary can benefit from well documented errors.  But within a project it rarely makes sense and add's another argument to the signature.
 
 > Note, there may be an undocumented way to do this but I'll leave that as an exercise for the reader.
-
-#### How do I define predicate types like in prior versions and in other libraries?
-
-Supporting predicates make the interface too complicated and error prone.  It's possible to do it manually and it's likely in future this library will expose a helper for automatically generating types from predicates.  But for now you can do this using sanctuary-def directly.
-
-But please check if sanctuary-def doesn't already provide a type that does what you want.
-
-```js
-const isUUID = require('is-uuid')
-
-const ID = T.Value('ID', {
-    Sequence: T.$.Number
-    ,UUID: T.$.NullaryType(
-        'UUID'
-        ,''
-        ,x => isUUID.v4(x)
-    )
-})
-```
 
 #### How do I access the value with in a type?
 
