@@ -1,39 +1,12 @@
 const test = require('tape');
 const UnionType = require('../lib');
-const R = require('ramda');
+
 const $ = require('sanctuary-def');
 
 const T = UnionType($, {
   checkTypes: true
   ,env: $.env
 })
-
-const a = $.TypeVariable('a')
-
-  // // Fig 1
-  // const List = UT.recursive( 
-  //   'List'
-  //   ,{
-  //     Cons: ({ Self }) => $.RecordType({ head: $.Any, tail: Self })
-  //     ,Nil: ({ Unit }) => Unit
-  //   }
-  // )
-
-  // // Fig 2
-  // const List = UT.recursive(
-  //   'List'
-  //   , self => ({
-  //     Cons: $.Pair( a, self )
-  //     ,Nil: Unit
-  //   })
-  // )
-
-  // const List = UT.value(
-  //   'List'
-  //   ,{ 
-  //     Cons: $.Pair( a, Self )
-  //   }
-  // )
 
 const J = o => JSON.parse(JSON.stringify(o))
 
@@ -292,6 +265,20 @@ test('case throws if receives a value that isnt a subtype', function(t){
   , 'Placeholder requires subtype'
   )
 
+  t.end()
+})
+
+test('Lower case case names throws', function(t){
+  t.throws(function(){
+    // eslint-disable-next-line no-unused-vars
+    const ISO8601 =
+      T.Value('ISO8601', {
+        mm: T.$.Number
+        ,ss: T.$.Number
+        ,hh: T.$.Number
+        ,ms: T.$.Number
+      })
+  }, /Case names must begin with a capital letter./)
   t.end()
 })
 
