@@ -338,7 +338,7 @@ Supporting predicates make the interface too complicated and error prone.  It's 
 But please check if sanctuary-def doesn't already provide a type that does what you want.
 
 ```js
-const isUUID = require('is-uuid)
+const isUUID = require('is-uuid')
 
 const ID = T.Value('ID', {
     Sequence: T.$.Number
