@@ -2,7 +2,6 @@ const test = require('tape');
 const T = require('..');
 const $ = T.$
 const J = o => JSON.parse(JSON.stringify(o))
-const sst = require('static-sum-type/configs/dev/foldThrow')
 const yslashn = require('static-sum-type/modules/yslashn')
 
 test('type, case and value should now appear on a serialized instance', t => {
