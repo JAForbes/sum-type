@@ -72,23 +72,6 @@ What is this library's interpretation of sum types?
 
 This library is a highly opinionated take on sum-types.  It eschews a lot of complexity by adhering to static functions only.  Type signature's are simple and variadics are avoided wherever possible.  sum-type takes advantage of a powerful Haskell like type system by using the module sanctuary-def behind the scenes.
 
-Nested types
-------------
-
-You can compose type definitions because the type constructors return sanctuary-def compatible `NullaryType`'s.  These types verify the `case` and `type` property are valid when initializing your union.
-
-```js
-const Point = T.Record(
-    'Point'
-    ,{Point: {x: T.$.Number, y: T.$.Number}}
-)
-
-const Shape = T.Record('Shape', {
-    Circle: { radius: T.$.Number, origin: Point }
-    ,Rectangle: { topLeft: Point, bottomRight: Point}
-})
-```
-
 Initialization
 --------------
 
@@ -139,6 +122,22 @@ const T = require('sum-type/custom')({
 })
 ```
 
+Nested types
+------------
+
+You can compose type definitions because the type constructors return sanctuary-def compatible `NullaryType`'s.  These types verify the `case` and `type` property are valid when initializing your union.
+
+```js
+const Point = T.Record(
+    'Point'
+    ,{Point: {x: T.$.Number, y: T.$.Number}}
+)
+
+const Shape = T.Record('Shape', {
+    Circle: { radius: T.$.Number, origin: Point }
+    ,Rectangle: { topLeft: Point, bottomRight: Point}
+})
+```
 
 API
 ---
