@@ -20,9 +20,6 @@ npm install sum-type --save
 ```
 
 ```js
-const $ = 
-    require('sanctuary-def')
-
 const { Record, Unit, $ } = 
     require('sum-type')
 
@@ -70,7 +67,7 @@ It's common for our business models to contain properties that may not exist in 
 
 A common scenario could be some data that isn't saved yet.  If it hasn't been sent to the server it likely doesn't have an id. But within that context its valid to not have an id yet.
 
-Whereas, if the record has been saved and the id is null that's a bug.  Without sum-types we may find ourselves assuming invalid data is valid and vice versa.  Without sum-types how are we to know whether this data is in a valid state?  Is the id intentionally null, or accidentally null?
+Whereas, if the record has been saved and the id is null - that's a bug.  Without sum-types we may find ourselves assuming invalid data is valid and vice versa.  Without sum-types how are we to know whether this data is in a valid state?  Is the id intentionally null, or accidentally null?
 
 Here's a demonstration of creating a `User` type with distinct states: `New` and `Saved`.
 
@@ -125,13 +122,13 @@ What is this library's interpretation of sum types?
 
 There are many popular JS sum-type libraries.  But they tend to have similar interpretations.  Both [daggy] and [union-type] allow you to treat your sum types as prototypical classes with methods.
 
-This library used to have the same interprtation.  But after using that interface in a lot of projects shifted towards a more opinionated take on `sum-type`s with hopefully less edge cases.  
+This library used to have the same interpretation.  But after using that interface in a lot of projects I shifted towards a more opinionated take on sum type's with hopefully less edge cases.  
 
-It eschews a lot of complexity by adhering to static functions only.  Type signature's are simple and variadics are avoided wherever possible.  `sum-type` takes advantage of a powerful Haskell like type system by using the module [sanctuary-def] behind the scenes.
+This iteration eschews numerous points of complexity by adhering to static functions only.  Type signature's are simple and variadics are avoided wherever possible.  `sum-type` takes advantage of a powerful Haskell like type system by using the module [sanctuary-def] behind the scenes.
 
 `sum-type` also sits on top of a very simple specification: `static-sum-type` that attempts to create a protocol for various sum-type and functional libraries to interact.
 
-One of the tenets of static-sum-type is serializable case values.
+One of the core tenets of [static-sum-type] is serializable case values.
 
 ```js
 const newUser = 
@@ -343,7 +340,7 @@ Shape.center (
 
 #### T.Recursive
 
-A type constructor that allows you to refer to it's own type.
+A type constructor that allows a type to refer to itself.
 
 ```js
 const List =
@@ -372,7 +369,7 @@ toString(list)
 
 #### T.Unit
 
-A sentinel value used to signify a constructor case that receives no value
+A sentinel value used to signify that a constructor case receives no value.
 
 ```js
 const Maybe = 
@@ -384,7 +381,7 @@ const Maybe =
 Maybe.Just (2)
 //=> Maybe.Just(2)
 
-Maybe.Nothing ()
+Maybe.Nothing () // Valid thanks to T.Unit!
 //=> Maybe.Nothing()
 ```
 
