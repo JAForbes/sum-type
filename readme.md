@@ -8,9 +8,9 @@ sum-type
 Serializable, static, strongly typed and most of all: simple.
 
 - Run time type checking powered by [sanctuary-def]
-- Serializable: Send types over the wire
+- Serializable: send types over the wire
 - Supports all [sanctuary-def] defined types including generics
-- Adheres to the [static-sum-type] specification and compatible with sst helpers
+- Adheres to the [static-sum-type] specification and compatible with [static-sum-type] functions
 
 Quick Start
 -----------
@@ -20,41 +20,46 @@ npm install sum-type --save
 ```
 
 ```js
-const $ = require('sanctuary-def')
-const { Record, Unit, $ } = require('sum-type')
+const $ = 
+    require('sanctuary-def')
+
+const { Record, Unit, $ } = 
+    require('sum-type')
 
 
 const User =
-    Record('User', {
-        Guest: Unit
+    Record (
+        'User'
+        ,{ Guest: Unit
 
-        ,Registered:
+        , Registered:
             { username: $.String
             , avatar: $.String
             }
-    })
+        })
 
 const renderWelcomeMessage =
-    User.case({
+    User.case ({
         Guest: () =>
             '<p>Welcome <a href="/signup">Sign Up?</a><p>'
+        
         ,Registered: ({username, avatar}) =>
             `<div><img src="${avatar}"/><p>${username}</p></div>`
     })
 
 const guest =
-    User.Guest()
+    User.Guest ()
 
 const registered =
-    User.Registered({
+    User.Registered ({
         username: 'JAForbes'
         , avatar: 'https://somewebsite.com/image.jpg'
     })
 
-renderWelcomeMessage(registered)
+renderWelcomeMessage (registered)
 //=> <div><img src="https://somewebsite.com/image.jpg"/><p>JAForbes</p></div>
 
-renderWelcomeMessage(guest)
+renderWelcomeMessage (guest)
 //=> <p>Welcome <a href="/signup">Sign Up?</a><p>
 ```
 
@@ -63,7 +68,11 @@ What are sum type's and why are they fantastic?
 
 It's common for our business models to contain properties that may not exist in certain situations.  This leads to null checks throughout our codebase.  Sum types are a way to define all the possible valid states, and those states can have wildly different structures.
 
-A common scenario could be some data that isn't saved yet.  It doesn't have an id, but if it hasn't been saved yet, it's valid to not have an id.  Whereas, if it has been saved and the id is null that's a bug.  Without sum-types we may find ourselves assuming invalid data is valid and vice versa.
+A common scenario could be some data that isn't saved yet.  If it hasn't been sent to the server it likely doesn't have an id. But within that context its valid to not have an id yet.
+
+Whereas, if the record has been saved and the id is null that's a bug.  Without sum-types we may find ourselves assuming invalid data is valid and vice versa.  Without sum-types how are we to know whether this data is in a valid state?  Is the id intentionally null, or accidentally null?
+
+Here's a demonstration of creating a `User` type with distinct states: `New` and `Saved`.
 
 ```js
 const User = 
@@ -98,15 +107,18 @@ const hasId =
         ,Saved: ({ user_id, user_username }) => true
     })
 
-hasId ( User.New ({ user_username: 'JAForbes' }) )
+const newUser =
+    User.New ({ user_username: 'JAForbes' })
+
+hasId ( newUser )
 //=> false
 ```
 
-Sum types go by many names, like union types and enumerated types.  These are equivalent terms.  You may also hear the term algebraic type.  An algebraic type is a type comprised of other types, and `sum-type`'s are the most common form of algebraic type (but there are others like subtraction and intersection types.)
+Sum types go by many names.  sum types, union types and enumerated types are equivalent terms.  You may also hear the term algebraic type.  An algebraic type is a type comprised of other types, and `sum-type`'s are the most common form of algebraic type (but there are others like subtraction and intersection types too.)
 
-Sum types allow us to push as much of our business model as possible into the type system.  This is often referred to as Domain Driven Design, a great introduction to DDD is Scott Wlaschin's talk [Railway Oriented Programming]
+Sum types allow us to push as much of our business model as possible into the type system.  This is often referred to as Domain Driven Design, a great introduction and argument for DDD is Scott Wlaschin's talk [Railway Oriented Programming]
 
-All in all, sum types are very cool.  They are useful in solving almost any problem domain and it's highly likely you can benefit from using them in your projects.
+All in all, sum types are very cool.  They are useful in solving problems in almost any domain and it's highly likely you can benefit from using them in your projects.
 
 What is this library's interpretation of sum types?
 ---------------------------------------------------
@@ -119,20 +131,30 @@ It eschews a lot of complexity by adhering to static functions only.  Type signa
 
 `sum-type` also sits on top of a very simple specification: `static-sum-type` that attempts to create a protocol for various sum-type and functional libraries to interact.
 
+One of the tenets of static-sum-type is serializable case values.
+
+```js
+const newUser = 
+    User.New ({ user_username: 'JAForbes' })
+
+const literallyTheSameThing =
+    JSON.parse(JSON.stringify(newUser))
+
+// totally fine
+User.case( ... ) ( literallyTheSameThing )
+```
+
+`sum-type` is an opinionated layer sitting on top of another opionated layer.  If there are particular aspects of this library that seem a bridge too far I suggest checking out other great libraries in this space like the aforementioned [daggy] and [union-type].
+
+Even just internalizing the idea of sum types is incredibly valuable.
+
 Initialization
 --------------
 
 #### Default configuration
 
-`sum-type` uses a library called [sanctuary-def] to perform runtime type checking.  [sanctuary-def] is highly configurable but the learning curve can be quite steep for new users.  That's why `sum-type` has a default entry point that set's up [sanctuary-def] automatically.
-
-The `$` variable allows us to access [sanctuary-def] types like `$.Number` or `$.String`.
-
-For a full list of of [sanctuary-def] types, please refer to the [documentation](https://github.com/sanctuary-js/sanctuary-def#types).
-
 ```js
 const T = require('sum-type')
-const R = require('ramda')
 
 const Point = T.Record('Point', {
     X: { x: T.$.Number }
@@ -140,17 +162,67 @@ const Point = T.Record('Point', {
     ,XYZ: { x: T.$.Number, y: T.$.Number, z: T.$.Number }
 })
 
-const o = f => g => x => f(g(x))
+Point.XY({ x:0, y:0 })
+```
 
-Point.map = f => Point.case({
-    X: o(Point.X) (f)
-    ,XY: o(Point.XY) (f)
-    ,XYZ: o(Point.XYZ) (f)
-})
+`sum-type` uses a library called [sanctuary-def] to perform runtime type checking.  
 
-Point.multiply = x => Point.map(
-    R.map(R.multiply(x))   
-)
+```js
+
+Point.XY(0, 0)
+// Type Error: 
+// too many arguments
+
+Point.XY([0, 0])
+// Type Error: 
+// [0,0] is not a member of Point.XY ({ x:0, y:0 })
+```
+
+[sanctuary-def] is highly configurable but the learning curve can be quite steep for new users.  That's why `sum-type` has a default entry point that set's up [sanctuary-def] automatically.
+
+The `$` variable allows us to access [sanctuary-def] types like `$.Number` or `$.String`.
+
+For a full list of of [sanctuary-def] types, please refer to the [documentation](https://github.com/sanctuary-js/sanctuary-def#types).
+
+```js
+const T = 
+    require('sum-type')
+
+const R = 
+    require('ramda')
+
+const Point = 
+    T.Record (
+        'Point'
+        ,{ X: 
+            { x: T.$.Number 
+            }
+        , XY: 
+            { x: T.$.Number
+            , y: T.$.Number 
+            }
+        , XYZ: 
+            { x: T.$.Number
+            , y: T.$.Number
+            , z: T.$.Number 
+            }
+        }
+    )
+
+const o = 
+    f => g => x => f(g(x))
+
+Point.map = 
+    f => Point.case ({
+        X: o(Point.X) (f)
+        ,XY: o(Point.XY) (f)
+        ,XYZ: o(Point.XYZ) (f)
+    })
+
+Point.multiply = 
+    x => Point.map (
+        R.map ( R.multiply (x) )
+    )
 
 Point.multiply (4) ( Point.XYZ ({ x:1, y:2, y: 3 }) )
 //=> Point.XYZ ({ x: 4, y: 8, z: 12 })
@@ -187,87 +259,16 @@ const Shape =
     })
 ```
 
-Advanced
---------
-
-Below is stuff you do not need to know to use this library effectively, but it's cool stuff that may interest you.
-
-#### Interop with [static-sum-type]
-
-`sum-type`'s are compatible with [static-sum-type] for free.  That means you can pass a `sum-type` you've created into [static-sum-type] functions or within a type definition.  
-
-However, if you want to use a [static-sum-type] in a `sum-type` definition you'll need to convert the type into a [sanctuary-def] `NullaryType` using `T.SST`.
-
-Here's a little demo:
-
-```js
-// A helper for generating common `sum-type`s
-const yslashn = 
-    require('static-sum-type/modules/yslashn')
-
-// Functions that work on static-sum-type's
-const { fold, map, bimap } = 
-    require('static-sum-type/configs/dev/foldThrow')
-
-// Create a type: Registered with a maybe-like structure
-const Registered = 
-    yslashn.maybe ('Registered')
-
-// Create a maybe
-const Maybe = 
-    yslashn.maybe ('Maybe')
-
-const User = 
-    T.Value ('User', {
-        User: T.SST (Registered)
-    })
-
-User.User (
-    Registered.Y ( Date.now() )
-)
-
-fold ( User ) ({
-    User: fold ( Registered ) ({
-        Y: (when) => 'User registered at: ' + when
-        N: () => 'User is a guest'
-    })
-})
-
-const signupDate =
-    fold ( User ) ({
-        User: bifold( Registered ) (
-            Maybe.N
-            mwhen => Maybe.Y( new Date( when ) )
-        )
-    })
-
-
-signupDate ( User.User( Registered.Y ( Date.now() ) ) )
-//=> Maybe.Y( DateObject )
-
-signupDate ( User.User( Registered.N () ) )
-//=> Maybe.N
-```
-
-You can read more about [static-sum-type] here: gitlab.com/JAForbes/static-sum-type.  [static-sum-type] is an evolving project, utilities and modules built on top of it are constantly changing: but the specification itself can be considered stable.
-
-
-#### Custom sanctuary-def configuration
-
-For users familiar with [sanctuary-def] you are free to customize the [sanctuary-def] instance passed to `sum-type`.
-
-```js
-const $ = require('sanctuary-def')
-const T = require('sum-type/custom')({
-    checkTypes: true
-    ,env: $.env
-})
-```
-
-You may want to customize the environment if you are using type variables with your sum-types.  Or you may want to reduce the default environment to improve performance.  You may just want to disable type checking altogether.
-
 API
 ---
+
+- T.Value 
+- T.Record
+- T.$
+- T.Predicate
+- T.Unit (Advanced)
+- T.Recursive (Advanced)
+- T.SST (Advanced)
 
 #### T.Value
 
@@ -453,6 +454,86 @@ const signupDate =
     )
 
 ```
+
+
+Advanced
+--------
+
+Below is stuff you do not need to know to use this library effectively, but it's cool stuff that may interest you.
+
+#### Interop with [static-sum-type]
+
+`sum-type`'s are compatible with [static-sum-type] for free.  That means you can pass a `sum-type` you've created into [static-sum-type] functions or within a type definition.  
+
+However, if you want to use a [static-sum-type] in a `sum-type` definition you'll need to convert the type into a [sanctuary-def] `NullaryType` using `T.SST`.
+
+Here's a little demo:
+
+```js
+// A helper for generating common `sum-type`s
+const yslashn = 
+    require('static-sum-type/modules/yslashn')
+
+// Functions that work on static-sum-type's
+const { fold, map, bimap } = 
+    require('static-sum-type/configs/dev/foldThrow')
+
+// Create a type: Registered with a maybe-like structure
+const Registered = 
+    yslashn.maybe ('Registered')
+
+// Create a maybe
+const Maybe = 
+    yslashn.maybe ('Maybe')
+
+const User = 
+    T.Value ('User', {
+        User: T.SST (Registered)
+    })
+
+User.User (
+    Registered.Y ( Date.now() )
+)
+
+fold ( User ) ({
+    User: fold ( Registered ) ({
+        Y: (when) => 'User registered at: ' + when
+        N: () => 'User is a guest'
+    })
+})
+
+const signupDate =
+    fold ( User ) ({
+        User: bifold( Registered ) (
+            Maybe.N
+            mwhen => Maybe.Y( new Date( when ) )
+        )
+    })
+
+
+signupDate ( User.User( Registered.Y ( Date.now() ) ) )
+//=> Maybe.Y( DateObject )
+
+signupDate ( User.User( Registered.N () ) )
+//=> Maybe.N
+```
+
+You can read more about [static-sum-type] here: gitlab.com/JAForbes/static-sum-type.  [static-sum-type] is an evolving project, utilities and modules built on top of it are constantly changing: but the specification itself can be considered stable.
+
+
+#### Custom sanctuary-def configuration
+
+For users familiar with [sanctuary-def] you are free to customize the [sanctuary-def] instance passed to `sum-type`.
+
+```js
+const $ = require('sanctuary-def')
+const T = require('sum-type/custom')({
+    checkTypes: true
+    ,env: $.env
+})
+```
+
+You may want to customize the environment if you are using type variables with your sum-types.  Or you may want to reduce the default environment to improve performance.  You may just want to disable type checking altogether.
 
 FAQ
 ---
