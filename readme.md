@@ -515,7 +515,7 @@ signupDate ( User.User( Registered.N () ) )
 //=> Maybe.N
 ```
 
-You can read more about [static-sum-type] here: gitlab.com/JAForbes/static-sum-type.  [static-sum-type] is an evolving project, utilities and modules built on top of it are constantly changing: but the specification itself can be considered stable.
+[static-sum-type] here is an evolving project.  Utilities and modules built on top of it are constantly changing: but the specification itself can be considered stable.
 
 
 #### Custom sanctuary-def configuration
