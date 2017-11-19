@@ -111,7 +111,7 @@ hasId ( newUser )
 //=> false
 ```
 
-Sum types go by many names.  sum types, union types and enumerated types are equivalent terms.  You may also hear the term algebraic type.  An algebraic type is a type comprised of other types, and `sum-type`'s are the most common form of algebraic type (but there are others like subtraction and intersection types too.)
+Sum types go by many names.  sum types, union types and enumerated types are equivalent terms.  You may also hear the term algebraic type.  An algebraic type is a type comprised of other types, and `sum-type`s are the most common form of algebraic type (but there are others like subtraction and intersection types too.)
 
 Sum types allow us to push as much of our business model as possible into the type system.  This is often referred to as Domain Driven Design, a great introduction and argument for DDD is Scott Wlaschin's talk [Railway Oriented Programming]
 
@@ -460,7 +460,7 @@ Below is stuff you do not need to know to use this library effectively, but it's
 
 #### Interop with [static-sum-type]
 
-`sum-type`'s are compatible with [static-sum-type] for free.  That means you can pass a `sum-type` you've created into [static-sum-type] functions or within a type definition.  
+`sum-type`s are compatible with [static-sum-type] for free.  That means you can pass a `sum-type` you've created into [static-sum-type] functions or within a type definition.  
 
 However, if you want to use a [static-sum-type] in a `sum-type` definition you'll need to convert the type into a [sanctuary-def] `NullaryType` using `T.SST`.
 
@@ -471,7 +471,7 @@ Here's a little demo:
 const yslashn = 
     require('static-sum-type/modules/yslashn')
 
-// Functions that work on static-sum-type's
+// Functions that work on `static-sum-type`s
 const { fold, map, bimap } = 
     require('static-sum-type/configs/dev/foldThrow')
 
