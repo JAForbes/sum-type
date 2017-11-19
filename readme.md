@@ -262,13 +262,13 @@ const Shape =
 API
 ---
 
-- T.Value 
-- T.Record
-- T.$
-- T.Predicate
-- T.Unit (Advanced)
-- T.Recursive (Advanced)
-- T.SST (Advanced)
+- [T.Value](#tvalue)
+- [T.Record](#trecord)
+- [T.$](#t)
+- [T.Predicate](#tpredicate)
+- [T.Unit (Advanced)](#tunit)
+- [T.Recursive (Advanced)](#trecursive)
+- [T.SST (Advanced)](#tsst)
 
 #### T.Value
 
