@@ -159,7 +159,7 @@ const ISO8601 =
 const to = {
     ms: ISO8601.case({
         MS: n => n
-        ,SS: n => to.ms(ISO8601.MM(n/1000))
+        ,SS: n => to.ms(ISO8601.MS(n/1000))
         ,MM: n => to.ms(ISO8601.SS(n/60))
         ,HH: n => to.ms(ISO8601.MM(n/60))
     })
