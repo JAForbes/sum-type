@@ -60,7 +60,7 @@ renderWelcomeMessage (guest)
 //=> <p>Welcome <a href="/signup">Sign Up?</a><p>
 ```
 
-What are sum type's and why are they fantastic?
+What are sum types and why are they fantastic?
 -----------------------------------------------
 
 It's common for our business models to contain properties that may not exist in certain situations.  This leads to null checks throughout our codebase.  Sum types are a way to define all the possible valid states, and those states can have wildly different structures.
