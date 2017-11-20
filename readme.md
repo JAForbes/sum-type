@@ -614,7 +614,7 @@ Every case has a `type` and `case` property.
 
 #### Why can't I initialize types with a spread of values?
 
-This library used to support that, but I vound it leads to brittle code and is hard to read.
+This library used to support that, but I found it leads to brittle code and is hard to read.
 
 It's very useful that constructor signatures are not variadic.  There are unit constructors which are thunks and receive no args.  And there are value constructors which accept one value.  If you pass too few, too many, or the wrong types you'll get a helpful error message.  In previous versions you'd receive no type feedback until the curried function executed, so it was quite difficult to track down the source of bugs.
 
