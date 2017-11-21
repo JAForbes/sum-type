@@ -1,6 +1,6 @@
 {
   "name": "sum-type",
-  "version": "0.11.1",
+  "version": "1.0.0-rc1",
   "description": "Descendant of paldepind/union-type with more descriptive error messages",
   "main": "lib/simple.js",
   "module": "lib/index.js",
