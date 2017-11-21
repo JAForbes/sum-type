@@ -3,5 +3,4 @@ node_modules
 /coverage/
 *log*
 index.js
-index.min.js
-all.min.js
+sumtype.min.js
