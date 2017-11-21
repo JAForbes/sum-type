@@ -265,7 +265,6 @@ API
 - [T.Predicate](#tpredicate)
 - [T.Unit (Advanced)](#tunit)
 - [T.Recursive (Advanced)](#trecursive)
-- [T.SST (Advanced)](#tsst)
 
 #### T.Value
 
@@ -413,46 +412,6 @@ const ID =
     )
 ```
 
-#### T.SST
-
-Convert a [static-sum-type] union into a [sanctuary-def] Nullary type.
-
-```js
-const yslashn = 
-    require('static-sum-type/modules/yslashn')
-
-const Registered = 
-    yslashn.maybe('Registered')
-
-const { fold, map } = 
-    require('static-sum-type/configs/dev/foldThrow')
-
-const User = 
-    T.Value ('User', {
-        User: T.SST (Registered)
-    })
-
-User.User (
-    Registered.Y ( Date.now() )
-)
-
-fold ( User ) ({
-    User: fold ( Registered ) ({
-        Y: (when) => 'User registered at: ' + when
-        N: () => 'User is a guest'
-    })
-})
-
-const signupDate =
-    map ( User ) (
-        map( Registered ) (
-            when => new Date( when )
-        )
-    )
-
-```
-
-
 Advanced
 --------
 
@@ -462,48 +421,59 @@ Below is stuff you do not need to know to use this library effectively, but it's
 
 `sum-type`s are compatible with [static-sum-type] for free.  That means you can pass a `sum-type` you've created into [static-sum-type] functions or within a type definition.  
 
-However, if you want to use a [static-sum-type] in a `sum-type` definition you'll need to convert the type into a [sanctuary-def] `NullaryType` using `T.SST`.
+However, if you want to use a [static-sum-type] in a `sum-type` definition you'll need to convert the type into a [sanctuary-def] `NullaryType` using the [sanctuary-def] interop module that comes with [static-sum-type]
 
 Here's a little demo:
 
 ```js
-// A helper for generating common `sum-type`s
-const yslashn = 
-    require('static-sum-type/modules/yslashn')
 
-// Functions that work on `static-sum-type`s
-const { fold, map, bimap } = 
+const sst = 
+    
+    // Functions that work on `static-sum-type`s
     require('static-sum-type/configs/dev/foldThrow')
+
+    sst.yslashn =
+
+        // A helper for generating common `sum-type`s like maybe/either
+        require('static-sum-type/modules/yslashn')
+
+    sst.sanctuaryDef =
+        
+        // Helpers for converting static-sum-type types into sanctuary-def types
+        require('static-sum-type/modules/sanctuary-def')
+    
 
 // Create a type: Registered with a maybe-like structure
 const Registered = 
-    yslashn.maybe ('Registered')
+    sst.yslashn.maybe ('Registered')
 
 // Create a maybe
 const Maybe = 
-    yslashn.maybe ('Maybe')
+    sst.yslashn.maybe ('Maybe')
 
 const User = 
     T.Value ('User', {
-        User: T.SST (Registered)
+        
+        // Convert Registered to a sanctuary-def type (which sum-type requires)
+        User: sst.sanctuaryDef.toNullaryType (Registered)
     })
 
 User.User (
     Registered.Y ( Date.now() )
 )
 
-fold ( User ) ({
-    User: fold ( Registered ) ({
+sst.fold ( User ) ({
+    User: sst.fold ( Registered ) ({
         Y: (when) => 'User registered at: ' + when
         N: () => 'User is a guest'
     })
 })
 
 const signupDate =
-    fold ( User ) ({
-        User: bifold( Registered ) (
+    sst.fold ( User ) ({
+        User: sst.bifold( Registered ) (
             Maybe.N
-            mwhen => Maybe.Y( new Date( when ) )
+            when => Maybe.Y( new Date( when ) )
         )
     })
 
@@ -517,6 +487,116 @@ signupDate ( User.User( Registered.N () ) )
 
 [static-sum-type] here is an evolving project.  Utilities and modules built on top of it are constantly changing: but the specification itself can be considered stable.
 
+It's important to note that this conversion is not necessary in the other direction.  If we want to use a sum-type type in a static-sum-type definition it works natively because sum-type returns the correct data structure.
+
+Below is an example of some text editor UI logic.  We mix [sum-type] and [static-sum-type] types interchangeably.  We use `yslashn` to quickly define domain specific binary types like `Loaded a b = Y a | N b` or `Modified a b = Y a | N b`, and then use `sum-type` to define `Saved` and `New` file record types.
+
+This might occur if you like to use `yslashn` throughout your codebase for quick throw away unions, and `sum-type` for more complex structures where a high degree of type accuracy is required.
+
+```js
+const T = require('sum-type')
+const sst = 
+    
+    // Functions that work on `static-sum-type`s
+    require('static-sum-type/configs/dev/foldThrow')
+
+    sst.yslashn =
+
+        // A helper for generating common `sum-type`s like maybe/either
+        require('static-sum-type/modules/yslashn')
+
+
+const File = 
+    T.Record('User', {
+        Saved: 
+            { filepath: $.String
+            , contents: $.String
+            , filename: $.String
+            , sizeOnDisk: $.PositiveNumber 
+            }
+        New: 
+            { contents: $.String
+            , filename: $.String 
+            }
+    })
+
+const [Loaded, Modified] = 
+    ['Loaded', 'Modified'].map(yslashn.either)
+
+const savedFile = 
+    Loaded.Y(
+        Modified.Y(
+            File.Saved({
+                filepath: '/readme.md'
+                ,contents: `
+                    An important document
+                    =====================
+
+                    Part 1
+                    ------
+
+                    Hello.
+                `
+                ,sizeOnDisk: 10
+            })
+        )
+    )
+
+const o = f => g => x => f(g(x))
+const T = (x,f) => f(x)
+const pipe = fns => x => fns.reduce( T, x )
+
+const loadingFile =
+    Loaded.N(50) // 50% loaded
+
+const unmodifiedNewFile =
+    Loaded.Y(
+        Modified.N(
+            File.New({
+                contents: `
+                    An unsaved document
+                    ===================
+                `
+            })
+        )
+    )
+
+
+const skip = o => o.value
+
+const editorView = 
+    
+    sst.bifold (Loaded) (
+        loadingSpinnerView
+        , pipe(
+            skip // Skip Modified
+            , skip // Skip Saved/New
+            , o => o.contents 
+            , textEditorView
+        )
+    )
+    
+
+const titlebarView = 
+    sst.bifold (Loaded) (
+        loadingSpinnerView
+        , o ( titleBarView ) (
+            sst.bifold (Modified) (
+                o ( f => f.filename ) ( skip )
+                o ( f => f.filename + ' *' ) ( skip )
+            )
+        )
+    )
+
+const saveButtonView = 
+    sst.bifold( Loaded ) (
+        loadingSpinnerView
+        , sst.bifold ( Modified ) (
+            o (disabledButtonView) (skip)
+            , o (enabledButtonView) (skip)
+        )
+    )
+```
 
 #### Custom sanctuary-def configuration
 

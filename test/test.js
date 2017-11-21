@@ -2,7 +2,6 @@ const test = require('tape');
 const T = require('..');
 const $ = T.$
 const J = o => JSON.parse(JSON.stringify(o))
-const yslashn = require('static-sum-type/modules/yslashn')
 
 test('type, case and value should now appear on a serialized instance', t => {
   const Identity =
@@ -312,22 +311,6 @@ test('Predicates!', function(t){
   t.throws(function(){
     Num.Even(3)
   }, /not a member of ‘Predicate :: x => x % 2 == 0’/)
-
-  t.end()
-})
-
-test('static-sum-type', function(t){
-  const Registered = yslashn.maybe('Registered')
-  
-  const User = T.Value('User', {
-    User: T.SST(Registered)
-  })
-
-  User.User( Registered.Y('hi') )
-  
-  t.throws(function(){
-    User.User( 'hi' )
-  },/not a member of ‘Registered’/)
 
   t.end()
 })
