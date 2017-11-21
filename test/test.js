@@ -314,3 +314,33 @@ test('Predicates!', function(t){
 
   t.end()
 })
+
+
+test('Empty Record type uncurried', function(t){
+
+  const $T1 = T.Record('',{
+    Empty: {}
+  })
+
+  const $T2 = T.Record('',{
+    Empty: T.Unit
+  })
+
+  t.throws(function(){
+    $T1.Empty()
+  },/not a member of ‘{ }’/)
+
+  t.doesNotThrow(function(){
+    $T1.Empty({})
+  })
+
+  t.throws(function(){
+    $T2.Empty({})
+  },/too many arguments/)
+
+  t.doesNotThrow(function(){
+    $T2.Empty()
+  })
+
+  t.end()
+})
