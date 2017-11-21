@@ -109,7 +109,7 @@ test('If a field value does not match the spec an error is thrown', t => {
 test('Switching on union types', t => {
 
   const Action =
-    T.Value('Action', {
+    T.Record('Action', {
       Up: T.Unit
       ,Right: T.Unit
       ,Down: T.Unit
