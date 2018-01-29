@@ -42,8 +42,8 @@ module.exports = name => o =>
                 }
 
                 p[k] = of
-
+                
                 return p
             }
-            ,{}
+            ,{ name }
         )
