@@ -12,12 +12,7 @@ npm install static-sum-type
 
 ```js
 const yslashn = require('static-sum-type/yslashn')
-const { fold, errMessage } = require('static-sum-type/fold/dev')(
-    function handleError(err){
-        throw new TypeError( errMessage(err))
-    }
-)
-
+const { fold } = require('static-sum-type/configs/dev/foldThrow')
 const Maybe = yslashn.maybe('Maybe')
 
 const fromMaybe = (otherwise, f)
