@@ -22,7 +22,7 @@
     "dist:predicated-dev": "browserify modules/predicated/dev.js --standalone sst.predicated > dist/predicated.dev.js",
     "dist:predicated-prod": "browserify modules/predicated/prod.js --standalone sst.predicated > dist/predicated.prod.js",
     "dist:taggy": "browserify modules/taggy/index.js --standalone sst.taggy > dist/taggy.js",
-    "dist": "npm-run-all dist:*",
+    "dist": "npm-run-all --parallel dist:*",
     "release": "git push && npm version minor && npm publish",
     "preversion": "npm test",
     "predist": "rm -fr dist && mkdir dist"
