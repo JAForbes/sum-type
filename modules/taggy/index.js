@@ -32,11 +32,13 @@ module.exports = name => o =>
                         )
                     }
 
-                    return { 
+                    return Object.assign({ 
                         case: k
-                        , value
                         , type: name
-                    }
+                    }, ks.length == 0 
+                        ? {} 
+                        : { value }
+                    )
                 }
 
                 p[k] = of
