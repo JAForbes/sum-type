@@ -16,11 +16,7 @@ Observe we are forced to handle all potential cases.
 ```js
 
 
-const { fold, errMessage } = require('static-sum-type/fold/dev')(
-    function handleError(err){
-        throw new TypeError( errMessage(err))
-    }
-)
+const { fold } = require('static-sum-type')
 
 const h = require('hyperscript') // or whatever
 
@@ -178,7 +174,7 @@ This design has come from working with JS algebraic type libraries on production
 - Paste the following into the file
 
 ```js
-const { fold } = require('static-sum-type/fold/prod')()
+const { fold } = require('static-sum-type')
 
 class Maybe {
     static Just(x){
@@ -219,7 +215,7 @@ You should see `"4.12"` and `"0.00"` log to the console.
 #### Give me a different syntax example
 
 ```js
-const { fold } = require('static-sum-type/fold/prod')()
+const { fold } = require('static-sum-type')
 
 const Either = {
     name: 'Either'
@@ -292,25 +288,6 @@ doubleEither(
 `fold` let's you specify different functions to handle different cases.
 
 If the case has a `value` property, it is passed into the provided function.
-
-
-#### What are static-sum-type/fold/dev and static-sum-type/fold/prod?
-
-These are different versions of the same function.
-
-Dev will check a variety of things before creating your function and before
-applying it.
-
-Prod will just try to execute immediately.
-
-Both functions are tiny (especially prod), but the idea is, you should design
-your app to not have runtime exceptions in production, so why pay the cost
-of error handling and introspection if you're confident you don't need it in
-production.
-
-Dev accepts a function that controls how the library responds to errors.
-
-Prod ignores whatever you pass to it.  It's designed to have the same interface as dev without any type checking.  It's just 11 lines of super verbose es5 code.
 
 #### What's a "Type"
 

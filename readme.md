@@ -92,7 +92,7 @@ Each module will always have a production counterpart that assumes types are 100
 
 #### Modules
 
-- [fold](https://gitlab.com/JAForbes/static-sum-type/tree/master/modules/fold) A function that traverses every case of a union.  The dev version has a variety of built in verification steps.  The prod version just executes immediately.
+- [fold](https://gitlab.com/JAForbes/static-sum-type/tree/master/modules/fold) A function that traverses every case of a union.  Fold has a variety of built in verification steps.
 
 - [predicated](https://gitlab.com/JAForbes/static-sum-type/tree/master/modules/predicated) A function that generates spec compliant unions while also allowing you to specify a predicate that the value must satisfy in order for an error to not be handled.
 
