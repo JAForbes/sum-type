@@ -99,7 +99,7 @@ Each module will always have a production counterpart that assumes types are 100
 
 - [yslashn](https://gitlab.com/JAForbes/static-sum-type/tree/master/modules/yslashn) Generates spec compliant unions that mimic well known types like maybe and either with a terse Y/N naming convention.
 
-- [taggy](https://gitlab.com/JAForbes/static-sum-type/tree/master/modules/taggy) Generates spec compliant unions also verify the existence of properties for each case.
+- [taggy](https://gitlab.com/JAForbes/static-sum-type/tree/master/modules/taggy) Generates spec compliant unions that also verify the existence of properties for each case.
 
 #### Error Handling
 
