@@ -94,10 +94,12 @@ Each module will always have a production counterpart that assumes types are 100
 
 - [fold](https://gitlab.com/JAForbes/static-sum-type/tree/master/modules/fold) A function that traverses every case of a union.  Fold has a variety of built in verification steps.
 
-- [predicated](https://gitlab.com/JAForbes/static-sum-type/tree/master/modules/predicated) A function that generates spec compliant unions while also allowing you to specify a predicate that the value must satisfy in order for an error to not be handled.
+- [predicated](https://gitlab.com/JAForbes/static-sum-type/tree/master/modules/predicated) Generates spec compliant unions while also allowing you to specify a predicate that the value must satisfy in order for an error to not be handled.
 
 
-- [yslashn](https://gitlab.com/JAForbes/static-sum-type/tree/master/modules/yslashn) A function that generates spec compliant unions that mimic well known types like maybe and either with a terse Y/N naming convention.
+- [yslashn](https://gitlab.com/JAForbes/static-sum-type/tree/master/modules/yslashn) Generates spec compliant unions that mimic well known types like maybe and either with a terse Y/N naming convention.
+
+- [taggy](https://gitlab.com/JAForbes/static-sum-type/tree/master/modules/taggy) Generates spec compliant unions also verify the existence of properties for each case.
 
 #### Error Handling
 
