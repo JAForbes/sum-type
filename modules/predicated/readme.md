@@ -15,11 +15,11 @@ Observe we are forced to handle all potential cases.
 
 ```js
 
-const { fold, errMessage } = require('static-sum-type/fold/dev')(
+const { fold, errMessage } = require('static-sum-type')(
     handleError
 )
 
-const Predicated = require('static-sum-type/predicated/dev')(
+const Predicated = require('static-sum-type/modules/predicated')(
     String
     ,handleError
 )
@@ -168,11 +168,11 @@ This design has come from working with JS algebraic type libraries on production
 
 ```js
 
-const { fold, errMessage } = require('static-sum-type/fold/dev')(
+const { fold, errMessage } = require('static-sum-type')(
     handleError
 )
 
-const Predicated = require('static-sum-type/predicated/dev')(
+const Predicated = require('static-sum-type/modules/predicated')(
     String
     ,handleError
 )
@@ -211,7 +211,7 @@ You should see `"4.12"` and `"0.00"` log to the console.
 #### Project Goals and Motivations
 
 - 0 Dependencies 
-- Tiny for frontend usage ( prod fold+predicated is ~40 LOC, ~300B )
+- Tiny for frontend usage
 - Represent types for raw values (like Numbers)
 - Serializable types (for sending typed data over the wire)
 - Interop with base static-sum-type spec
@@ -227,25 +227,6 @@ You should see `"4.12"` and `"0.00"` log to the console.
 `fold` let's you specify different functions to handle different cases.
 
 If the case has a `value` property, it is passed into the provided function.
-
-
-#### What are static-sum-type/fold/dev and static-sum-type/fold/prod?
-
-These are different versions of the same function.  
-
-Dev will check a variety of things before creating your function and before 
-applying it.
-
-Prod will just try to execute immediately.
-
-Both functions are tiny (especially prod), but the idea is, you should design
-your app to not have runtime exceptions in production, so why pay the cost
-of error handling and introspection if you're confident you don't need it in
-production.
-
-Dev accepts a function that controls how the library responds to errors.
-
-Prod ignores whatever you pass to it.  It's designed to have the same interface as dev without any type checking.  It's just 11 lines of super verbose es5 code.
 
 #### What's a "Type"
 

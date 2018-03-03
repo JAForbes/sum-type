@@ -1,19 +1,14 @@
 const test = require('tape')
 const $ = require('sanctuary-def')
 const {
-  fold: devFold
+  fold
   , bifold
-  , map: devMap
-  , errMessage
-} = require('../modules/fold/dev')(function(e){
-  return e
-})
+  , map
+} = require('..')
 
 const yslashn = require('../modules/yslashn')
 
-const PredicatedLib = require('../modules/predicated/dev')
-
-const { fold: prodCata, map: prodMap } = require('../modules/fold/prod')()
+const SumTypePred = require('../modules/predicated')
 
 class Maybe {
   static Just(x) {
@@ -31,7 +26,7 @@ class Maybe {
   }
 
   static map(f){
-    return o => devFold(Maybe) ({
+    return o => fold(Maybe) ({
       Just: a => Maybe.Just(f(a))
       ,Nothing: () => Maybe.Nothing()
     })(o)
@@ -78,7 +73,7 @@ var Maybe2 ={
 }
 
 test('static-sum-type', function(t){
-  const foldMaybe = devFold(Maybe)
+  const foldMaybe = fold(Maybe)
 
   var maybeToNum = foldMaybe({
     Just: () => 1
@@ -97,81 +92,62 @@ test('static-sum-type', function(t){
     , 'fold can fold different types that meet the spec'
   )
 
-  t.equals(
-    maybeToNum(Loadable.Loaded('whatever')).case
-    ,'InstanceWrongType'
-    ,'Fold identifies when a value is of the wrong type'
+  t.throws(
+    () => maybeToNum(Loadable.Loaded('whatever'))
+    , /InstanceWrongType/
+    , 'fold detects when instance of the wrong type'
   )
 
-  t.equals(
-    devFold(Maybe, 0).case
-    ,'TooManyArguments'
+  t.throws(
+    () => fold(Maybe, 0)
+    ,/TooManyArguments/
     ,'fold identifies when there are too many arguments level:0'
   )
 
-  t.equals(
-    devFold(Maybe)({ Just: () => 1, Nothing: () => 0 }, 1).case
-    ,'TooManyArguments'
+  t.throws(
+    () => fold(Maybe)({ Just: () => 1, Nothing: () => 0 }, 1)
+    ,/TooManyArguments/
     ,'fold identifies when there are too many arguments level:1'
   )
 
-  t.equals(
-    devFold(Maybe)({ Just: () => 1, Nothing: () => 0 })( Maybe.Just(1), 1 ).case
-    ,'TooManyArguments'
+  t.throws(
+    () => fold(Maybe)({ Just: () => 1, Nothing: () => 0 })( Maybe.Just(1), 1 )
+    ,/TooManyArguments/
     ,'fold identifies when there are too many arguments level:2'
   )
 
-  t.equals(
-    maybeToNum( null ).case
-    ,'InstanceNull'
+  t.throws(
+    () => maybeToNum( null )
+    ,/InstanceNull/
     ,'fold identifies when a value is null'
   )
 
-  t.equals(
-    maybeToNum({
+  t.throws(
+    () => maybeToNum({
       type: Maybe.name
       ,case: Loadable.Loaded.name
       ,value: 1
-    }).case
-    ,'InstanceShapeInvalid'
+    })
+    ,/InstanceShapeInvalid/
     ,'fold identifies when a instance has the wrong case key'
   )
 
-  t.equals(
-    foldMaybe({
+  t.throws(
+    () => foldMaybe({
       Just: () => 1
-    }).case
-    ,'TooFewCases'
+    })
+    ,/TooFewCases/
     ,'fold detects when there are too few cases provided'
   )
 
-  t.equals(
-    foldMaybe({
+  t.throws(
+    () => foldMaybe({
       Just: () => 1
       ,Nothing: () => 1
       ,Left: () => 1
-    }).case
-    ,'TooManyCases'
+    })
+    ,/TooManyCases/
     ,'fold detects when there are too few many provided'
-  )
-
-  t.equals(
-    prodCata(
-      Loadable
-    )({
-      Loaded: () => 1
-    })(
-      Loadable.Loaded(1)
-    )
-    ,1
-    ,'prodCata ignores errors and blindy tries to do its job'
-  )
-
-  const SumTypePred = PredicatedLib(
-    x => x != null && x.toString()
-    , e => {
-      throw new Error(e.message)
-    }
   )
 
   const Shape = SumTypePred('Shape', {
@@ -188,7 +164,7 @@ test('static-sum-type', function(t){
 
   const c = Shape.Circle(2)
 
-  var f = devFold(Shape) ({
+  var f = fold(Shape) ({
     Circle: x => x * 2
     ,Rectangle: x => x * 2
     ,Triangle: x => x * 2
@@ -197,12 +173,13 @@ test('static-sum-type', function(t){
   t.equals( f(c), 4 )
 
   t.equals(
-    String( c), 'Shape.Circle(2)'
+    String(c), 'Shape.Circle(2)'
   )
 
-  t.throws(function(){
-    Shape.Triangle({x:'0', y:'2'})
-  },/did not satisfy the constraint for Shape.Triangle/)
+  t.throws( 
+    () => Shape.Triangle({x:'0', y:'2'})
+    ,/did not satisfy the constraint for Shape.Triangle/
+  )
 
   t.end()
 })
@@ -211,74 +188,67 @@ test('errors', function(t){
   const YNMaybe = yslashn.maybe('Maybe')
   
   const fromMaybe = (otherwise, f) =>
-    devFold( YNMaybe )({
+    fold( YNMaybe )({
         Y: f
         ,N: () => otherwise
     })
 
-  const TooManyCases =
-    devFold( YNMaybe )({
+  t.throws(
+    () => fold( YNMaybe )({
         Y: () => ''
         ,N: () => ''
         ,A: () => ''
     })
+    ,/TooManyCases/
+  )
 
-  const TooFewCases =
-    devFold( YNMaybe )({
+  t.throws(
+    () => fold( YNMaybe )({
         Y: () => ''
     })
-
-  t.equals(
-    'Too Many Cases! Your case function must have exactly the same number of  keys as the type: Maybe.  The following cases should not have been present: A'
-    ,errMessage(TooManyCases)
+    ,/TooFewCases/
   )
 
-
-  t.equals(
-    'Too Few Cases! Your case function must have exactly the same number of keys as the type: Maybe. The following keys were missing: N'
-    ,errMessage(TooFewCases)
+  t.throws(
+    () => fromMaybe(0, x => x )(null)
+    ,/InstanceNull/
   )
 
-  t.equals(
-    errMessage(fromMaybe(0, x => x )(null))
-    ,'Null is not a valid member of the type Maybe'
+  t.throws(
+    () => fromMaybe(0, x=>x)( { type: 'Maybe', case: 'Unknown' })
+    ,/InstanceShapeInvalid/
   )
 
-  t.equals(
-    errMessage(fromMaybe(0, x=>x)( { type: 'Maybe', case: 'Unknown' }))
-    ,'Unknown()::Maybe is not a valid Member of the type: Maybe.  Please review the definition of Maybe'
+  t.throws(
+    () => fold(YNMaybe,1,2,3)
+    ,/TooManyArguments/
   )
 
-  t.equals(
-    errMessage( devFold(YNMaybe,1,2,3) )
-    ,'Too Many Arguments! fold accepts 1 argument at a time but received 4.  Received: [object Object] 1 2 3'
+  t.throws(
+    () => fold(YNMaybe) ( { Y: () => 1, N: () => 2 }, 4, 5, 6)
+    ,/TooManyArguments/
   )
 
-  t.equals(
-    errMessage( devFold(YNMaybe) ( { Y: () => 1, N: () => 2 }, 4, 5, 6)  )
-    ,'Too Many Arguments! fold accepts 1 argument at a time but received 4.  Received: [object Object] 4 5 6'
-  )
-
-  t.equals(
-    errMessage( bifold( yslashn.nFold('X', ['A', 'B', 'C'])) )
-    ,'BifoldNotInferrable: You can only bifold when a Type\'s case count=2 but X has 3: A | B | C'
+  t.throws(
+    () => bifold( yslashn.nFold('X', ['A', 'B', 'C']))
+    ,/BifoldNotInferrable/
   )
 
   const {N:L} = yslashn.either('Either')
   
-  t.equals(
-    errMessage(fromMaybe(0, x => x * x)(L(10)))
-    ,'N(10)::Either is not a valid member of the type Maybe which expects the following cases Y | N'
+  t.throws(
+    () => fromMaybe(0, x => x * x)(L(10))
+    ,/InstanceWrongType/
   )
 
-  t.equals(
-    errMessage(fromMaybe(0, x => x * x)(L({ toString(){ return 'hello' } })))
-    ,'N(hello)::Either is not a valid member of the type Maybe which expects the following cases Y | N'
+  t.throws(
+    () => fromMaybe(0, x => x * x)(L({ toString(){ return 'hello' } }))
+    ,/InstanceWrongType/
   )
   
-  t.equals(
-    errMessage(fromMaybe(0, x => x * x)(L(null)))
-    ,'N(null)::Either is not a valid member of the type Maybe which expects the following cases Y | N'
+  t.throws(
+    () => fromMaybe(0, x => x * x)(L(null))
+    ,/InstanceWrongType/
   )
 
 
@@ -290,7 +260,7 @@ test('yslashn', function(t){
   const YNMaybe = yslashn.maybe('Maybe')
 
   const fromMaybe = (otherwise, f) =>
-      devFold( YNMaybe )({
+      fold( YNMaybe )({
           Y: f
           ,N: () => otherwise
       })
@@ -327,17 +297,17 @@ test('yslashn', function(t){
     Selected.N()
 
   const f =
-      devFold ( Selected ) ({
-          Y: devFold ( Loaded ) ({
+      fold ( Selected ) ({
+          Y: fold ( Loaded ) ({
               Y: x => x.toUpperCase()
               ,N: x => x + '% complete'
           })
           ,N: () => 'Please select a thingy'
       })
 
-  t.equals(
-    f( loading ).case
-    ,'InstanceWrongType'
+  t.throws(
+    () => f( loading ).case
+    ,/InstanceWrongType/
   )
 
   t.equals(
@@ -369,7 +339,7 @@ test('yslashn', function(t){
   const Credit = yslashn.nFold('Credit', ['Recharge', 'Normal', 'Insufficient'])
 
   t.equals(
-    devFold( Credit )({
+    fold( Credit )({
       Normal: n => n * n
       ,Recharge: () => 0
       ,Insufficient: () => 0
@@ -386,22 +356,12 @@ test('bifold, bimap, map', function(t){
 
   // map is defined in terms of bimap which is defined in terms of bifold
   t.equals(
-    devMap (Maybe) ( x => x * x ) ( Maybe.Y(10) ).value
+    map (Maybe) ( x => x * x ) ( Maybe.Y(10) ).value
     , 100
   )
 
   t.equals(
-    devMap (Maybe) ( x => x * x ) ( Maybe.N() ).case
-    , 'N'
-  )
-
-  t.equals(
-    prodMap (Maybe) ( x => x * x ) ( Maybe.Y(10) ).value
-    , 100
-  )
-
-  t.equals(
-    prodMap (Maybe) ( x => x * x ) ( Maybe.N() ).case
+    map (Maybe) ( x => x * x ) ( Maybe.N() ).case
     , 'N'
   )
 

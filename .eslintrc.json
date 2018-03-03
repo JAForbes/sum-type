@@ -2,11 +2,11 @@
     "env": {
         "browser": true,
         "commonjs": true,
-        "es6": false,
         "node": true
     },
     "parserOptions": {
-        "sourceType": "module"
+        "sourceType": "module",
+        "ecmaVersion": 5
     },
     "rules": {
         "no-const-assign": "warn",

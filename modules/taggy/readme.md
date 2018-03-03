@@ -12,7 +12,7 @@ Quick Start
 `npm install static-sum-type`
 
 ```js
-const sst = require('static-sum-type/configs/dev/foldThrow')
+const sst = require('static-sum-type')
 const taggy = require('static-sum-type/modules/taggy')
 
 const UploadState = taggy ('UploadState') ({
