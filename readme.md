@@ -13,83 +13,6 @@ A simple library for complex logic.
 
 This library is a series of tiny composeable modules designed to make working with sum-types more flexible without losing any power.
 
-Each module interops with every other module because they all share a base specification.  That specification is defined in [static-sum-type/fold](https://gitlab.com/JAForbes/static-sum-type/tree/master/fold) because all behaviour we need can be defined in terms of `fold`.
-
-`fold` requires a data structure that can be written manually using a variety of syntax.  The interface was designed to piggy back on some default behaviours of Javascript types (like functions and classes) to avoid manual typing.  But its completely possible (albeit verbose) to define a type as a simple pojo.
-
-```js
-// A type
-const Maybe {
-    name: 'Maybe'
-    ,Just: {}
-    ,Nothing: {}
-}
-
-// A case instance
-const just = {
-    type: { name: 'Maybe' }
-    ,case: { name: 'Just' }
-    ,value: 2
-}
-
-fold(Maybe)({
-    Just: x => x * 2
-    Nothing: () => 0
-})(just) //=> 4
-```
-
-The design of the spec allows for a variety of other statically analyzable syntaxes which can be viewed at [static-sum-type/fold](https://gitlab.com/JAForbes/static-sum-type/tree/master/modules/fold).  But its also possible to generate types dynamically far more succintly.
-
-The predicated module is an example of a type generator that is spec compliant but also checks if values meet a predicate.  This can be seen as a low level type checking system when you don't want to pay the filesize cost of a more complete type checking library like sanctuary-def.
-
-```js
-const Maybe = Predicated('Maybe', {
-    Just: (...args) => args.length == 1
-    ,Nothing: (...args) => args.length == 0
-})
-
-const just = Maybe.Just(2)
-
-fold(Maybe)({
-    Just: x => x * 2
-    Nothing: () => 0
-})(just) //=> 3
-```
-
-Check out the [predicated module here](https://gitlab.com/JAForbes/static-sum-type/tree/master/modules/predicated)
-
-The plan is to build several tiny modules that cover specific use cases.  A sanctuary-def module, a typescript module etc.
-
-Each module will always have a production counterpart that assumes types are 100% correct so you do not pay the performance or network load cost in production.
-
-#### Project Goals and Motivations
-
-- 0 Dependencies
-- Tiny for frontend usage
-- Statically Analyzable
-    - Nice editor experience in VSCode or tern.js
-    - Easy interop with TS/Flow
-    - Less magic
-
-- Represent types for raw values (like Numbers)
-- Serializable types (for sending typed data over the wire)
-- Convenient base abstraction for higher abstraction libraries to build on top of
-- Convenient API to be used directly by users
-- Opt in everything:
-
-    - Opt in class syntax
-    - Opt in type decorators (like sanctuary-def)
-    - Opt in Err handling
-    - Opt in invalid case handling
-    - Opt in dynamic generation of types if you need it
-    - Opt in constructors
-
-- Encourage code that is less brittle
-
-    - No placeholder cases (like sum-type/union-type)
-    - No auto spreading of values (like sum-type/union-type)
-    - No auto curried constructors (like sum-type/union-type)
-
 #### Modules
 
 - [fold](https://gitlab.com/JAForbes/static-sum-type/tree/master/modules/fold) A function that traverses every case of a union.  Fold has a variety of built in verification steps.
@@ -101,6 +24,93 @@ Each module will always have a production counterpart that assumes types are 100
 
 - [taggy](https://gitlab.com/JAForbes/static-sum-type/tree/master/modules/taggy) Generates spec compliant unions that also verify the existence of properties for each case.
 
-#### Error Handling
 
-The fold funciton defines (as a spec compliant sum type) all the possible errors it will emit.  You can provide a custom handler that can handle that data type in whatever way makes the most sense for your application.  A typical case may be to simply throw an error.  There's a provided `errMessage` function on the [fold](https://gitlab.com/JAForbes/static-sum-type/tree/master/modules/fold) module that will turn the err object into a dev friendly string.
+Each module adheres to the static-sum-type specification.  That specification is defined in [static-sum-type/fold](https://gitlab.com/JAForbes/static-sum-type/tree/master/fold).
+
+
+The design of the spec allows for a variety of other statically analyzable syntaxes which can be viewed at [static-sum-type/fold](https://gitlab.com/JAForbes/static-sum-type/tree/master/modules/fold).  But its also possible to generate types dynamically far more succintly.
+
+#### Project Goals and Motivations
+
+- 0 Dependencies
+- Tiny for frontend usage
+- Data oriented precision
+- Serializable
+- A simple and convenient abstraction for library interop and direct usage.
+
+
+#### How does static-sum-type differ from other libraries in the ecosystem.
+
+`static-sum-type` removes the following features because we believe they lead to brittle codebases.
+
+- placeholder cases
+- auto spreading of values in cata/fold
+- auto curried constructors
+- prototypes
+
+`static-sum-type` is technically 0KB, it's an idea.  You can use static-sum-type in your codebase without ever running `npm install`.
+
+Specification
+-------------
+#### What's a "Type"
+
+A type is a struct with a name property and as many keys as there are cases.
+
+A Maybe type looks like this
+
+```
+{ name :: TitlecaseString
+, Just :: Any
+, Nothing :: Any
+}
+```
+
+Keep in mind lowercase properties other than `name` are ignored.  If you want your type to have static functions or other data you can safely do so as long as the property is a `LowercaseString`
+
+> Any keys in a call to `getOwnPropertyNames(Type)` where `key[0] == key[0].toUpperCase()` will be treated as a case.
+
+#### What is a "Case"
+
+```
+{ name :: String
+, type :: TitlecaseString
+, case :: TitlecaseString
+, value? :: a
+}
+```
+
+- A `Case` is a struct with a `type`, `case` and an optional `value` property.
+- The type and case property must be an `TitlecaseString`.
+- The `case` property must correspond to a matching key on a type object.
+- The matching type object must include a property that matches the cases `case` property.
+
+A case *can* have a `value` property.  But it is optional.  The `value` property can be of any type.
+
+#### Show me some examples of some valid types.
+
+```js
+class Type1 {
+    static Case1(){}
+    static Case2(){}
+}
+
+{ name: 'Type2'
+, 'Case1': true
+, 'Case2': true
+}
+```
+
+The above specification is compatible with Javascript classes because `class` has an automatically generated property `name`.
+
+#### Show me some examples of some valid cases.
+
+```js
+{ case: 'Case1'
+, type: Type1.name //references above
+}
+
+{ case: 'Case2'
+, type: 'Type1' // has same name as above which is also OK
+, value: 'this is a value'
+}
+```
