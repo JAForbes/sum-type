@@ -65,7 +65,7 @@ Each module will always have a production counterpart that assumes types are 100
 #### Project Goals and Motivations
 
 - 0 Dependencies
-- Tiny for frontend usage ( prod is 11 LOC, ~200B )
+- Tiny for frontend usage
 - Statically Analyzable
     - Nice editor experience in VSCode or tern.js
     - Easy interop with TS/Flow
