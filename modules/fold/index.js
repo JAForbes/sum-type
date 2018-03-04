@@ -46,6 +46,7 @@ var StaticSumTypeError = nFold('StaticSumTypeError', [
     ,'InstanceShapeInvalid'
     ,'TooManyArguments'
     ,'BifoldNotInferrable'
+    ,'NotACaseConstructor'
 ])
 
 var ErrMessageCases =
@@ -107,6 +108,10 @@ var ErrMessageCases =
         return 'fold accepts 1 argument at a time but received'
             + ' '+args.length+'.'
             + '  Received: '+Array.from(args).map(toString).join(' ')
+    }
+    ,NotACaseConstructor: function NotACaseConstructor(o){
+        return o.context + ' expected a function that returns a case object'
+            + ' but instead received '+toString(o.caseConstructor)
     }
     }
 
@@ -254,11 +259,72 @@ function map(T){
     }
 }
 
+// mapCase ( Loaded.Y ) ( x => x * 100 )
+function mapCase(caseConstructor){
+
+    var f = foldCase (caseConstructor)
+    return function mapCase$caseConstructor(visitor){
+        var g = f(visitor)
+        return function mapCase$visitor(Ma){
+            return {
+                case: Ma.case
+                ,value: g(Ma.value)
+                ,type: Ma.type
+            }
+        }
+    }
+}
+
+// mapCase ( Loaded.Y ) ( x => x * 100 )
+function foldCase(caseConstructor){
+    
+    var err = Err.NotACaseConstructor({
+        caseConstructor: caseConstructor
+        ,context: mapCase.name
+    })
+    
+    var T = { name: out.name }
+
+    if( typeof caseConstructor != 'function' ){
+        return handleError( err )
+    }
+
+    var out = caseConstructor()
+
+    if ( !( typeof out.case == 'string' && typeof out.type == 'string') ){
+        return handleError( err )
+    }
+
+    return function mapCase$caseConstructor(visitor){
+        return function mapCase$visitor(Ma){
+            if ( Ma == null ){
+                return handleError(
+                    Err.InstanceNull({ T:T })
+                )
+
+            } else if ( Ma.case != out.case || Ma.type != out.type ){
+    
+                var cases = {}
+                cases[out.case] = true
+                return handleError(
+                    Err.InstanceWrongType({
+                        T:T, cases:cases, x:Ma
+                    })
+                )
+            } else {
+                return visitor ( Ma.value )
+            }
+        }
+    }
+}
+
+
 module.exports = {
     fold: fold
     ,bifold: bifold
     ,bimap: bimap
     ,map: map
+    ,mapCase: mapCase
     ,errMessage: errMessage
     ,StaticSumTypeError: StaticSumTypeError
 }
