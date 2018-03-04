@@ -11,7 +11,7 @@ A simple library for complex logic.
 
 #### What is it
 
-This library is a series of tiny composeable modules designed to make working with sum-types more flexible without losing any power.
+A series of tiny modules that make encoding logic as data _a breeze_ ⛱️.
 
 #### Modules
 
@@ -56,24 +56,52 @@ Specification
 
 A type is a struct with a name property and as many keys as there are cases.
 
-A Maybe type looks like this
+Each case on the type must have a `name` property that matches it's key.
 
 ```
 { name :: TitlecaseString
-, Just :: Any
-, Nothing :: Any
+, [a] :: any
+, [b] :: any
+}
+```
+
+Here is an example of a valid `Maybe` type
+
+```js
+{ name: 'Maybe' 
+, Just: null
+, Nothing: null
 }
 ```
 
 Keep in mind lowercase properties other than `name` are ignored.  If you want your type to have static functions or other data you can safely do so as long as the property is a `LowercaseString`
+You can safely add static methods or properties to your type structure without interfing with `static-sum-type` provided they do not start with a capital letter.
 
-> Any keys in a call to `getOwnPropertyNames(Type)` where `key[0] == key[0].toUpperCase()` will be treated as a case.
+
+> 💡  Any keys in a call to `getOwnPropertyNames(Type)` where `key[0] == key[0].toUpperCase()` will be treated as a case.
+
+Because `.name` is auto generated for functions and classes, the following forms are spec compliant.
+
+```js
+const Maybe = {
+    name: 'Maybe'
+    Just(){} // Maybe.Just.name == 'Just'
+    Nothing(){} //Maybe.Nothing.name == 'Nothing'
+}
+```
+
+```js
+class Maybe {
+
+    static Just(){} // Maybe.Just.name == 'Just'
+    static Nothing(){} // Maybe.Nothing.name == 'Nothing'
+}
+```
 
 #### What is a "Case"
 
 ```
-{ name :: String
-, type :: TitlecaseString
+{ type :: TitlecaseString
 , case :: TitlecaseString
 , value? :: a
 }
@@ -86,21 +114,7 @@ Keep in mind lowercase properties other than `name` are ignored.  If you want yo
 
 A case *can* have a `value` property.  But it is optional.  The `value` property can be of any type.
 
-#### Show me some examples of some valid types.
-
-```js
-class Type1 {
-    static Case1(){}
-    static Case2(){}
-}
-
-{ name: 'Type2'
-, 'Case1': true
-, 'Case2': true
-}
-```
-
-The above specification is compatible with Javascript classes because `class` has an automatically generated property `name`.
+> 💡  The above specification is compatible with Javascript classes because `class` has an automatically generated property `name`.
 
 #### Show me some examples of some valid cases.
 
