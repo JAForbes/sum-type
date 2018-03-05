@@ -6,6 +6,7 @@ const {
   , foldCase
   , mapCase
   , map
+  , chain
 } = require('..')
 
 const yslashn = require('../modules/yslashn')
@@ -353,8 +354,9 @@ test('yslashn', function(t){
   t.end()
 })
 
-test('bifold, bimap, map', function(t){
+test('bifold, bimap, map, chain', function(t){
   const Maybe = yslashn.maybe('Maybe')
+  const Either = yslashn.maybe('Either')
 
   // map is defined in terms of bimap which is defined in terms of bifold
   t.equals(
@@ -365,6 +367,51 @@ test('bifold, bimap, map', function(t){
   t.equals(
     map (Maybe) ( x => x * x ) ( Maybe.N() ).case
     , 'N'
+  )
+
+  t.deepEquals (
+    chain (Maybe) ( x => Maybe.Y(x) ) ( Maybe.Y(10) )
+    , { value: 10, case: 'Y', type: 'Maybe' }
+  )
+
+  t.deepEquals (
+    chain (Maybe) ( () => Maybe.N() ) ( Maybe.Y(10) )
+    , { case: 'N', type: 'Maybe' }
+  )
+
+  t.deepEquals (
+    chain (Maybe) ( x => x ) ( Maybe.N() )
+    ,{ case: 'N', type: 'Maybe' }
+  )
+
+  t.throws (
+    () => chain (null)
+    , /NotAType/
+  )
+
+  t.throws (
+    () => chain ({})
+    , /NotAType/
+  )
+
+  t.throws (
+    () => chain (Maybe) (null)
+    ,/VisitorNotAFunction/
+  )
+
+  t.throws (
+    () => chain (Maybe) (x => x ) (null)
+    ,/InstanceShapeInvalid/
+  )
+
+  t.throws (
+    () => chain (Maybe) (x => x ) ( Either.N(2) )
+    ,/InstanceShapeInvalid/
+  )
+
+  t.throws (
+    () => chain (Maybe) (x => x ) ( null )
+    ,/InstanceShapeInvalid/
   )
 
   t.end()
@@ -400,7 +447,7 @@ test('foldCase, mapCase', function(t){
   )
 
   t.equals(
-    mapCase (Maybe.Y) (x=>x) (Maybe.N()).case
+    mapCase (Maybe.Y) (x => x) (Maybe.N()).case
     ,'N'
   )
 
