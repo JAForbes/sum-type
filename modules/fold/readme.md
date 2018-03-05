@@ -16,8 +16,6 @@ Observe we are forced to model and handle all potential cases.
 
 
 ```js
-
-
 const { fold } = require('static-sum-type')
 const { either, maybe } = require('yslashn')
 const h = require('hyperscript') // or whatever
@@ -156,84 +154,112 @@ console.log(NumToFixed( Maybe.Nothing() ))
 //=> "0.00"
 ```
 
-- Run `node index.js`
+API
+---
 
-You should see `"4.12"` and `"0.00"` log to the console.
+#### fold
 
-#### Give me a different syntax example
-
-```js
-const { fold } = require('static-sum-type')
-
-const Either = {
-    name: 'Either'
-
-    Left: (value) => ({
-        value
-        ,type: Either.name
-        ,case: Either.Left.name
-    })
-    
-    ,Right: (value) => ({
-        value
-        ,type: Either.name
-        ,case: Either.Right.name
-    })
-}
-
-const Either$map = f =>
-    fold(Either) ({
-        Left: Either.Left
-        ,Right(value){
-            return Either.Right(f(value))
-        }
-    })
-
-var doubleEither = Either$map( x => x * 2 )
-
-doubleEither(
-    Either.Left('Error Message')
-)
-//=> Either.Left('Error Message)
-
-doubleEither(
-    Either.Right(2)
-)
-//=> Either.Right(4)
-```
-
-
-#### What's fold do?
 
 `fold` let's you specify different functions to handle different cases.
 
 If the case has a `value` property, it is passed into the provided function.
 
-#### How do I let my types contain more than one value?
-
-Just use arrays or objects as your `value` property.  The specification does not dictate how your constructors work at all.  So *if* you want, you can do stuff like this:
-
 ```js
-class List {
-    static NonEmpty(...value){
-        return {
-            type: List.name
-            ,value: value
-            ,case: List.NonEmpty.name
+const f = 
+    fold (Either) ({
+        Left( leftValue ){
+            return leftValue + '!'
+        }, 
+        Right( rightValue ){
+            return rightValue * 2
         }
-    }
+    })
 
-}
+f ( Either.Left('Hi') ) //=> 'Hi!'
+
+f ( Either.Right(2) ) //=> 4
 ```
 
-Thanks to [Kurt Milam](https://github.com/kurtmilam) for this brilliant idea / approach.
+#### bifold
+
+`bifold` allows you to fold over a type with 2 cases without having tp specify the case name.
+
+```js
+const f = bifold (Either) (
+    b => 'B:' + b
+    ,a => 'A:' + a
+)
+
+f ( Either.Left('b') ) //=> 'B:b'
+f ( Either.Right('A') ) //=> 'A:a'
+```
+
+Function order is in reverse defintion order.
+
+So if your type was defined as:
+
+```js
+const Either = 
+    { name: 'Either'
+    , Right(){}
+    , Left(){}
+    }
+```
+
+Then you specify your bifold like so:
+
+```js
+fold ( Either ) (
+    leftFn
+    ,rightFn
+)
+```
+
+#### bimap
+
+Like `bifold` but maintains it's original encoding.
+
+#### map
+
+Like `bimap` but only visitors the first case defined in your type.
+
+#### foldCase
+
+`fold` acts like `fold` but allows you to constrain the type of the instance to a specific case.
+
+Useful if you only want to run logic against 1 case.
+
+```js
+const f = foldCase (Maybe.Y) ( 0, x => x + 1 )
+
+f ( Maybe.Y(2) ) //=> 3
+
+f ( Maybe.N() ) //=> Type Error!
+```
+
+#### mapCase
+
+`mapCase` acts like `map` but allows you to constrain the type of the instance to be a specific case.
+
+`mapCase` also enables mapping over types with 1 or more than 2 cases, unlike `map` which expects exactly 2.
+
+```js
+const f = mapCase (Maybe.Y) ( x => x + 1 )
+
+f ( Maybe.Y(2) ) //=> Maybe.Y(3)
+
+f ( Maybe.N() ) //=> Type Error!
+```
+
+`mapCase`, like `map` will not execute visitor functions on valueless cases.
+
+```js
+//=> Type Error!
+const f = mapCase (Maybe.N) 
+```
 
 #### Why is the source code ES5?
 
 So many problems are solved by just using ES5 for library source code.  When things settle down that will change.
 
 > If anyone knows how to get coverage working with es6, let me know!
-
-#### Why is this library on GitLab?
-
-GitLab is open source, it has built in CI.  It's got a better UI and UX.  I always hope other libraries move to GitLab so I thought why not make the move myself.

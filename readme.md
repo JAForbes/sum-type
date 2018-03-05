@@ -15,7 +15,7 @@ A series of tiny modules that make encoding logic as data _a breeze_ ⛱️.
 
 #### Modules
 
-- [fold](https://gitlab.com/JAForbes/static-sum-type/tree/master/modules/fold) A function that traverses every case of a union.  Fold has a variety of built in verification steps.
+- [fold](https://gitlab.com/JAForbes/static-sum-type/tree/master/modules/fold) A module of utility functions that interop with other `static-sum-type` modules.
 
 - [predicated](https://gitlab.com/JAForbes/static-sum-type/tree/master/modules/predicated) Generates spec compliant unions while also allowing you to specify a predicate that the value must satisfy in order for an error to not be handled.
 

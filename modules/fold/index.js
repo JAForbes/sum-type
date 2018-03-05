@@ -46,6 +46,9 @@ var StaticSumTypeError = nFold('StaticSumTypeError', [
     ,'InstanceShapeInvalid'
     ,'TooManyArguments'
     ,'BifoldNotInferrable'
+    ,'NotACaseConstructor'
+    ,'VisitorNotAFunction'
+    ,'MapEmptyCase'
 ])
 
 var ErrMessageCases =
@@ -107,6 +110,18 @@ var ErrMessageCases =
         return 'fold accepts 1 argument at a time but received'
             + ' '+args.length+'.'
             + '  Received: '+Array.from(args).map(toString).join(' ')
+    }
+    ,NotACaseConstructor: function NotACaseConstructor(o){
+        return o.context + ' expected a function that returns a case object'
+            + ' but instead received '+toString(o.caseConstructor)
+    }
+    ,VisitorNotAFunction: function(o){
+        return o.context + ' expected a visitor function '
+            + ' but instead received '+toString(o.visitor)
+    }
+    ,MapEmptyCase: function(o){
+        return o.context + ' cannot map over a case that does not have a value:'
+            + ' ' +toString(o.instance)
     }
     }
 
@@ -254,11 +269,90 @@ function map(T){
     }
 }
 
+// mapCase ( Loaded.Y ) ( x => x * 100 )
+function mapCase(caseConstructor){
+
+    var f = foldCase (caseConstructor)
+    return function mapCase$caseConstructor(visitor){
+        var otherwise = {}
+        var g = f(otherwise, visitor)
+        return function mapCase$visitor(Ma){
+
+            var value = g(Ma)
+            
+            
+            if ( value == otherwise ){
+                return Ma
+            } else if ( 'value' in Ma ) {
+                return { case: Ma.case, value: value, type: Ma.type }
+            } else {
+                handleError(
+                    Err.MapEmptyCase({ context: mapCase.name, instance: Ma })
+                )
+            }
+        }
+    }
+}
+
+// mapCase ( Loaded.Y ) ( x => x * 100 )
+function foldCase(caseConstructor){
+    
+    var err = Err.NotACaseConstructor({
+        caseConstructor: caseConstructor
+        ,context: mapCase.name
+    })
+    
+    
+    if( typeof caseConstructor != 'function' ){
+        return handleError( err )
+    }
+    
+    var out = caseConstructor() || {}
+    var T = { name: out.name }
+
+    if ( !( typeof out.case == 'string' && typeof out.type == 'string') ){
+        return handleError( err )
+    }
+
+    return function foldCase$caseConstructor(otherwise, visitor){
+        if( typeof visitor != 'function' ){
+            return handleError(
+                Err.VisitorNotAFunction({ context: foldCase.name, visitor: visitor })
+            )
+        }
+
+        return function foldCase$visitor(Ma){
+            if ( Ma == null ){
+                return handleError(
+                    Err.InstanceNull({ T:T })
+                )
+
+            } else if ( Ma.type != out.type ){
+    
+                var cases = {}
+                cases[out.case] = true
+                return handleError(
+                    Err.InstanceWrongType({
+                        T:T, cases:cases, x:Ma
+                    })
+                )
+            } else if (Ma.case != out.case ) {
+                return otherwise
+            } else {
+                return visitor ( Ma.value )
+            }
+        }
+    }
+}
+
+
 module.exports = {
     fold: fold
     ,bifold: bifold
     ,bimap: bimap
     ,map: map
+    ,mapCase: mapCase
+    ,foldCase: foldCase
     ,errMessage: errMessage
     ,StaticSumTypeError: StaticSumTypeError
 }
