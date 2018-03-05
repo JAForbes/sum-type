@@ -223,6 +223,10 @@ Like `bifold` but maintains it's original encoding.
 
 Like `bimap` but only visitors the first case defined in your type.
 
+#### chain
+
+Like `map` but unwraps 1 layer of encoding.
+
 #### foldCase
 
 `fold` acts like `fold` but allows you to constrain the type of the instance to a specific case.

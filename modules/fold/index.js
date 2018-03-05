@@ -5,6 +5,37 @@ var Skip = {
   ,name: true
 }
 
+function assertValidType(context, T){
+    if( !(T != null && typeof T.name == 'string') ){
+        return handleError(
+            Err.NotAType({ context:context, T:T })
+        )
+    }
+}
+
+function assertValidCase(T, caseInstance){
+    if ( !(
+        caseInstance != null 
+        && caseInstance.type == T.name 
+        && caseInstance.case in T 
+    )) {
+        return handleError(
+            Err.InstanceShapeInvalid({
+                x: caseInstance
+                ,T: T
+            })
+        )
+    }
+}
+
+function assertValidVisitor(o){
+    if( typeof o.visitor != 'function' ){
+        return handleError(
+            Err.VisitorNotAFunction({ context: o.context, visitor: o.visitor })
+        )
+    }
+}
+
 function I(a){
     return a
 }
@@ -49,6 +80,7 @@ var StaticSumTypeError = nFold('StaticSumTypeError', [
     ,'NotACaseConstructor'
     ,'VisitorNotAFunction'
     ,'MapEmptyCase'
+    ,'NotAType'
 ])
 
 var ErrMessageCases =
@@ -122,6 +154,10 @@ var ErrMessageCases =
     ,MapEmptyCase: function(o){
         return o.context + ' cannot map over a case that does not have a value:'
             + ' ' +toString(o.instance)
+    }
+    ,NotAType: function(o){
+        return o.context + ' expected a Type ({ name: string ...caseNames })'
+            + ' but received '+toString(o.T)
     }
     }
 
@@ -315,11 +351,7 @@ function foldCase(caseConstructor){
     }
 
     return function foldCase$caseConstructor(otherwise, visitor){
-        if( typeof visitor != 'function' ){
-            return handleError(
-                Err.VisitorNotAFunction({ context: foldCase.name, visitor: visitor })
-            )
-        }
+        assertValidVisitor({ context: foldCase.name, visitor: visitor })
 
         return function foldCase$visitor(Ma){
             if ( Ma == null ){
@@ -346,11 +378,35 @@ function foldCase(caseConstructor){
 }
 
 
+function chain(T){
+    
+    assertValidType('chain', T)
+
+    return function chain$T( f ){
+        
+        assertValidVisitor({ context: chain.name, visitor: f })
+
+        return function chain$f( Ma ){
+            
+            assertValidCase( T, Ma )
+
+            var Ma2 = 'value' in Ma 
+                ? f( Ma.value )
+                : Ma
+
+            assertValidCase( T, Ma2 )
+
+            return Ma2
+        }
+    }
+}
+
 module.exports = {
     fold: fold
     ,bifold: bifold
     ,bimap: bimap
     ,map: map
+    ,chain: chain
     ,mapCase: mapCase
     ,foldCase: foldCase
     ,errMessage: errMessage
