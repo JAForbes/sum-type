@@ -168,7 +168,7 @@ If the case has a `value` property, it is passed into the provided function.
 const f = 
     fold (Either) ({
         Left( leftValue ){
-            return leftValue + '!
+            return leftValue + '!'
         }, 
         Right( rightValue ){
             return rightValue * 2
@@ -186,8 +186,8 @@ f ( Either.Right(2) ) //=> 4
 
 ```js
 const f = bifold (Either) (
-    b => 'B:'b
-    ,a => 'A: ' + a
+    b => 'B:' + b
+    ,a => 'A:' + a
 )
 
 f ( Either.Left('b') ) //=> 'B:b'
@@ -230,7 +230,7 @@ Like `bimap` but only visitors the first case defined in your type.
 Useful if you only want to run logic against 1 case.
 
 ```js
-const f = foldCase (Maybe.Y) (0, x => x + 1 )
+const f = foldCase (Maybe.Y) ( 0, x => x + 1 )
 
 f ( Maybe.Y(2) ) //=> 3
 
