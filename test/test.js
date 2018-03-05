@@ -3,6 +3,8 @@ const $ = require('sanctuary-def')
 const {
   fold
   , bifold
+  , foldCase
+  , mapCase
   , map
 } = require('..')
 
@@ -365,6 +367,67 @@ test('bifold, bimap, map', function(t){
     , 'N'
   )
 
+  t.end()
+
+})
+
+
+test('foldCase, mapCase', function(t){
+  const Maybe = yslashn.maybe('Maybe')
+  const Loaded = yslashn.maybe('Loaded')
+
+  t.equals(
+    foldCase (Maybe.Y) (0, x => x * x ) ( Maybe.Y(10) )
+    , 100
+  )
+
+  t.equals(
+    foldCase (Maybe.N) ( 'No', () => 'Yes' ) ( Maybe.N() )
+    , 'Yes'
+  )
+
+
+  t.equals(
+    foldCase (Maybe.Y) ('No', x=>x) (Maybe.N())
+    ,'No'
+  )
+
+
+  
+  t.equals(
+    mapCase (Maybe.Y) ( () => 'Yes' ) ( Maybe.Y() ).case
+    , 'Y'
+  )
+
+  t.equals(
+    mapCase (Maybe.Y) (x=>x) (Maybe.N()).case
+    ,'N'
+  )
+
+  t.throws(
+    () => mapCase (Maybe.N) ( () => 'Yes' ) ( Maybe.N() )
+    , /MapEmptyCase/
+  )
+
+  t.equals(
+    map (Maybe) ( x => x * x ) ( Maybe.N() ).case
+    , 'N'
+  )
+
+  ;[
+    [() => mapCase (Maybe.Y) (null), /VisitorNotAFunction/]
+    , [() => mapCase (Maybe.Y) (x => x) (null), /InstanceNull/]
+    , [() => mapCase (Maybe.Y) (x=>x) (Loaded.N()), /InstanceWrongType/]
+  ]
+  .concat(
+    [ () => mapCase ( Maybe )
+    , () => mapCase ( function(){} )
+    , () => mapCase ( null )
+    ]
+    .map( f => [f, /NotACaseConstructor/] )
+  )
+  .forEach( ([f, pattern]) => t.throws(f, pattern, f+'') )
+  
   t.end()
 
 })
