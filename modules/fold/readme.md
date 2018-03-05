@@ -238,7 +238,7 @@ const f = foldCase (Maybe.Y) ( 0, x => x + 1 )
 
 f ( Maybe.Y(2) ) //=> 3
 
-f ( Maybe.N() ) //=> Type Error!
+f ( Maybe.N() ) //=> 0
 ```
 
 #### mapCase
@@ -252,7 +252,7 @@ const f = mapCase (Maybe.Y) ( x => x + 1 )
 
 f ( Maybe.Y(2) ) //=> Maybe.Y(3)
 
-f ( Maybe.N() ) //=> Type Error!
+f ( Maybe.N() ) //=> Maybe.N()
 ```
 
 `mapCase`, like `map` will not execute visitor functions on valueless cases.
