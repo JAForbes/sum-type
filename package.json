@@ -1,6 +1,6 @@
 {
   "name": "static-sum-type",
-  "version": "0.18.0",
+  "version": "0.18.1",
   "description": "An underlying format for algebraic types that can be used directly or composed with other libraries.",
   "main": "modules/fold/index.js",
   "files": [
