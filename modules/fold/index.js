@@ -86,7 +86,7 @@ var StaticSumTypeError = nFold('StaticSumTypeError', [
 var ErrMessageCases =
     { TooManyCases: function TooManyCases(o){
         return (
-            [ 'Your case function must have exactly the same number of'
+            [ 'Your case function must have exactly the same'
             , ' keys as the type: '+o.T.name+'. '
             , 'The following cases should not have been present:'
             , o.extraKeys.join(', ')
@@ -102,7 +102,7 @@ var ErrMessageCases =
     }
     ,TooFewCases: function TooFewCases(o){
         return (
-            [ 'Your case function must have exactly the same number of'
+            [ 'Your case function must have exactly the same'
             , 'keys as the type: ' + o.T.name + '. The following keys were'
             , 'missing:'
             , o.missingKeys.join(', ')
