@@ -1,6 +1,9 @@
 Sum-Type
 ========
 
+> Notice: type checking currently only works with sanctuary-def v0.14.x and older.  The v1 release will likely not natively support sanctuary-def.  You can check out the ongoing API design and experiments for v1 at the [static-sum-type](https://gitlab.com/JAForbes/static-sum-type) repository.
+> You can continue to use this library without type checking or with an old sanctuary-def version.  Alternatively check out other great sum type libraries in the JS ecosystem.
+
 [![Build Status](https://travis-ci.org/JAForbes/sum-type.svg?branch=master)](https://travis-ci.org/JAForbes/sum-type)
 
 [![npm version](https://badge.fury.io/js/sum-type.svg)](https://badge.fury.io/js/sum-type)
