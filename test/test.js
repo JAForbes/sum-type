@@ -427,3 +427,31 @@ test('foldCase, mapCase', function (t) {
   t.end()
 
 })
+
+test('taggy', t => {
+  const T = taggy('T')({
+    A: ['a'],
+    B: []
+  })
+
+  t.throws(
+    () => T.A()
+    , /A expects {a} but received: undefined/
+  )
+
+  t.throws(
+    () => T.A({})
+    , /A is missing expected values: a/
+  )
+
+  const b1 = T.B(1, 2, 3).value
+  const b2 = T.B({}).value
+  const b3 = T.B().value
+
+  t.equals(
+    JSON.stringify({ b1, b2, b3 })
+    , JSON.stringify({})
+  )
+
+  t.end()
+})
