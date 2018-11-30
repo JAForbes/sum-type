@@ -1,8 +1,8 @@
-image: node:7.9.0
+image: node:10
 
 cache:
   paths:
-  - node_modules/
+    - node_modules/
 
 stages:
   - test
@@ -10,5 +10,5 @@ stages:
 test:
   stage: test
   script:
-   - npm install
-   - npm test
+    - npm install
+    - npm test
