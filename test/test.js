@@ -102,24 +102,6 @@ test('static-sum-type', function(t){
   )
 
   t.throws(
-    () => fold(Maybe, 0)
-    ,/TooManyArguments/
-    ,'fold identifies when there are too many arguments level:0'
-  )
-
-  t.throws(
-    () => fold(Maybe)({ Just: () => 1, Nothing: () => 0 }, 1)
-    ,/TooManyArguments/
-    ,'fold identifies when there are too many arguments level:1'
-  )
-
-  t.throws(
-    () => fold(Maybe)({ Just: () => 1, Nothing: () => 0 })( Maybe.Just(1), 1 )
-    ,/TooManyArguments/
-    ,'fold identifies when there are too many arguments level:2'
-  )
-
-  t.throws(
     () => maybeToNum( null )
     ,/InstanceNull/
     ,'fold identifies when a value is null'
@@ -220,16 +202,6 @@ test('errors', function(t){
   t.throws(
     () => fromMaybe(0, x=>x)( { type: 'Maybe', case: 'Unknown' })
     ,/InstanceShapeInvalid/
-  )
-
-  t.throws(
-    () => fold(YNMaybe,1,2,3)
-    ,/TooManyArguments/
-  )
-
-  t.throws(
-    () => fold(YNMaybe) ( { Y: () => 1, N: () => 2 }, 4, 5, 6)
-    ,/TooManyArguments/
   )
 
   t.throws(

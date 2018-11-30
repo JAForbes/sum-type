@@ -75,7 +75,6 @@ var StaticSumTypeError = nFold('StaticSumTypeError', [
     ,'InstanceNull'
     ,'InstanceWrongType'
     ,'InstanceShapeInvalid'
-    ,'TooManyArguments'
     ,'BifoldNotInferrable'
     ,'NotACaseConstructor'
     ,'VisitorNotAFunction'
@@ -138,11 +137,6 @@ var ErrMessageCases =
         .join(' ')
     }
 
-    ,TooManyArguments: function TooManyArguments(args){
-        return 'fold accepts 1 argument at a time but received'
-            + ' '+args.length+'.'
-            + '  Received: '+Array.from(args).map(toString).join(' ')
-    }
     ,NotACaseConstructor: function NotACaseConstructor(o){
         return o.context + ' expected a function that returns a case object'
             + ' but instead received '+toString(o.caseConstructor)
@@ -173,81 +167,63 @@ function handleError(err){
 
 function fold(T){
 
-    if( arguments.length > 1 ){
-        return handleError(
-            Err.TooManyArguments(arguments)
+    return function devCata$T(cases){
+        var caseKeys =
+          getCases(cases)
+
+        var tKeys =
+            getCases(T)
+
+
+        var xKeys = [
+            [caseKeys, T]
+            ,[tKeys, cases]
+        ]
+        .map(
+            function(t){
+                var xs = t[0]
+                var index = t[1]
+                return xs.filter(function(x){
+                    return !(x in index)
+                })
+            }
         )
-    } else {
 
-        return function devCata$T(cases){
-            if( arguments.length > 1 ){
-                return handleError(
-                    Err.TooManyArguments(arguments)
-                )
-            } else {
+        var extraKeys = xKeys[0]
+        var missingKeys = xKeys[1]
 
-                var caseKeys =
-                    getCases(cases)
+        if( missingKeys.length > 0 ){
+            return handleError(
+                Err.TooFewCases({T:T, cases:cases, missingKeys: missingKeys})
+            )
+        } else if (extraKeys.length > 0){
+            return handleError(
+                Err.TooManyCases({T:T, cases:cases, extraKeys:extraKeys})
+            )
+        } else {
+            return function(x){
 
-                var tKeys =
-                    getCases(T)
-
-
-                var xKeys = [
-                    [caseKeys, T]
-                    ,[tKeys, cases]
-                ]
-                .map(
-                    function(t){
-                        var xs = t[0]
-                        var index = t[1]
-                        return xs.filter(function(x){
-                            return !(x in index)
-                        })
-                    }
-                )
-
-                var extraKeys = xKeys[0]
-                var missingKeys = xKeys[1]
-
-                if( missingKeys.length > 0 ){
-                    return handleError(
-                        Err.TooFewCases({T:T, cases:cases, missingKeys: missingKeys})
-                    )
-                } else if (extraKeys.length > 0){
-                    return handleError(
-                        Err.TooManyCases({T:T, cases:cases, extraKeys:extraKeys})
-                    )
-                } else {
-                    return function(x){
-
-                        return (
-                            arguments.length > 1
-                            ? handleError(
-                                Err.TooManyArguments(arguments)
-                            )
-                            : x == null
-                                ? handleError(
-                                    Err.InstanceNull({
-                                        T:T, cases:cases, x:x
-                                    })
-                                )
-                            : x.type !== T.name
-                                ? handleError(
-                                    Err.InstanceWrongType({
-                                        T:T, cases:cases, x:x
-                                    })
-                                )
-                            : !( x.case in T )
-                                ? handleError(
-                                    Err.InstanceShapeInvalid({
-                                        T:T, cases:cases, x:x
-                                    })
-                                )
-                                : cases[x.case](x.value)
+                return (
+                    x == null
+                        ? handleError(
+                            Err.InstanceNull({
+                                T:T, cases:cases, x:x
+                            })
                         )
-                    }
-                }
+                    : x.type !== T.name
+                        ? handleError(
+                            Err.InstanceWrongType({
+                                T:T, cases:cases, x:x
+                            })
+                        )
+                    : !( x.case in T )
+                        ? handleError(
+                            Err.InstanceShapeInvalid({
+                                T:T, cases:cases, x:x
+                            })
+                        )
+                        : cases[x.case](x.value)
+                )
             }
         }
 
