@@ -343,10 +343,13 @@ function foldCase(caseConstructor){
         return handleError( err )
     }
     
-    var out = caseConstructor() || {}
-    var T = { name: out.name }
+    var exampleInstance = caseConstructor() || {}
+    var T = { name: exampleInstance.type }
 
-    if ( !( typeof out.case == 'string' && typeof out.type == 'string') ){
+    if ( 
+        typeof exampleInstance.case != 'string' 
+        && typeof exampleInstance.type != 'string'
+    ){
         return handleError( err )
     }
 
@@ -359,16 +362,16 @@ function foldCase(caseConstructor){
                     Err.InstanceNull({ T:T })
                 )
 
-            } else if ( Ma.type != out.type ){
+            } else if ( Ma.type != exampleInstance.type ){
     
                 var cases = {}
-                cases[out.case] = true
+                cases[exampleInstance.case] = true
                 return handleError(
                     Err.InstanceWrongType({
                         T:T, cases:cases, x:Ma
                     })
                 )
-            } else if (Ma.case != out.case ) {
+            } else if (Ma.case != exampleInstance.case ) {
                 return otherwise
             } else {
                 return visitor ( Ma.value )
