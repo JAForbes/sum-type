@@ -6,10 +6,10 @@ const {
   , mapCase
   , map
   , chain
+  , taggy
+  , maybe
+  , either
 } = require('..')
-
-const yslashn = require('../modules/yslashn')
-const taggy = require('../modules/taggy')
 
 class Maybe {
   static Just(x) {
@@ -137,7 +137,7 @@ test('static-sum-type', function (t) {
 })
 
 test('errors', function (t) {
-  const YNMaybe = yslashn.maybe('Maybe')
+  const YNMaybe = maybe('Maybe')
 
   const fromMaybe = (otherwise, f) =>
     fold(YNMaybe)({
@@ -182,7 +182,7 @@ test('errors', function (t) {
     , /BifoldNotInferrable/
   )
 
-  const { N: L } = yslashn.either('Either')
+  const { N: L } = either('Either')
 
   t.throws(
     () => fromMaybe(0, x => x * x)(L(10))
@@ -205,7 +205,7 @@ test('errors', function (t) {
 
 test('yslashn', function (t) {
 
-  const YNMaybe = yslashn.maybe('Maybe')
+  const YNMaybe = maybe('Maybe')
 
   const fromMaybe = (otherwise, f) =>
     fold(YNMaybe)({
@@ -228,10 +228,10 @@ test('yslashn', function (t) {
   )
 
   // Selected = Y a | N
-  const Selected = yslashn.maybe('Selected')
+  const Selected = maybe('Selected')
 
   // Loaded = Y a | N b
-  const Loaded = yslashn.either()
+  const Loaded = either()
 
   // 50% loaded
   const loading =
@@ -304,8 +304,8 @@ test('yslashn', function (t) {
 })
 
 test('bifold, bimap, map, chain', function (t) {
-  const Maybe = yslashn.maybe('Maybe')
-  const Either = yslashn.maybe('Either')
+  const Maybe = maybe('Maybe')
+  const Either = maybe('Either')
 
   // map is defined in terms of bimap which is defined in terms of bifold
   t.equals(
@@ -369,8 +369,8 @@ test('bifold, bimap, map, chain', function (t) {
 
 
 test('foldCase, mapCase', function (t) {
-  const Maybe = yslashn.maybe('Maybe')
-  const Loaded = yslashn.maybe('Loaded')
+  const Maybe = maybe('Maybe')
+  const Loaded = maybe('Loaded')
 
   t.equals(
     foldCase(Maybe.Y)(0, x => x * x)(Maybe.Y(10))

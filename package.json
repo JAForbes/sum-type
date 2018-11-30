@@ -15,8 +15,6 @@
     "test:check-coverage": "nyc check-coverage --statements 100 --branches 100 --functions 100 --lines 100",
     "test:report-coverage": "nyc report",
     "dist:fold": "browserify modules/fold/index.js --standalone sst | terser -mc > dist/sst.min.js",
-    "dist:yslashn": "browserify modules/yslashn/index.js --standalone sst.yslashn > dist/yslashn.js",
-    "dist:taggy": "browserify modules/taggy/index.js --standalone sst.taggy > dist/taggy.js",
     "dist": "concurrently npm:dist:*",
     "release": "git push && npm version minor && npm publish",
     "preversion": "npm test",

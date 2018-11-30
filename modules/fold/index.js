@@ -1,10 +1,11 @@
-var taggy = require('../taggy')
-
-var Skip = {
+const Skip = {
     length: true
     , prototype: true
     , name: true
 }
+
+const o = (f, g) => x => f(g(x))
+const I = x => x
 
 function assertValidType(context, T) {
     if (!(T != null && typeof T.name == 'string')) {
@@ -37,8 +38,112 @@ function assertValidVisitor(o) {
     }
 }
 
-function I(a) {
-    return a
+const taggy = name => o =>
+    Object.keys(o)
+        .map(k => [k, o[k]])
+        .reduce(
+            (p, [k, ks]) => {
+
+                const of = value => {
+
+                    const badValue =
+                        ks.length > 0
+                        && (
+                            value == null
+                            || typeof value != 'object'
+                        )
+
+                    if (badValue) {
+                        throw new TypeError(
+                            k + ' expects {' + ks.join(', ') + '} but received: '
+                            + value
+                        )
+                    }
+
+                    const missingValues =
+                        ks.filter(
+                            k => !(k in value)
+                        )
+
+                    if (missingValues.length) {
+                        throw new TypeError(
+                            k + ' is missing expected values: '
+                            + missingValues.join(',')
+                        )
+                    }
+
+                    return Object.assign({
+                        case: k
+                        , type: name
+                    }, ks.length == 0
+                            ? {}
+                            : { value }
+                    )
+                }
+
+                p[k] = of
+
+                return p
+            }
+            , { name }
+        )
+
+const yn = {
+    bifold: T => {
+        const $fold = fold(T)
+        return (N, Y) => $fold({ N, Y })
+    },
+    bimap: T => {
+        const $bifold = ynBifold(T)
+        return (N, Y) => $bifold(
+            o(T.N, N)
+            , o(T.Y, Y)
+        )
+    },
+    map: T => Y => yn.bimapBimap(T)(I, Y)
+}
+
+
+function either(type) {
+    const T = {
+        name: type
+        , Y(value) {
+            return { type, case: 'Y', value }
+        }
+        , N(value) {
+            return { type, case: 'N', value }
+        },
+    }
+
+    return {
+        name: T.name
+        , Y: T.Y
+        , N: T.Y
+        , bifold: yn.bifold(T)
+        , bimap: yn.bimap(T)
+        , map: yn.map(T)
+    }
+}
+
+function maybe(type) {
+    const T = {
+        name: type
+        , Y: function Y(value) {
+            return { type: type, case: 'Y', value: value }
+        }
+        , N: function N() {
+            return { type: type, case: 'N' }
+        }
+    }
+
+    return {
+        name: T.name
+        , Y: T.Y
+        , N: T.Y
+        , bifold: yn.bifold(T)
+        , bimap: yn.bimap(T)
+        , map: yn.map(T)
+    }
 }
 
 function getCases(T) {
@@ -70,36 +175,27 @@ function toString(x) {
     }
 }
 
-var StaticSumTypeError =
+const StaticSumTypeError =
     taggy('StaticSumTypeError')({
         TooManyCases: ['extraKeys']
         , TooFewCases: ['missingKeys']
         , InstanceNull: ['T']
         , InstanceWrongType: ['T', 'x']
         , InstanceShapeInvalid: ['T', 'x']
-        , BifoldNotInferrable: ['T']
         , NotACaseConstructor: ['context', 'caseConstructor']
         , VisitorNotAFunction: ['context', 'visitor']
         , MapEmptyCase: ['context', 'instance']
         , NotAType: ['context', 'T']
     })
 
-var ErrMessageCases =
-{
-    TooManyCases: function TooManyCases(o) {
+const ErrMessageCases =
+    { TooManyCases: function TooManyCases(o) {
         return (
             ['Your case function must have exactly the same'
                 , ' keys as the type: ' + o.T.name + '. '
                 , 'The following cases should not have been present:'
                 , o.extraKeys.join(', ')
             ].join(' ')
-        )
-    }
-    , BifoldNotInferrable: function (o) {
-        return (
-            'You can only bifold when a Type\'s case count=2'
-            + ' but ' + o.T.name + ' has ' + getCases(o.T).length + ': '
-            + getCases(o.T).join(' | ')
         )
     }
     , TooFewCases: function TooFewCases(o) {
@@ -160,41 +256,42 @@ var ErrMessageCases =
 }
 
 
-var Err = StaticSumTypeError
+const Err = StaticSumTypeError
 
 function handleError(err) {
-
-    var e = new Error(err.case + ': ' + errMessage(err))
+    const e = new Error(err.case + ': ' + errMessage(err))
     e.case = err
     throw e
 }
 
 function fold(T) {
 
+    assertValidType('fold', T)
+
     return function devCata$T(cases) {
-        var caseKeys =
+        const caseKeys =
             getCases(cases)
 
-        var tKeys =
+        const tKeys =
             getCases(T)
 
 
-        var xKeys = [
+        const xKeys = [
             [caseKeys, T]
             , [tKeys, cases]
         ]
             .map(
                 function (t) {
-                    var xs = t[0]
-                    var index = t[1]
+                    const xs = t[0]
+                    const index = t[1]
                     return xs.filter(function (x) {
                         return !(x in index)
                     })
                 }
             )
 
-        var extraKeys = xKeys[0]
-        var missingKeys = xKeys[1]
+        const extraKeys = xKeys[0]
+        const missingKeys = xKeys[1]
 
         if (missingKeys.length > 0) {
             return handleError(
@@ -234,97 +331,21 @@ function fold(T) {
     }
 }
 
-var errMessage =
+const errMessage =
     fold(StaticSumTypeError)(ErrMessageCases)
 
-
-function bifold(T) {
-    var caseNames =
-        getCases(T)
-
-    if (caseNames.length != 2) {
-        return handleError(
-            Err.BifoldNotInferrable({
-                T: T
-            })
-        )
-    }
-
-    return function bifold$T(fb, fa) {
-
-        // reverse because its customary to fold the failure first
-        var ks = caseNames.slice().reverse()
-        var kb = ks[0]
-        var ka = ks[1]
-
-        var cases = {}
-        cases[ka] = fa
-        cases[kb] = fb
-        return fold(T)(cases)
-    }
-}
-
-function bimap(T) {
-    return function bimap$T(fb, fa) {
-        return function (Ta) {
-            return bifold(T)(
-                function (b) {
-                    return { case: Ta.case, type: T.name, value: fb(b) }
-                }
-                , function (a) {
-                    return { case: Ta.case, type: T.name, value: fa(a) }
-                }
-            )(Ta)
-        }
-    }
-}
-
-function map(T) {
-    return function bimap$T(fa) {
-        return bimap(T)(I, fa)
-    }
-}
-
-// mapCase ( Loaded.Y ) ( x => x * 100 )
-function mapCase(caseConstructor) {
-
-    var f = foldCase(caseConstructor)
-    return function mapCase$caseConstructor(visitor) {
-        var otherwise = {}
-        var g = f(otherwise, visitor)
-        return function mapCase$visitor(Ma) {
-
-            var value = g(Ma)
-
-
-            if (value == otherwise) {
-                return Ma
-            } else if ('value' in Ma) {
-                return { case: Ma.case, value: value, type: Ma.type }
-            } else {
-                handleError(
-                    Err.MapEmptyCase({ context: mapCase.name, instance: Ma })
-                )
-            }
-        }
-    }
-}
-
-// mapCase ( Loaded.Y ) ( x => x * 100 )
-function foldCase(caseConstructor) {
-
-    var err = Err.NotACaseConstructor({
-        caseConstructor: caseConstructor
+const foldCase = Case => {
+    const err = Err.NotACaseConstructor({
+        caseConstructor: Case
         , context: mapCase.name
     })
-
 
     if (typeof caseConstructor != 'function') {
         return handleError(err)
     }
 
-    var exampleInstance = caseConstructor() || {}
-    var T = { name: exampleInstance.type }
+    const exampleInstance = Case() || {}
+    const T = { name: exampleInstance.type }
 
     if (
         typeof exampleInstance.case != 'string'
@@ -333,18 +354,16 @@ function foldCase(caseConstructor) {
         return handleError(err)
     }
 
-    return function foldCase$caseConstructor(otherwise, visitor) {
-        assertValidVisitor({ context: foldCase.name, visitor: visitor })
+    return (otherwise, visitor) => {
+        assertValidVisitor({ context: foldCase.name, visitor })
 
-        return function foldCase$visitor(Ma) {
+        return Ma => {
             if (Ma == null) {
                 return handleError(
-                    Err.InstanceNull({ T: T })
+                    Err.InstanceNull({ T })
                 )
-
             } else if (Ma.type != exampleInstance.type) {
-
-                var cases = {}
+                const cases = {}
                 cases[exampleInstance.case] = true
                 return handleError(
                     Err.InstanceWrongType({
@@ -360,38 +379,66 @@ function foldCase(caseConstructor) {
     }
 }
 
+// mapCase ( Loaded.Y ) ( x => x * 100 )
+const mapCase = (Case) => {
 
-function chain(T) {
+    const f = foldCase(Case)
 
-    assertValidType('chain', T)
+    return visitor => {
+        const otherwise = {}
+        const g = f(otherwise, visitor)
 
-    return function chain$T(f) {
+        return (Ma) => {
 
-        assertValidVisitor({ context: chain.name, visitor: f })
+            const value = g(Ma)
 
-        return function chain$f(Ma) {
-
-            assertValidCase(T, Ma)
-
-            var Ma2 = 'value' in Ma
-                ? f(Ma.value)
-                : Ma
-
-            assertValidCase(T, Ma2)
-
-            return Ma2
+            if (value == otherwise) {
+                return Ma
+            } else if ('value' in Ma) {
+                return { case: Ma.case, value: value, type: Ma.type }
+            } else {
+                handleError(
+                    Err.MapEmptyCase({ context: mapCase.name, instance: Ma })
+                )
+            }
         }
     }
 }
 
-module.exports = {
-    fold: fold
-    , bifold: bifold
-    , bimap: bimap
-    , map: map
-    , chain: chain
-    , mapCase: mapCase
-    , foldCase: foldCase
-    , errMessage: errMessage
-    , StaticSumTypeError: StaticSumTypeError
+const chainCase = (Case) => {
+
+    const f = foldCase(Case)
+    const example = Case()
+
+    return visitor => {
+
+        const otherwise = {}
+        const g = f(otherwise, visitor)
+        const T = { name: example.type, [example.case]: true }
+
+        return Ma => {
+
+            const value = g(Ma)
+
+            assertValidCase(T, value)
+
+            if (value === otherwise) {
+                return Ma
+            } else {
+                return value
+            }
+        }
+    }
+}
+
+export {
+    fold
+    , chainCase
+    , mapCase
+    , foldCase
+    , errMessage
+    , StaticSumTypeError
+    , taggy
+    , maybe
+    , either
 }

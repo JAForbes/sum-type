@@ -1,3 +1,4 @@
 {
-  "prettier.disableLanguages": ["javascript"]
+  "prettier.disableLanguages": ["javascript"],
+  "javascript.format.enable": false
 }
