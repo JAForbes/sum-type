@@ -1,13 +1,10 @@
-static-sum-type
-===============
+# static-sum-type
 
 [![pipeline status](https://gitlab.com/JAForbes/static-sum-type/badges/master/pipeline.svg)](https://gitlab.com/JAForbes/static-sum-type/commits/master)
 
 [![coverage report](https://gitlab.com/JAForbes/static-sum-type/badges/master/coverage.svg)](https://gitlab.com/JAForbes/static-sum-type/commits/master)
 
-A simple library for complex logic.
------------------------------------
-
+## A simple library for complex logic.
 
 #### What is it
 
@@ -17,18 +14,15 @@ A series of tiny modules that make encoding logic as data _a breeze_ ⛱️.
 
 - [fold](https://gitlab.com/JAForbes/static-sum-type/tree/master/modules/fold) A module of utility functions that interop with other `static-sum-type` modules.
 
-- [predicated](https://gitlab.com/JAForbes/static-sum-type/tree/master/modules/predicated) Generates spec compliant unions while also allowing you to specify a predicate that the value must satisfy in order for an error to not be handled.
-
-
 - [yslashn](https://gitlab.com/JAForbes/static-sum-type/tree/master/modules/yslashn) Generates spec compliant unions that mimic well known types like maybe and either with a terse Y/N naming convention.
 
 - [taggy](https://gitlab.com/JAForbes/static-sum-type/tree/master/modules/taggy) Generates spec compliant unions that also verify the existence of properties for each case.
 
+- [superouter](https://gitlab.com/harth/superouter/) A Router that both exposes and internally uses static-sum-type to model route definitions, validation and more.
 
-Each module adheres to the static-sum-type specification.  That specification is defined in [static-sum-type/fold](https://gitlab.com/JAForbes/static-sum-type/tree/master/fold).
+Each module adheres to the static-sum-type specification. That specification is defined in [static-sum-type/fold](https://gitlab.com/JAForbes/static-sum-type/tree/master/fold).
 
-
-The design of the spec allows for a variety of other statically analyzable syntaxes which can be viewed at [static-sum-type/fold](https://gitlab.com/JAForbes/static-sum-type/tree/master/modules/fold).  But its also possible to generate types dynamically far more succintly.
+The design of the spec allows for a variety of other statically analyzable syntaxes which can be viewed at [static-sum-type/fold](https://gitlab.com/JAForbes/static-sum-type/tree/master/modules/fold). But its also possible to generate types dynamically far more succintly.
 
 #### Project Goals and Motivations
 
@@ -37,7 +31,6 @@ The design of the spec allows for a variety of other statically analyzable synta
 - Data oriented precision
 - Serializable
 - A simple and convenient abstraction for library interop and direct usage.
-
 
 #### How does static-sum-type differ from other libraries in the ecosystem.
 
@@ -48,10 +41,10 @@ The design of the spec allows for a variety of other statically analyzable synta
 - auto curried constructors
 - prototypes
 
-`static-sum-type` is technically 0KB, it's an idea.  You can use static-sum-type in your codebase without ever running `npm install`.
+`static-sum-type` is technically 0KB, it's an idea. You can use static-sum-type in your codebase without ever running `npm install`.
 
-Specification
--------------
+## Specification
+
 #### What's a "Type"
 
 A type is a struct with a name property and as many keys as there are cases.
@@ -68,17 +61,16 @@ Each case on the type must have a `name` property that matches it's key.
 Here is an example of a valid `Maybe` type
 
 ```js
-{ name: 'Maybe' 
+{ name: 'Maybe'
 , Just: null
 , Nothing: null
 }
 ```
 
-Keep in mind lowercase properties other than `name` are ignored.  If you want your type to have static functions or other data you can safely do so as long as the property is a `LowercaseString`
+Keep in mind lowercase properties other than `name` are ignored. If you want your type to have static functions or other data you can safely do so as long as the property is a `LowercaseString`
 You can safely add static methods or properties to your type structure without interfing with `static-sum-type` provided they do not start with a capital letter.
 
-
-> 💡  Any keys in a call to `getOwnPropertyNames(Type)` where `key[0] == key[0].toUpperCase()` will be treated as a case.
+> 💡 Any keys in a call to `getOwnPropertyNames(Type)` where `key[0] == key[0].toUpperCase()` will be treated as a case.
 
 Because `.name` is auto generated for functions and classes, the following forms are spec compliant.
 
@@ -92,9 +84,8 @@ const Maybe = {
 
 ```js
 class Maybe {
-
-    static Just(){} // Maybe.Just.name == 'Just'
-    static Nothing(){} // Maybe.Nothing.name == 'Nothing'
+  static Just() {} // Maybe.Just.name == 'Just'
+  static Nothing() {} // Maybe.Nothing.name == 'Nothing'
 }
 ```
 
@@ -112,9 +103,9 @@ class Maybe {
 - The `case` property must correspond to a matching key on a type object.
 - The matching type object must include a property that matches the cases `case` property.
 
-A case *can* have a `value` property.  But it is optional.  The `value` property can be of any type.
+A case _can_ have a `value` property. But it is optional. The `value` property can be of any type.
 
-> 💡  The above specification is compatible with Javascript classes because `class` has an automatically generated property `name`.
+> 💡 The above specification is compatible with Javascript classes because `class` has an automatically generated property `name`.
 
 #### Show me some examples of some valid cases.
 

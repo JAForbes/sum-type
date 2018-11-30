@@ -1,175 +1,179 @@
-var nFold = require('../yslashn/index.js').nFold
+var taggy = require('../taggy')
+
 var Skip = {
-  length: true
-  ,prototype: true
-  ,name: true
+    length: true
+    , prototype: true
+    , name: true
 }
 
-function assertValidType(context, T){
-    if( !(T != null && typeof T.name == 'string') ){
+function assertValidType(context, T) {
+    if (!(T != null && typeof T.name == 'string')) {
         return handleError(
-            Err.NotAType({ context:context, T:T })
+            Err.NotAType({ context: context, T: T })
         )
     }
 }
 
-function assertValidCase(T, caseInstance){
-    if ( !(
-        caseInstance != null 
-        && caseInstance.type == T.name 
-        && caseInstance.case in T 
+function assertValidCase(T, caseInstance) {
+    if (!(
+        caseInstance != null
+        && caseInstance.type == T.name
+        && caseInstance.case in T
     )) {
         return handleError(
             Err.InstanceShapeInvalid({
                 x: caseInstance
-                ,T: T
+                , T: T
             })
         )
     }
 }
 
-function assertValidVisitor(o){
-    if( typeof o.visitor != 'function' ){
+function assertValidVisitor(o) {
+    if (typeof o.visitor != 'function') {
         return handleError(
             Err.VisitorNotAFunction({ context: o.context, visitor: o.visitor })
         )
     }
 }
 
-function I(a){
+function I(a) {
     return a
 }
 
-function getCases(T){
+function getCases(T) {
     return Object.getOwnPropertyNames(T)
-        .filter(function(o){
+        .filter(function (o) {
             return o[0] == o[0].toUpperCase()
         })
-        .filter(function(x){
+        .filter(function (x) {
             return !(x in Skip)
         })
 }
 
-function toString(x){
-  if( x == null ){
-    return 'null'
-  } else if( x.type && x.case ){
-    return x.case
-      +'('
-        + (
-          'value' in x
-          ? toString(x.value)
-          : ''
-        )
+function toString(x) {
+    if (x == null) {
+        return 'null'
+    } else if (x.type && x.case) {
+        return x.case
+            + '('
+            + (
+                'value' in x
+                    ? toString(x.value)
+                    : ''
+            )
 
-      +')::'
-      +x.type
-  } else {
-    return x.toString()
-  }
+            + ')::'
+            + x.type
+    } else {
+        return x.toString()
+    }
 }
 
-var StaticSumTypeError = nFold('StaticSumTypeError', [
-    'TooManyCases'
-    ,'TooFewCases'
-    ,'InstanceNull'
-    ,'InstanceWrongType'
-    ,'InstanceShapeInvalid'
-    ,'BifoldNotInferrable'
-    ,'NotACaseConstructor'
-    ,'VisitorNotAFunction'
-    ,'MapEmptyCase'
-    ,'NotAType'
-])
+var StaticSumTypeError =
+    taggy('StaticSumTypeError')({
+        TooManyCases: ['extraKeys']
+        , TooFewCases: ['missingKeys']
+        , InstanceNull: ['T']
+        , InstanceWrongType: ['T', 'x']
+        , InstanceShapeInvalid: ['T', 'x']
+        , BifoldNotInferrable: ['T']
+        , NotACaseConstructor: ['context', 'caseConstructor']
+        , VisitorNotAFunction: ['context', 'visitor']
+        , MapEmptyCase: ['context', 'instance']
+        , NotAType: ['context', 'T']
+    })
 
 var ErrMessageCases =
-    { TooManyCases: function TooManyCases(o){
+{
+    TooManyCases: function TooManyCases(o) {
         return (
-            [ 'Your case function must have exactly the same'
-            , ' keys as the type: '+o.T.name+'. '
-            , 'The following cases should not have been present:'
-            , o.extraKeys.join(', ')
+            ['Your case function must have exactly the same'
+                , ' keys as the type: ' + o.T.name + '. '
+                , 'The following cases should not have been present:'
+                , o.extraKeys.join(', ')
             ].join(' ')
         )
     }
-    ,BifoldNotInferrable: function(o){
+    , BifoldNotInferrable: function (o) {
         return (
             'You can only bifold when a Type\'s case count=2'
-            +' but '+o.T.name+' has '+getCases(o.T).length+': '
+            + ' but ' + o.T.name + ' has ' + getCases(o.T).length + ': '
             + getCases(o.T).join(' | ')
         )
     }
-    ,TooFewCases: function TooFewCases(o){
+    , TooFewCases: function TooFewCases(o) {
         return (
-            [ 'Your case function must have exactly the same'
-            , 'keys as the type: ' + o.T.name + '. The following keys were'
-            , 'missing:'
-            , o.missingKeys.join(', ')
+            [
+                'Your case function must have exactly the same'
+                , 'keys as the type: ' + o.T.name + '. The following keys were'
+                , 'missing:'
+                , o.missingKeys.join(', ')
             ]
         )
-        .join(' ')
+            .join(' ')
     }
 
-    ,InstanceNull: function InstanceNull(o){
+    , InstanceNull: function InstanceNull(o) {
         return (
-            'Null is not a valid member of the type '+o.T.name
+            'Null is not a valid member of the type ' + o.T.name
         )
     }
 
-    ,InstanceWrongType: function InstanceWrongType(o){
+    , InstanceWrongType: function InstanceWrongType(o) {
         return (
-            [ toString(o.x)+' is not a valid member of the type'
-            , o.T.name
-            , 'which expects the following cases'
-            , getCases(o.T).join(' | ')
+            [toString(o.x) + ' is not a valid member of the type'
+                , o.T.name
+                , 'which expects the following cases'
+                , getCases(o.T).join(' | ')
             ]
         )
-        .join(' ')
+            .join(' ')
     }
 
-    ,InstanceShapeInvalid: function InstanceShapeInvalid(o){
+    , InstanceShapeInvalid: function InstanceShapeInvalid(o) {
         return [
             toString(o.x)
             , 'is not a valid Member of the type:'
-            , o.T.name+'. '
-            ,'Please review the definition of '+o.T.name
+            , o.T.name + '. '
+            , 'Please review the definition of ' + o.T.name
         ]
-        .join(' ')
+            .join(' ')
     }
 
-    ,NotACaseConstructor: function NotACaseConstructor(o){
+    , NotACaseConstructor: function NotACaseConstructor(o) {
         return o.context + ' expected a function that returns a case object'
-            + ' but instead received '+toString(o.caseConstructor)
+            + ' but instead received ' + toString(o.caseConstructor)
     }
-    ,VisitorNotAFunction: function(o){
+    , VisitorNotAFunction: function (o) {
         return o.context + ' expected a visitor function '
-            + ' but instead received '+toString(o.visitor)
+            + ' but instead received ' + toString(o.visitor)
     }
-    ,MapEmptyCase: function(o){
+    , MapEmptyCase: function (o) {
         return o.context + ' cannot map over a case that does not have a value:'
-            + ' ' +toString(o.instance)
+            + ' ' + toString(o.instance)
     }
-    ,NotAType: function(o){
+    , NotAType: function (o) {
         return o.context + ' expected a Type ({ name: string ...caseNames })'
-            + ' but received '+toString(o.T)
+            + ' but received ' + toString(o.T)
     }
-    }
+}
 
 
 var Err = StaticSumTypeError
 
-function handleError(err){
+function handleError(err) {
 
-    var e = new Error(err.case+': '+errMessage(err))
+    var e = new Error(err.case + ': ' + errMessage(err))
     e.case = err
     throw e
 }
 
-function fold(T){
+function fold(T) {
 
-    return function devCata$T(cases){
+    return function devCata$T(cases) {
         var caseKeys =
-          getCases(cases)
+            getCases(cases)
 
         var tKeys =
             getCases(T)
@@ -177,52 +181,52 @@ function fold(T){
 
         var xKeys = [
             [caseKeys, T]
-            ,[tKeys, cases]
+            , [tKeys, cases]
         ]
-        .map(
-            function(t){
-                var xs = t[0]
-                var index = t[1]
-                return xs.filter(function(x){
-                    return !(x in index)
-                })
-            }
-        )
+            .map(
+                function (t) {
+                    var xs = t[0]
+                    var index = t[1]
+                    return xs.filter(function (x) {
+                        return !(x in index)
+                    })
+                }
+            )
 
         var extraKeys = xKeys[0]
         var missingKeys = xKeys[1]
 
-        if( missingKeys.length > 0 ){
+        if (missingKeys.length > 0) {
             return handleError(
-                Err.TooFewCases({T:T, cases:cases, missingKeys: missingKeys})
+                Err.TooFewCases({ T: T, cases: cases, missingKeys: missingKeys })
             )
-        } else if (extraKeys.length > 0){
+        } else if (extraKeys.length > 0) {
             return handleError(
-                Err.TooManyCases({T:T, cases:cases, extraKeys:extraKeys})
+                Err.TooManyCases({ T: T, cases: cases, extraKeys: extraKeys })
             )
         } else {
-            return function(x){
+            return function (x) {
 
                 return (
                     x == null
                         ? handleError(
                             Err.InstanceNull({
-                                T:T, cases:cases, x:x
+                                T: T, cases: cases, x: x
                             })
                         )
-                    : x.type !== T.name
-                        ? handleError(
-                            Err.InstanceWrongType({
-                                T:T, cases:cases, x:x
-                            })
-                        )
-                    : !( x.case in T )
-                        ? handleError(
-                            Err.InstanceShapeInvalid({
-                                T:T, cases:cases, x:x
-                            })
-                        )
-                        : cases[x.case](x.value)
+                        : x.type !== T.name
+                            ? handleError(
+                                Err.InstanceWrongType({
+                                    T: T, cases: cases, x: x
+                                })
+                            )
+                            : !(x.case in T)
+                                ? handleError(
+                                    Err.InstanceShapeInvalid({
+                                        T: T, cases: cases, x: x
+                                    })
+                                )
+                                : cases[x.case](x.value)
                 )
             }
         }
@@ -234,19 +238,19 @@ var errMessage =
     fold(StaticSumTypeError)(ErrMessageCases)
 
 
-function bifold(T){
+function bifold(T) {
     var caseNames =
         getCases(T)
-    
-    if( caseNames.length != 2 ){
-        return handleError(   
+
+    if (caseNames.length != 2) {
+        return handleError(
             Err.BifoldNotInferrable({
                 T: T
             })
         )
     }
 
-    return function bifold$T(fb, fa){
+    return function bifold$T(fb, fa) {
 
         // reverse because its customary to fold the failure first
         var ks = caseNames.slice().reverse()
@@ -256,46 +260,46 @@ function bifold(T){
         var cases = {}
         cases[ka] = fa
         cases[kb] = fb
-        return fold (T) (cases)
+        return fold(T)(cases)
     }
 }
 
-function bimap(T){
-    return function bimap$T(fb, fa){
-        return function(Ta){
-            return bifold (T)(
-                function(b){ 
+function bimap(T) {
+    return function bimap$T(fb, fa) {
+        return function (Ta) {
+            return bifold(T)(
+                function (b) {
                     return { case: Ta.case, type: T.name, value: fb(b) }
                 }
-                ,function(a){ 
+                , function (a) {
                     return { case: Ta.case, type: T.name, value: fa(a) }
-                } 
+                }
             )(Ta)
         }
     }
 }
 
-function map(T){
-    return function bimap$T(fa){
-        return bimap (T) (I, fa)
+function map(T) {
+    return function bimap$T(fa) {
+        return bimap(T)(I, fa)
     }
 }
 
 // mapCase ( Loaded.Y ) ( x => x * 100 )
-function mapCase(caseConstructor){
+function mapCase(caseConstructor) {
 
-    var f = foldCase (caseConstructor)
-    return function mapCase$caseConstructor(visitor){
+    var f = foldCase(caseConstructor)
+    return function mapCase$caseConstructor(visitor) {
         var otherwise = {}
         var g = f(otherwise, visitor)
-        return function mapCase$visitor(Ma){
+        return function mapCase$visitor(Ma) {
 
             var value = g(Ma)
-            
-            
-            if ( value == otherwise ){
+
+
+            if (value == otherwise) {
                 return Ma
-            } else if ( 'value' in Ma ) {
+            } else if ('value' in Ma) {
                 return { case: Ma.case, value: value, type: Ma.type }
             } else {
                 handleError(
@@ -307,73 +311,73 @@ function mapCase(caseConstructor){
 }
 
 // mapCase ( Loaded.Y ) ( x => x * 100 )
-function foldCase(caseConstructor){
-    
+function foldCase(caseConstructor) {
+
     var err = Err.NotACaseConstructor({
         caseConstructor: caseConstructor
-        ,context: mapCase.name
+        , context: mapCase.name
     })
-    
-    
-    if( typeof caseConstructor != 'function' ){
-        return handleError( err )
+
+
+    if (typeof caseConstructor != 'function') {
+        return handleError(err)
     }
-    
+
     var exampleInstance = caseConstructor() || {}
     var T = { name: exampleInstance.type }
 
-    if ( 
-        typeof exampleInstance.case != 'string' 
+    if (
+        typeof exampleInstance.case != 'string'
         && typeof exampleInstance.type != 'string'
-    ){
-        return handleError( err )
+    ) {
+        return handleError(err)
     }
 
-    return function foldCase$caseConstructor(otherwise, visitor){
+    return function foldCase$caseConstructor(otherwise, visitor) {
         assertValidVisitor({ context: foldCase.name, visitor: visitor })
 
-        return function foldCase$visitor(Ma){
-            if ( Ma == null ){
+        return function foldCase$visitor(Ma) {
+            if (Ma == null) {
                 return handleError(
-                    Err.InstanceNull({ T:T })
+                    Err.InstanceNull({ T: T })
                 )
 
-            } else if ( Ma.type != exampleInstance.type ){
-    
+            } else if (Ma.type != exampleInstance.type) {
+
                 var cases = {}
                 cases[exampleInstance.case] = true
                 return handleError(
                     Err.InstanceWrongType({
-                        T:T, cases:cases, x:Ma
+                        T: T, cases: cases, x: Ma
                     })
                 )
-            } else if (Ma.case != exampleInstance.case ) {
+            } else if (Ma.case != exampleInstance.case) {
                 return otherwise
             } else {
-                return visitor ( Ma.value )
+                return visitor(Ma.value)
             }
         }
     }
 }
 
 
-function chain(T){
-    
+function chain(T) {
+
     assertValidType('chain', T)
 
-    return function chain$T( f ){
-        
+    return function chain$T(f) {
+
         assertValidVisitor({ context: chain.name, visitor: f })
 
-        return function chain$f( Ma ){
-            
-            assertValidCase( T, Ma )
+        return function chain$f(Ma) {
 
-            var Ma2 = 'value' in Ma 
-                ? f( Ma.value )
+            assertValidCase(T, Ma)
+
+            var Ma2 = 'value' in Ma
+                ? f(Ma.value)
                 : Ma
 
-            assertValidCase( T, Ma2 )
+            assertValidCase(T, Ma2)
 
             return Ma2
         }
@@ -382,12 +386,12 @@ function chain(T){
 
 module.exports = {
     fold: fold
-    ,bifold: bifold
-    ,bimap: bimap
-    ,map: map
-    ,chain: chain
-    ,mapCase: mapCase
-    ,foldCase: foldCase
-    ,errMessage: errMessage
-    ,StaticSumTypeError: StaticSumTypeError
+    , bifold: bifold
+    , bimap: bimap
+    , map: map
+    , chain: chain
+    , mapCase: mapCase
+    , foldCase: foldCase
+    , errMessage: errMessage
+    , StaticSumTypeError: StaticSumTypeError
 }
