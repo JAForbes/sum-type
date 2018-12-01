@@ -1,15 +1,14 @@
-const test = require('tape')
-const {
+import test from 'tape'
+
+import {
   fold
-  , bifold
   , foldCase
   , mapCase
-  , map
-  , chain
+  , chainCase
   , taggy
   , maybe
   , either
-} = require('..')
+} from '../modules/fold/index'
 
 class Maybe {
   static Just(x) {
@@ -152,6 +151,7 @@ test('errors', function (t) {
       , A: () => ''
     })
     , /TooManyCases/
+    ,'TooManyCases'
   )
 
   t.throws(
@@ -159,27 +159,19 @@ test('errors', function (t) {
       Y: () => ''
     })
     , /TooFewCases/
+    , 'TooFewCases'
   )
 
   t.throws(
     () => fromMaybe(0, x => x)(null)
     , /InstanceNull/
+    , 'InstanceNull'
   )
 
   t.throws(
     () => fromMaybe(0, x => x)({ type: 'Maybe', case: 'Unknown' })
     , /InstanceShapeInvalid/
-  )
-
-  t.throws(
-    () => bifold(
-      taggy('X')({
-        A: [],
-        B: [],
-        C: []
-      })
-    )
-    , /BifoldNotInferrable/
+    , 'InstanceShapeInvalid'
   )
 
   const { N: L } = either('Either')
@@ -187,16 +179,19 @@ test('errors', function (t) {
   t.throws(
     () => fromMaybe(0, x => x * x)(L(10))
     , /InstanceWrongType/
+    , 'InstanceWrongType: Either is not Maybe'
   )
 
   t.throws(
     () => fromMaybe(0, x => x * x)(L({ toString() { return 'hello' } }))
     , /InstanceWrongType/
+    , 'InstanceWrongType: Object is not maybe'
   )
 
   t.throws(
     () => fromMaybe(0, x => x * x)(L(null))
     , /InstanceWrongType/
+    , 'InstanceWrongType: Either of null is not Maybe'
   )
 
 
@@ -208,7 +203,7 @@ test('yslashn', function (t) {
   const YNMaybe = maybe('Maybe')
 
   const fromMaybe = (otherwise, f) =>
-    fold(YNMaybe)({
+    YNMaybe.fold({
       Y: f
       , N: () => otherwise
     })
@@ -219,19 +214,21 @@ test('yslashn', function (t) {
   t.equals(
     fromMaybe(0, x => x * x)(y)
     , 100
+    ,'fromMaybe with Just'
   )
   // => 100
 
   t.equals(
     fromMaybe(0, x => x * x)(n)
     , 0
+    ,'fromMaybe with Nothing'
   )
 
   // Selected = Y a | N
   const Selected = maybe('Selected')
 
   // Loaded = Y a | N b
-  const Loaded = either()
+  const Loaded = either('Loaded')
 
   // 50% loaded
   const loading =
@@ -307,59 +304,55 @@ test('bifold, bimap, map, chain', function (t) {
   const Maybe = maybe('Maybe')
   const Either = maybe('Either')
 
+  
+  t.equals(typeof Maybe.map, 'function', 'ylashn has a map')
+  t.equals(typeof Maybe.bifold, 'function', 'ylashn has a bifold')
+  t.equals(typeof Maybe.bimap, 'function', 'ylashn has a bimap')
+  t.equals(typeof Maybe.chain, 'function', 'ylashn has a chain')
+
   // map is defined in terms of bimap which is defined in terms of bifold
   t.equals(
-    map(Maybe)(x => x * x)(Maybe.Y(10)).value
+    Maybe.map(x => x * x)(Maybe.Y(10)).value
     , 100
   )
 
   t.equals(
-    map(Maybe)(x => x * x)(Maybe.N()).case
+    Maybe.map(x => x * x)(Maybe.N()).case
     , 'N'
   )
 
   t.deepEquals(
-    chain(Maybe)(x => Maybe.Y(x))(Maybe.Y(10))
+    Maybe.chain(x => Maybe.Y(x))(Maybe.Y(10))
     , { value: 10, case: 'Y', type: 'Maybe' }
   )
 
   t.deepEquals(
-    chain(Maybe)(() => Maybe.N())(Maybe.Y(10))
+    Maybe.chain(() => Maybe.N())(Maybe.Y(10))
     , { case: 'N', type: 'Maybe' }
   )
 
   t.deepEquals(
-    chain(Maybe)(x => x)(Maybe.N())
+    Maybe.chain(x => x)(Maybe.N())
     , { case: 'N', type: 'Maybe' }
   )
 
   t.throws(
-    () => chain(null)
-    , /NotAType/
-  )
-
-  t.throws(
-    () => chain({})
-    , /NotAType/
-  )
-
-  t.throws(
-    () => chain(Maybe)(null)
+    () => Maybe.chain(null)
     , /VisitorNotAFunction/
   )
 
   t.throws(
-    () => chain(Maybe)(x => x)(null)
-    , /InstanceShapeInvalid/
+    () => Maybe.chain(x => x)(null)
+    , /InstanceNull/
   )
 
   t.throws(
-    () => chain(Maybe)(x => x)(Either.N(2))
-    , /InstanceShapeInvalid/
+    () => Maybe.chain(x => x)(Either.N(2))
+    , /InstanceWrongType/
   )
 
   t.throws(
-    () => chain(Maybe)(x => x)(null)
+    () => Maybe.chain(x => x)({ type: 'Maybe', case:'Bad' })
     , /InstanceShapeInvalid/
   )
 
@@ -406,7 +399,7 @@ test('foldCase, mapCase', function (t) {
   )
 
   t.equals(
-    map(Maybe)(x => x * x)(Maybe.N()).case
+    Maybe.map(x => x * x)(Maybe.N()).case
     , 'N'
   )
 

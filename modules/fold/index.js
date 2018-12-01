@@ -10,7 +10,7 @@ const I = x => x
 function assertValidType(context, T) {
     if (!(T != null && typeof T.name == 'string')) {
         return handleError(
-            Err.NotAType({ context: context, T: T })
+            Err.NotAType({ context, T })
         )
     }
 }
@@ -94,13 +94,38 @@ const yn = {
         return (N, Y) => $fold({ N, Y })
     },
     bimap: T => {
-        const $bifold = ynBifold(T)
+        const $bifold = yn.bifold(T)
         return (N, Y) => $bifold(
             o(T.N, N)
             , o(T.Y, Y)
         )
     },
-    map: T => Y => yn.bimapBimap(T)(I, Y)
+    map: T => {
+        const $bimap = yn.bimap(T)
+        return Y => $bimap(I, Y)
+    },
+    chain: T => {
+        const $fold = fold(T)
+        return Y => {
+            
+            assertValidVisitor({ context: 'chain', visitor: Y })
+
+            const otherwise = {}
+            const f = $fold({ N: () => otherwise, Y })
+
+            return Ma => {
+                    
+                const out = f(Ma)
+    
+                if (out === otherwise) {
+                    return Ma
+                } else {
+                    assertValidCase(T, out)
+                    return out
+                }
+            }
+        }
+    }
 }
 
 
@@ -118,10 +143,12 @@ function either(type) {
     return {
         name: T.name
         , Y: T.Y
-        , N: T.Y
+        , N: T.N
+        , fold: fold(T)
         , bifold: yn.bifold(T)
         , bimap: yn.bimap(T)
         , map: yn.map(T)
+        , chain: yn.chain(T)
     }
 }
 
@@ -129,20 +156,22 @@ function maybe(type) {
     const T = {
         name: type
         , Y: function Y(value) {
-            return { type: type, case: 'Y', value: value }
+            return { type, case: 'Y', value: value }
         }
         , N: function N() {
-            return { type: type, case: 'N' }
+            return { type, case: 'N' }
         }
     }
 
     return {
         name: T.name
         , Y: T.Y
-        , N: T.Y
+        , N: T.N
+        , fold: fold(T)
         , bifold: yn.bifold(T)
         , bimap: yn.bimap(T)
         , map: yn.map(T)
+        , chain: yn.chain(T)
     }
 }
 
@@ -311,19 +340,19 @@ function fold(T) {
                                 T: T, cases: cases, x: x
                             })
                         )
-                        : x.type !== T.name
-                            ? handleError(
-                                Err.InstanceWrongType({
-                                    T: T, cases: cases, x: x
-                                })
-                            )
-                            : !(x.case in T)
-                                ? handleError(
-                                    Err.InstanceShapeInvalid({
-                                        T: T, cases: cases, x: x
-                                    })
-                                )
-                                : cases[x.case](x.value)
+                    : x.type !== T.name
+                        ? handleError(
+                            Err.InstanceWrongType({
+                                T: T, cases: cases, x: x
+                            })
+                        )
+                    : !(x.case in T)
+                        ? handleError(
+                            Err.InstanceShapeInvalid({
+                                T: T, cases: cases, x: x
+                            })
+                        )
+                        : cases[x.case](x.value)
                 )
             }
         }
@@ -337,10 +366,10 @@ const errMessage =
 const foldCase = Case => {
     const err = Err.NotACaseConstructor({
         caseConstructor: Case
-        , context: mapCase.name
+        , context: mapCase
     })
 
-    if (typeof caseConstructor != 'function') {
+    if (typeof Case != 'function') {
         return handleError(err)
     }
 
@@ -355,7 +384,7 @@ const foldCase = Case => {
     }
 
     return (otherwise, visitor) => {
-        assertValidVisitor({ context: foldCase.name, visitor })
+        assertValidVisitor({ context: 'foldCase', visitor })
 
         return Ma => {
             if (Ma == null) {
@@ -398,7 +427,7 @@ const mapCase = (Case) => {
                 return { case: Ma.case, value: value, type: Ma.type }
             } else {
                 handleError(
-                    Err.MapEmptyCase({ context: mapCase.name, instance: Ma })
+                    Err.MapEmptyCase({ context: 'mapCase', instance: Ma })
                 )
             }
         }
@@ -413,6 +442,7 @@ const chainCase = (Case) => {
     return visitor => {
 
         const otherwise = {}
+        assertValidVisitor({ context: 'chainCase', visitor })
         const g = f(otherwise, visitor)
         const T = { name: example.type, [example.case]: true }
 
