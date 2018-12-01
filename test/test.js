@@ -361,7 +361,7 @@ test('bifold, bimap, map, chain', function (t) {
 })
 
 
-test('foldCase, mapCase', function (t) {
+test('foldCase, mapCase, chainCase', function (t) {
   const Maybe = maybe('Maybe')
   const Loaded = maybe('Loaded')
 

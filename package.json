@@ -11,10 +11,10 @@
   "scripts": {
     "test": "npm run test:dist && npm run test:test && npm run test:check-coverage && npm run test:report-coverage",
     "test:dist": "npm run dist",
-    "test:test": "nyc --reporter=lcov tape \"./test/*.js\" | tap-spec",
+    "test:test": "nyc --reporter=lcov tape -r esm \"./test/*.js\" | tap-spec",
     "test:check-coverage": "nyc check-coverage --statements 100 --branches 100 --functions 100 --lines 100",
     "test:report-coverage": "nyc report",
-    "dist:fold": "browserify modules/fold/index.js --standalone sst | terser -mc > dist/sst.min.js",
+    "dist:fold": "rollup -c ./rollup.config.js",
     "dist": "concurrently npm:dist:*",
     "release": "git push && npm version minor && npm publish",
     "preversion": "npm test",
@@ -31,16 +31,22 @@
   "author": "JAForbes",
   "license": "MIT",
   "devDependencies": {
+    "@babel/core": "^7.1.6",
+    "@babel/preset-env": "^7.1.6",
+    "babel-preset-es2015-rollup": "^3.0.0",
     "browserify": "^14.4.0",
     "eslint": "^4.2.0",
     "esm": "^3.0.84",
     "nyc": "^13.1.0",
+    "rollup": "^0.67.3",
+    "rollup-plugin-babel": "^4.0.3",
     "sanctuary-def": "^0.13.0",
     "tap-spec": "^4.1.1",
     "tape": "^4.7.0",
     "terser": "^3.10.13"
   },
   "dependencies": {
-    "concurrently": "^4.1.0"
+    "concurrently": "^4.1.0",
+    "rollup-plugin-terser": "^3.0.0"
   }
 }
