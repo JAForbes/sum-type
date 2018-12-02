@@ -8,7 +8,7 @@ import {
   , tagged
   , maybe
   , either
-} from '../modules/fold/index'
+} from '../lib/index'
 
 class Maybe {
   static Just(x) {
