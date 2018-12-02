@@ -5,7 +5,7 @@ import {
   , foldCase
   , mapCase
   , chainCase
-  , taggy
+  , tagged
   , maybe
   , either
 } from '../modules/fold/index'
@@ -194,6 +194,21 @@ test('errors', function (t) {
     , 'InstanceWrongType: Either of null is not Maybe'
   )
 
+  t.throws(
+    () => fold(null)
+    ,/NotAType/
+    ,'NotAType'
+  )
+
+  {
+    const T = maybe('Maybe')
+    t.throws(
+      () => T.chain( () => null ) (T.Y(1))
+      ,/InstanceShapeInvalid:/
+      ,'InstanceShapeInvalid'
+    )
+  }
+
 
   t.end()
 })
@@ -282,7 +297,7 @@ test('yslashn', function (t) {
   )
 
   const Credit =
-    taggy('Credit')({
+    tagged('Credit')({
       Recharge: []
       , Normal: ['n']
       , Insufficient: []
@@ -381,7 +396,23 @@ test('foldCase, mapCase, chainCase', function (t) {
     , 'No'
   )
 
+  t.deepEquals(
+    chainCase
+      (Maybe.Y)
+      (x => Maybe.Y(x))
+      (Maybe.Y('Yes'))
+    , Maybe.Y('Yes')
+    ,'chainCase happy path'
+  )
 
+  t.deepEquals(
+    chainCase
+      (Maybe.Y)
+      (x => Maybe.Y(x))
+      (Maybe.N())
+    , Maybe.N()
+    ,'chainCase unhappy path'
+  )
 
   t.equals(
     mapCase(Maybe.Y)(() => 'Yes')(Maybe.Y()).case
@@ -421,8 +452,8 @@ test('foldCase, mapCase, chainCase', function (t) {
 
 })
 
-test('taggy', t => {
-  const T = taggy('T')({
+test('tagged', t => {
+  const T = tagged('T')({
     A: ['a'],
     B: []
   })

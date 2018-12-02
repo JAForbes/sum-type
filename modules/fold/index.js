@@ -38,7 +38,7 @@ function assertValidVisitor(o) {
     }
 }
 
-const taggy = name => o =>
+const tagged = name => o =>
     Object.keys(o)
         .map(k => [k, o[k]])
         .reduce(
@@ -205,7 +205,7 @@ function toString(x) {
 }
 
 const StaticSumTypeError =
-    taggy('StaticSumTypeError')({
+    tagged('StaticSumTypeError')({
         TooManyCases: ['extraKeys']
         , TooFewCases: ['missingKeys']
         , InstanceNull: ['T']
@@ -450,11 +450,10 @@ const chainCase = (Case) => {
 
             const value = g(Ma)
 
-            assertValidCase(T, value)
-
             if (value === otherwise) {
                 return Ma
             } else {
+                assertValidCase(T, value)
                 return value
             }
         }
@@ -468,7 +467,7 @@ export {
     , foldCase
     , errMessage
     , StaticSumTypeError
-    , taggy
+    , tagged
     , maybe
     , either
 }

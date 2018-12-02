@@ -10,8 +10,8 @@ export default {
     output: {
         file: './dist/sst.min.js',
         format: 'umd',
-        name: 'sst'
+        name: 'sst',
+        sourcemap: 'external'
     },
 
-    sourcemap: 'external'
 }
