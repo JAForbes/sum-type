@@ -3,6 +3,7 @@
   "version": "1.0.0-rc1",
   "description": "An underlying format for algebraic types that can be used directly or composed with other libraries.",
   "main": "dist/sst.min.js",
+  "unpkg": "dist/sst.min.js",
   "module": "lib/index.js",
   "files": [
     "dist"
