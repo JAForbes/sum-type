@@ -10,7 +10,7 @@
 #### Quick Start
 
 ```bash
-npm install static-sum-type
+npm install static-sum-type@next
 ```
 
 ```js
