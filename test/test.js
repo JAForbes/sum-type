@@ -118,7 +118,7 @@ test('static-sum-type', function (t) {
     () => foldMaybe({
       Just: () => 1
     })
-    , /TooFewCases/
+    , /MissingCases/
     , 'fold detects when there are too few cases provided'
   )
 
@@ -128,7 +128,7 @@ test('static-sum-type', function (t) {
       , Nothing: () => 1
       , Left: () => 1
     })
-    , /TooManyCases/
+    , /ExtraCases/
     , 'fold detects when there are too few many provided'
   )
 
@@ -150,16 +150,16 @@ test('errors', function (t) {
       , N: () => ''
       , A: () => ''
     })
-    , /TooManyCases/
-    ,'TooManyCases'
+    , /ExtraCases/
+    ,'ExtraCases'
   )
 
   t.throws(
     () => fold(YNMaybe)({
       Y: () => ''
     })
-    , /TooFewCases/
-    , 'TooFewCases'
+    , /MissingCases/
+    , 'MissingCases'
   )
 
   t.throws(
@@ -218,10 +218,9 @@ test('yslashn', function (t) {
   const YNMaybe = maybe('Maybe')
 
   const fromMaybe = (otherwise, f) =>
-    YNMaybe.fold({
-      Y: f
-      , N: () => otherwise
-    })
+    YNMaybe.bifold(
+      () => otherwise, f
+    )
 
   const y = YNMaybe.Y(10)
   const n = YNMaybe.N()
@@ -422,11 +421,6 @@ test('foldCase, mapCase, chainCase', function (t) {
   t.equals(
     mapCase(Maybe.Y)(x => x)(Maybe.N()).case
     , 'N'
-  )
-
-  t.throws(
-    () => mapCase(Maybe.N)(() => 'Yes')(Maybe.N())
-    , /MapEmptyCase/
   )
 
   t.equals(
