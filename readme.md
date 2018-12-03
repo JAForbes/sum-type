@@ -16,7 +16,7 @@ npm install static-sum-type
 ```js
 import { either } from "static-sum-type";
 
-// Create different Either types
+// Create specific types for specific scenarios.
 const Loaded = 
     either("Loaded")
 
@@ -55,7 +55,7 @@ Freedom from booleans.
 
 Scenario: You've solving a moderately difficult problem, and there's a degree of data modelling involved.  You've got several booleans for tracking loading states, save states, modified states, selected states and on and on.
 
-Oh and you're tracking all those states for every item in a list separately.
+Oh! and you're tracking all those states for every item in a list separately.
 
 Depending on a specific combination of these boolean flags you need to render _differently_, talk to the server _differently_, persist state _differently_.
 
@@ -139,40 +139,42 @@ f( data )
 //=> Selected.Y( Loaded.Y( Modified.Y( Saved.N('unsaved') ) ) )
 ```
 
-If we wanted to traverse and extract at the same time, we could use `fold` instead of `map`.
+If we wanted to traverse and extract at the same time, we could use `fold` instead of `map`.  But then we have to handle all the `N` states along the way too.
 
-We can flatten this composition with standard function composition.
 
 ```js
-import { compose } from 'ramda'
 
 const f =
-    compose(
-        Selected.map
-        ,Loaded.map
-        ,Modified.map
-        ,Saved.bimap(
-            x => 'unsaved'
-            ,x => 'saved'
+    Selected.bifold(
+        () => 'unselected',
+        Loaded.bifold(
+            () => 'loading',
+            Modified.map(
+                () => 'unmodified',
+                Saved.bimap(
+                    x => 'unsaved'
+                    ,x => 'saved'
+                )
+            )
         )
     )
 
 f( data )
-//=> Selected.Y( Loaded.Y( Modified.Y( Saved.N('unsaved') ) ) )
+//=> 'unsaved'
 ```
 
 If we pass the wrong data structure into our composition, we will get a specific, helpful error message explaining what your type looked like
 and what that particular method was expecting.
 
-Your stack trace is going to be legible because `static-sum-type` internally avoids point free composition.
+Your stack trace is going to be particularly legible because `static-sum-type` internally avoids point free composition.
 
 Every error that `static-sum-type` yields, is itself a transformation of 
-a `static-sum-type`.  All the error types are documented too.
+a `static-sum-type`.  All the error types are documented in the [Errors section](#errors)
 
 
 #### Specification
 
-`static-sum-type` differentiates itself by document the internal structure used for types and instances of types.  This allows you to create your
+`static-sum-type` differentiates itself by documenting the internal structure used for types and instances of types.  This allows you to create your
 own constructors/transformers in userland.  You can store the exact output
 of a static-sum-type constructor in a `redux-store`, `localStorage` or even a `json` column in `postgres`.
 
@@ -191,7 +193,7 @@ Each module listed here adheres to the static-sum-type specification. That speci
 - Tiny for frontend usage
 - Avoid pitfalls found in other sum type libraries
 
-#### How does static-sum-type differ from other libraries in the ecosystem.
+#### How does static-sum-type differ from other libraries in the ecosystem?
 
 `static-sum-type` removes the following features because we believe they lead to brittle codebases.
 
@@ -199,6 +201,7 @@ Each module listed here adheres to the static-sum-type specification. That speci
 - auto spreading of values in cata/fold
 - auto curried constructors
 - prototypes (reference equality checks / instanceof)
+- serializable / useable with Redux/meiosis etc
 
 `static-sum-type` is technically 0KB, it's an idea. You can use static-sum-type in your codebase without ever running `npm install`.
 
@@ -207,35 +210,106 @@ Each module listed here adheres to the static-sum-type specification. That speci
 
 #### either
 
-#### either.map
+```js
+import { either } from 'static-sum-type'
 
-#### either.bimap
+const Loaded = 
+    either('Loaded')
+```
 
-#### either.bifold
+#### `either::Y`
 
-#### either.fold
+`a -> Either Y a | N b`
 
-#### either.chain
+#### `either::N` 
 
-#### maybe
+`a -> Either Y a | N b`
 
-#### maybe.map
+#### `either::map`
 
-#### maybe.bimap
+`( a -> c ) -> Either Y a | N b -> Either Y c | N b`
 
-#### maybe.bifold
+#### `either::bimap`
 
-#### maybe.chain
+`(( a -> c ), ( b -> d )) -> Either Y a | N b -> Either Y c | N d`
 
-#### tagged
+#### `either::bifold`
 
-#### fold
+`(( a -> c ), ( b -> c )) -> Either Y a | N b -> c`
 
-#### mapCase
+#### `either::chain`
 
-#### foldCase
+`( a -> Either Y c | N d ) -> Either Y a | N b -> Either Y c | N d`
 
-#### chainCase
+#### `maybe`
+
+```js
+import { maybe } from 'static-sum-type'
+
+const Selected = 
+    maybe('Selected')
+```
+
+#### `maybe::Y`
+
+`a -> Maybe Y a | N`
+
+#### `maybe::N`
+
+`() -> Maybe Y a | N`
+
+#### `maybe::map`
+
+`( a -> c ) -> Maybe Y a | N -> Maybe Y c | N`
+
+#### `maybe::bimap`
+
+`(( () -> b ), ( a -> b )) -> Maybe Y a | N -> Maybe Y b | N`
+
+#### `maybe::bifold`
+
+`(( () -> b ), ( a -> b )) -> Either Y a | N -> b`
+
+#### `maybe::chain`
+
+`( a -> Maybe Y b | N ) -> Maybe Y a | N -> Maybe Y b | N`
+
+#### `tagged`
+
+```js
+import { tagged } from 'static-sum-type'
+
+const Geom = 
+    tagged ('Geom') ({
+        Point: ['x', 'y'],
+        Line: ['p1', 'p2'],
+        Poly: ['p1', 'p2', 'rest']
+    })
+
+const p1 = Geom.Point({ x:0, y: 0 })
+
+const p2 = p1
+
+const line = Geom.Line({ p1, p2 })
+
+const poly = Geom.Poly({ p1, p2, rest: [p3]})
+```
+
+#### `fold`
+
+`Type -> { [caseName]: a -> b } -> Case -> b`
+
+#### `mapCase`
+
+`(a -> Case a) -> (a -> b) -> Case -> Case`
+
+#### `foldCase`
+
+`(b, (a -> Case b)) -> Case -> b`
+
+#### `chainCase`
+
+`(a -> Case a) -> (a -> Case b) -> Case -> Case`
 
 ### Errors
 
