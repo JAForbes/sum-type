@@ -227,7 +227,7 @@ Each module listed here adheres to the static-sum-type specification. That speci
 
 #### maybe.chain
 
-#### tag
+#### tagged
 
 #### fold
 
@@ -237,5 +237,31 @@ Each module listed here adheres to the static-sum-type specification. That speci
 
 #### chainCase
 
-
 ### Errors
+
+Below is the source code definition for the internal errors this library throws. 
+
+```js
+const StaticSumTypeError =
+    tagged('StaticSumTypeError')({
+        ExtraCases: ['extraKeys']
+        , MissingCases: ['missingKeys']
+        , InstanceNull: ['T']
+        , InstanceWrongType: ['T', 'x']
+        , InstanceShapeInvalid: ['T', 'x']
+        , NotACaseConstructor: ['context', 'caseConstructor']
+        , VisitorNotAFunction: ['context', 'visitor']
+        , NotAType: ['context', 'T']
+    })
+```
+
+ Error                  | Throws ... 
+------------------------|--------
+ `ExtraCases`           | when a fold specifies a visitor for cases that are not of the type.
+ `MissingCases`         | when a fold does not specify a visitor for each case of the type.
+ `InstanceNull`         | when an argument was expected to be an instance of a sum type but was instead null.
+ `InstanceWrongType`    | when an instance is a valid `static-sum-type` but not the specifically expected type for that function.
+ `InstanceShapeInvalid` | when an instance has the correct `type` property but an unknown `case` property.
+ `NotACaseConstructor`  | when a function was expecting a case constructor but received anything else.
+ `VisitorNotAFunction`  | when a function was expected a visitor function but received anything else.
+ `NotAType`             | when a function expected a `static-sum-type` `type` but received anything else.
