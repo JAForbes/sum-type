@@ -6,7 +6,8 @@
   "unpkg": "dist/sst.min.js",
   "module": "lib/index.js",
   "files": [
-    "dist"
+    "dist",
+    "lib"
   ],
   "scripts": {
     "test": "npm run test:dist && npm run test:test && npm run test:check-coverage && npm run test:report-coverage",
