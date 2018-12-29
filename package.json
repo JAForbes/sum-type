@@ -1,6 +1,6 @@
 {
   "name": "stags",
-  "version": "1.0.0-rc4",
+  "version": "1.0.0-rc5",
   "description": "An underlying format for algebraic types that can be used directly or composed with other libraries.",
   "main": "dist/stags.min.js",
   "unpkg": "dist/stags.min.js",

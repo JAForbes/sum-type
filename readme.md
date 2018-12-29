@@ -1,8 +1,8 @@
 # stags
 
-[![pipeline status](https://gitlab.com/JAForbes/stags/badges/master/pipeline.svg)](https://gitlab.com/JAForbes/stags/commits/master)
+[![pipeline status](https://gitlab.com/JAForbes/static-sum-tye/badges/master/pipeline.svg)](https://gitlab.com/JAForbes/static-sum-tye/commits/master)
 
-[![coverage report](https://gitlab.com/JAForbes/stags/badges/master/coverage.svg)](https://gitlab.com/JAForbes/stags/commits/master)
+[![coverage report](https://gitlab.com/JAForbes/static-sum-tye/badges/master/coverage.svg)](https://gitlab.com/JAForbes/static-sum-tye/commits/master)
 
 ## A simple library for complex logic.
 
@@ -182,7 +182,7 @@ of a stags constructor in a `redux-store`, `localStorage` or even a `json` colum
 
 #### Ecosystem
 
-Each module listed here adheres to the stags specification. That specification is defined at [stags/docs/spec.md](https://gitlab.com/JAForbes/stags/tree/master/docs/spec.md).
+Each module listed here adheres to the stags specification. That specification is defined at [stags/docs/spec.md](https://gitlab.com/JAForbes/static-sum-tye/tree/master/docs/spec.md).
 
 - [superouter](https://gitlab.com/harth/superouter/) A Router that both exposes and internally uses stags to model route definitions, validation and more.
 
