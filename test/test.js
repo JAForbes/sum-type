@@ -72,7 +72,7 @@ var Maybe2 = {
   }
 }
 
-test('static-sum-type', function (t) {
+test('stags', function (t) {
   const foldMaybe = fold(Maybe)
 
   var maybeToNum = foldMaybe({

@@ -23,7 +23,7 @@ Here is an example of a valid `Maybe` type
 ```
 
 Keep in mind lowercase properties other than `name` are ignored. If you want your type to have static functions or other data you can safely do so as long as the property is a `LowercaseString`
-You can safely add static methods or properties to your type structure without interfing with `static-sum-type` provided they do not start with a capital letter.
+You can safely add static methods or properties to your type structure without interfing with `stags` provided they do not start with a capital letter.
 
 > 💡 Any keys in a call to `getOwnPropertyNames(Type)` where `key[0] == key[0].toUpperCase()` will be treated as a case.
 

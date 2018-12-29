@@ -8,9 +8,9 @@ export default {
         terser()
     ],
     output: {
-        file: './dist/sst.min.js',
+        file: './dist/stags.min.js',
         format: 'umd',
-        name: 'sst',
+        name: 'stags',
         sourcemap: 'external'
     },
 
