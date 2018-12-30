@@ -227,11 +227,11 @@ const Loaded =
 
 #### `either::map`
 
-`( a -> c ) -> Either Y a | N b -> Either Y c | N b`
+`( a -> c ) -> Either Y c | N b`
 
 #### `either::bimap`
 
-`(( a -> c ), ( b -> d )) -> Either Y a | N b -> Either Y c | N d`
+`(( a -> c ), ( b -> d )) -> Either Y c | N d`
 
 #### `either::bifold`
 
@@ -239,7 +239,7 @@ const Loaded =
 
 #### `either::chain`
 
-`( a -> Either Y c | N d ) -> Either Y a | N b -> Either Y c | N d`
+`( a -> Either Y c | N b ) -> Either Y c | N b`
 
 #### `maybe`
 
@@ -260,11 +260,11 @@ const Selected =
 
 #### `maybe::map`
 
-`( a -> c ) -> Maybe Y a | N -> Maybe Y c | N`
+`( a -> c ) -> Maybe Y c | N`
 
 #### `maybe::bimap`
 
-`(( () -> b ), ( a -> b )) -> Maybe Y a | N -> Maybe Y b | N`
+`(( () -> b ), ( a -> b )) -> Maybe Y b | N`
 
 #### `maybe::bifold`
 
@@ -272,7 +272,7 @@ const Selected =
 
 #### `maybe::chain`
 
-`( a -> Maybe Y b | N ) -> Maybe Y a | N -> Maybe Y b | N`
+`( a -> Maybe Y b | N ) -> Maybe Y b | N`
 
 #### `tagged`
 
@@ -297,19 +297,27 @@ const poly = Geom.Poly({ p1, p2, rest: [p3]})
 
 #### `fold`
 
-`Type -> { [caseName]: a -> b } -> Case -> b`
-
-#### `mapCase`
-
-`(a -> Case a) -> (a -> b) -> Case -> Case`
+`Type -> { [caseName]: a -> b } -> case -> b`
 
 #### `foldCase`
 
-`(b, (a -> Case b)) -> Case -> b`
+`(b, (a -> b)) -> case a -> b`
+
+#### `mapCase`
+
+`(a -> b) -> case a -> case b`
+
+#### `bimapCase`
+
+`(() -> b, a -> b) -> case -> case b`
+
+#### `bifoldCase`
+
+`(() -> b, a -> b) -> case -> b`
 
 #### `chainCase`
 
-`(a -> Case a) -> (a -> Case b) -> Case -> Case`
+`(a -> case b) -> case a -> case b`
 
 ### Errors
 
@@ -323,7 +331,7 @@ const StaticSumTypeError =
         , InstanceNull: ['T']
         , InstanceWrongType: ['T', 'x']
         , InstanceShapeInvalid: ['T', 'x']
-        , NotACaseConstructor: ['context', 'caseConstructor']
+        , InvalidCase: ['context']
         , VisitorNotAFunction: ['context', 'visitor']
         , NotAType: ['context', 'T']
     })
@@ -336,6 +344,6 @@ const StaticSumTypeError =
  `InstanceNull`         | when an argument was expected to be an instance of a sum type but was instead null.
  `InstanceWrongType`    | when an instance is a valid `stags` but not the specifically expected type for that function.
  `InstanceShapeInvalid` | when an instance has the correct `type` property but an unknown `case` property.
- `NotACaseConstructor`  | when a function was expecting a case constructor but received anything else.
+ `InvalidCase`  | when a function was expecting a struct of shape { type:string, case: string } but received anything else.
  `VisitorNotAFunction`  | when a function was expected a visitor function but received anything else.
  `NotAType`             | when a function expected a `stags` `type` but received anything else.

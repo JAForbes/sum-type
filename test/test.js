@@ -5,6 +5,8 @@ import {
   , foldCase
   , mapCase
   , chainCase
+  , bifoldCase
+  , bimapCase
   , tagged
   , maybe
   , either
@@ -380,24 +382,24 @@ test('foldCase, mapCase, chainCase', function (t) {
   const Loaded = maybe('Loaded')
 
   t.equals(
-    foldCase(Maybe.Y)(0, x => x * x)(Maybe.Y(10))
+    foldCase(Maybe.Y())(0, x => x * x)(Maybe.Y(10))
     , 100
   )
 
   t.equals(
-    foldCase(Maybe.N)('No', () => 'Yes')(Maybe.N())
+    foldCase(Maybe.N())('No', () => 'Yes')(Maybe.N())
     , 'Yes'
   )
 
 
   t.equals(
-    foldCase(Maybe.Y)('No', x => x)(Maybe.N())
+    foldCase(Maybe.Y())('No', x => x)(Maybe.N())
     , 'No'
   )
 
   t.deepEquals(
     chainCase
-      (Maybe.Y)
+      (Maybe.Y())
       (x => Maybe.Y(x))
       (Maybe.Y('Yes'))
     , Maybe.Y('Yes')
@@ -406,7 +408,7 @@ test('foldCase, mapCase, chainCase', function (t) {
 
   t.deepEquals(
     chainCase
-      (Maybe.Y)
+      (Maybe.Y())
       (x => Maybe.Y(x))
       (Maybe.N())
     , Maybe.N()
@@ -414,12 +416,23 @@ test('foldCase, mapCase, chainCase', function (t) {
   )
 
   t.equals(
-    mapCase(Maybe.Y)(() => 'Yes')(Maybe.Y()).case
+    bimapCase(Maybe.Y())(() => 'No', () => 'Yes')(Maybe.Y()).case
+    , 'Y'
+  )
+
+
+  t.equals(
+    bimapCase(Maybe.Y())(() => 'No', () => 'Yes')(Maybe.N()).case
+    , 'N'
+  )
+
+  t.equals(
+    mapCase(Maybe.Y())(() => 'Yes')(Maybe.Y()).case
     , 'Y'
   )
 
   t.equals(
-    mapCase(Maybe.Y)(x => x)(Maybe.N()).case
+    mapCase(Maybe.Y())(x => x)(Maybe.N()).case
     , 'N'
   )
 
@@ -429,16 +442,16 @@ test('foldCase, mapCase, chainCase', function (t) {
   )
 
     ;[
-      [() => mapCase(Maybe.Y)(null), /VisitorNotAFunction/]
-      , [() => mapCase(Maybe.Y)(x => x)(null), /InstanceNull/]
-      , [() => mapCase(Maybe.Y)(x => x)(Loaded.N()), /InstanceWrongType/]
+      [() => mapCase(Maybe.Y())(null), /VisitorNotAFunction/]
+      , [() => mapCase(Maybe.Y())(x => x)(null), /InstanceNull/]
+      , [() => mapCase(Maybe.Y())(x => x)(Loaded.N()), /InstanceWrongType/]
     ]
       .concat(
         [() => mapCase(Maybe)
           , () => mapCase(function () { })
           , () => mapCase(null)
         ]
-          .map(f => [f, /NotACaseConstructor/])
+          .map(f => [f, /InvalidCase/])
       )
       .forEach(([f, pattern]) => t.throws(f, pattern, f + ''))
 
