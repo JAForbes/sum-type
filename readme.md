@@ -221,9 +221,9 @@ const Loaded =
 
 `a -> Either Y a | N b`
 
-#### `either::N` 
+#### `either::N`
 
-`a -> Either Y a | N b`
+`b -> Either Y a | N b`
 
 #### `either::map`
 
@@ -236,6 +236,18 @@ const Loaded =
 #### `either::bifold`
 
 `(( a -> c ), ( b -> c )) -> Either Y a | N b -> c`
+
+#### `either::getWith`
+
+`( c , ( b -> c )) -> Either Y a | N b -> c`
+
+#### `either::getOr`
+
+`c -> Either Y a | N b -> c`
+
+#### `either::fold`
+
+`Type -> { Y: a -> c, N: b -> c } -> case -> c`
 
 #### `either::chain`
 
@@ -268,11 +280,42 @@ const Selected =
 
 #### `maybe::bifold`
 
-`(( () -> b ), ( a -> b )) -> Either Y a | N -> b`
+`(( () -> b ), ( a -> b )) -> Maybe Y a | N -> b`
+
+#### `maybe::getWith`
+
+`( b , ( a -> b )) -> Maybe Y a | N -> b`
+
+#### `maybe::getOr`
+
+`b -> Maybe Y a | N -> b`
+
+#### `maybe::fold`
+
+`Type -> { Y: a -> b, N: () -> b } -> case -> b`
 
 #### `maybe::chain`
 
 `( a -> Maybe Y b | N ) -> Maybe Y b | N`
+
+#### Canonical Maybe / Either
+
+In the future some functions will return optional values.  This library encourages you to define your own but this library exports two pregenerated Maybe / Either types that can be used canonically as the "real" Maybe or Either which can be helpful when doing natural transformations and conversions between types and safe and unsafe data.
+
+```js
+import { Maybe, Either } from stags
+
+const yes = Maybe.Y(100)
+const no = Maybe.N()
+
+const f = Maybe.getOr(0)
+
+f(yes)
+// => 100
+
+g(no)
+// => 0
+```
 
 #### `tagged`
 
@@ -299,25 +342,216 @@ const poly = Geom.Poly({ p1, p2, rest: [p3]})
 
 `Type -> { [caseName]: a -> b } -> case -> b`
 
-#### `foldCase`
+#### `foldT`
 
-`(b, (a -> b)) -> case a -> b`
+`( () -> Type ) -> { [caseName]: a -> b } -> case -> b`
 
-#### `mapCase`
+Like fold, but receives a function to obtain the type.  Useful for defining folds on the type at the time of definition.
 
-`(a -> b) -> case a -> case b`
+#### `map`
 
-#### `bimapCase`
+`Type -> { [caseName]: a -> b } -> case -> Type b`
 
-`(() -> b, a -> b) -> case -> case b`
 
-#### `bifoldCase`
+> ⚠ Both `map` and `chain` will skip executing cases when their instance has no `.value` property (usually determined by their type constructor).
 
-`(() -> b, a -> b) -> case -> b`
+#### `chain`
 
-#### `chainCase`
+`Type -> { [caseName]: a -> Type b } -> case -> Type b`
 
-`(a -> case b) -> case a -> case b`
+> ⚠ Both `map` and `chain` will skip executing cases when their instance has no `.value` property (usually determined by their type constructor).
+
+But when using `map` and `chain` you are still required to pass in a handler for every case.
+
+It's recommended to use `otherwise` with `map` and `chain` to prefill values that are not relevant to the fold.
+
+#### otherwise
+
+`string[] -> f -> { [key:string]: f }`
+
+A helper function for generating folds that are versioned separately to the type definition.
+
+```js
+
+const { Y, N } = stags.Maybe
+const Platform = stags.tagged ('Platform') ({
+    ModernWindows: [],
+    XP: [],
+    Linux: [],
+    Darwin: []
+})
+
+// defined separately to detect changes in intent
+const rest = stags.otherwise([
+    'ModernWindows',
+    'XP',
+    'Linux',
+    'Darwin'
+])
+
+const windows = stags.otherwise([
+    'ModernWindows',
+    'XP'
+])
+
+const foldWindows = f => stags.map(Platform) ({
+    ... rest(N),
+    ... windows( () => Y(f()) )
+})
+
+const winPing = 
+    foldWindows
+        ( () => 'ping \\t www.google.com' )
+
+winPing( Platform.Darwin() )
+// => stags.Maybe.N()
+
+winPing( Platform.XP() )
+// => stags.Maybe.Y('ping \t www.google.com')
+
+```
+
+At a later date, you may add support for WSL.  Which will likely break earlier assumptions because it's both linux _and_ windows.
+
+```js
+const Platform = stags.tagged ('Platform') ({
+    ModernWindows: [],
+    XP: [],
+    WSL: [], // NEW!
+    Linux: [],
+    Darwin: []
+})
+```
+
+Now `stags` will helpfully throw a `MissingCases` error for all the usages of our original `otherwise` functions that no longer discriminate the union.
+
+We can now create a new otherwise for that assumption:
+
+```js
+
+
+const windows = stags.otherwise([ //OLD
+    'ModernWindows',
+    'XP'
+])
+
+const rest = stags.otherwise([ //OLD
+    'ModernWindows',
+    'XP',
+    'Linux',
+    'Darwin'
+])
+
+const rest2 = stags.otherwise([ // NEW!
+    'ModernWindows',
+    'XP',
+    'WSL', // NEW
+    'Linux',
+    'Darwin',
+])
+
+const windowsGUI = stags.otherwise([ // NEW
+    'ModernWindows',
+    'XP',
+])
+
+const foldWindowsGUI = f => stags.map(Platform) ({ // NEW
+    ... rest2(N),
+    ... windowsGUI( () => Y(f()) )
+})
+
+const foldWindows = f => stags.map(Platform) ({ // OLD
+    ... rest(N),
+    ... windows( () => Y(f()) )
+})
+
+```
+
+Our original `ping` function is using our old function, let's revisit our assumptions:
+
+```js
+const winPing = 
+    foldWindows
+        ( () => 'ping \\t www.google.com' )
+
+const winPing2 =
+    foldWindowsGUI
+        ( () => 'ping \\t www.google.com' )
+```
+
+When we've updated all the references, `stags` will stop throwing errors on initialization.  You can then delete the old definitions and update the new definitions to have the old names.  Leaving us with:
+
+```js
+
+const rest = stags.otherwise([ // renamed
+    'ModernWindows',
+    'XP',
+    'WSL',
+    'Linux',
+    'Darwin',
+])
+
+const windowsGUI = stags.otherwise([
+    'ModernWindows',
+    'XP',
+])
+
+const foldWindowsGUI = f => stags.map(Platform) ({
+    ... rest2(N),
+    ... windowsGUI( () => Y(f()) )
+})
+
+const winPing =
+    foldWindowsGUI
+        ( () => 'ping \\t www.google.com' )
+
+```
+
+If we hadn't versioned our `otherwise` structures separately to the type, we'd get no initialization errors and instead our code would break in unpredictable ways.  For example `WSL` has it's own `ping` and `\t` doesn't do anything on the linux version.  This is what makes separately versioned placeholders so powerful. 
+
+```js
+import { foldT } from 'stags'
+
+const Example = {
+  name: 'Example'
+  A(value){
+    return { type: 'Example', case: 'A', value }
+  },
+  B(){
+    return { type: 'Example', case: 'B' }
+  },
+  // Example doesn't exist at the time of definition
+  // So the type is referenced lazily.
+  isA: foldT( () => Example ) ({
+      A: () => true,
+      B: () => false
+  })
+}
+```
+
+---
+
+## Experimental
+
+These functions are likely to change at any moment.
+
+#### `caseName`
+
+`caseName` -> `caseName:string`
+
+Extract the name of a case from an instance of a type.
+
+#### `sameCase`
+
+`T` -> `(Ta, Tb)` -> `boolean`
+
+Returns `true` if two case instances have the same subtype.
+
+#### `getCases`
+
+`T` -> `(caseName:string)[]`
+
+Returns a list of the `caseName`'s for a given type `T`.
 
 ### Errors
 
@@ -344,6 +578,5 @@ const StaticSumTypeError =
  `InstanceNull`         | when an argument was expected to be an instance of a sum type but was instead null.
  `InstanceWrongType`    | when an instance is a valid `stags` but not the specifically expected type for that function.
  `InstanceShapeInvalid` | when an instance has the correct `type` property but an unknown `case` property.
- `InvalidCase`  | when a function was expecting a struct of shape { type:string, case: string } but received anything else.
  `VisitorNotAFunction`  | when a function was expected a visitor function but received anything else.
  `NotAType`             | when a function expected a `stags` `type` but received anything else.

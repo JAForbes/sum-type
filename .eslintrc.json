@@ -6,7 +6,10 @@
   },
   "parserOptions": {
     "sourceType": "module",
-    "ecmaVersion": 5
+    "ecmaVersion": 2017,
+    "ecmaFeatures": {
+      "experimentalObjectRestSpread": true
+    }
   },
   "rules": {
     "no-const-assign": "warn",
@@ -16,6 +19,9 @@
     "no-unused-vars": "warn",
     "constructor-super": "warn",
     "valid-typeof": "warn",
-    "semi": ["error", "never"]
+    "semi": [
+      "error",
+      "never"
+    ]
   }
 }
