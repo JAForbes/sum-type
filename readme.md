@@ -348,6 +348,26 @@ const poly = Geom.Poly({ p1, p2, rest: [p3]})
 
 Like fold, but receives a function to obtain the type.  Useful for defining folds on the type at the time of definition.
 
+```js
+import { foldT } from 'stags'
+
+const Example = {
+  name: 'Example'
+  A(value){
+    return { type: 'Example', case: 'A', value }
+  },
+  B(){
+    return { type: 'Example', case: 'B' }
+  },
+  // Example doesn't exist at the time of definition
+  // So the type is referenced lazily.
+  isA: foldT( () => Example ) ({
+      A: () => true,
+      B: () => false
+  })
+}
+```
+
 #### `map`
 
 `Type -> { [caseName]: a -> b } -> case -> Type b`
@@ -369,10 +389,11 @@ It's recommended to use `otherwise` with `map` and `chain` to prefill values tha
 
 `string[] -> f -> { [key:string]: f }`
 
-A helper function for generating folds that are versioned separately to the type definition.
+A helper function for generating folds that are versioned separately to the type definition.  It's useful when you want to avoid specifying each clause in a fold without losing type safety or introducing [other modelling problems](https://github.com/JAForbes/sum-type/issues/13)
+
+Read more about `otherwise` [here](./otherwise.md)
 
 ```js
-
 const { Y, N } = stags.Maybe
 const Platform = stags.tagged ('Platform') ({
     ModernWindows: [],
@@ -380,108 +401,6 @@ const Platform = stags.tagged ('Platform') ({
     Linux: [],
     Darwin: []
 })
-
-// defined separately to detect changes in intent
-const rest = stags.otherwise([
-    'ModernWindows',
-    'XP',
-    'Linux',
-    'Darwin'
-])
-
-const windows = stags.otherwise([
-    'ModernWindows',
-    'XP'
-])
-
-const foldWindows = f => stags.map(Platform) ({
-    ... rest(N),
-    ... windows( () => Y(f()) )
-})
-
-const winPing = 
-    foldWindows
-        ( () => 'ping \\t www.google.com' )
-
-winPing( Platform.Darwin() )
-// => stags.Maybe.N()
-
-winPing( Platform.XP() )
-// => stags.Maybe.Y('ping \t www.google.com')
-
-```
-
-At a later date, you may add support for WSL.  Which will likely break earlier assumptions because it's both linux _and_ windows.
-
-```js
-const Platform = stags.tagged ('Platform') ({
-    ModernWindows: [],
-    XP: [],
-    WSL: [], // NEW!
-    Linux: [],
-    Darwin: []
-})
-```
-
-Now `stags` will helpfully throw a `MissingCases` error for all the usages of our original `otherwise` functions that no longer discriminate the union.
-
-We can now create a new otherwise for that assumption:
-
-```js
-
-
-const windows = stags.otherwise([ //OLD
-    'ModernWindows',
-    'XP'
-])
-
-const rest = stags.otherwise([ //OLD
-    'ModernWindows',
-    'XP',
-    'Linux',
-    'Darwin'
-])
-
-const rest2 = stags.otherwise([ // NEW!
-    'ModernWindows',
-    'XP',
-    'WSL', // NEW
-    'Linux',
-    'Darwin',
-])
-
-const windowsGUI = stags.otherwise([ // NEW
-    'ModernWindows',
-    'XP',
-])
-
-const foldWindowsGUI = f => stags.map(Platform) ({ // NEW
-    ... rest2(N),
-    ... windowsGUI( () => Y(f()) )
-})
-
-const foldWindows = f => stags.map(Platform) ({ // OLD
-    ... rest(N),
-    ... windows( () => Y(f()) )
-})
-
-```
-
-Our original `ping` function is using our old function, let's revisit our assumptions:
-
-```js
-const winPing = 
-    foldWindows
-        ( () => 'ping \\t www.google.com' )
-
-const winPing2 =
-    foldWindowsGUI
-        ( () => 'ping \\t www.google.com' )
-```
-
-When we've updated all the references, `stags` will stop throwing errors on initialization.  You can then delete the old definitions and update the new definitions to have the old names.  Leaving us with:
-
-```js
 
 const rest = stags.otherwise([ // renamed
     'ModernWindows',
@@ -505,28 +424,12 @@ const winPing =
     foldWindowsGUI
         ( () => 'ping \\t www.google.com' )
 
-```
+winPing( Platform.Darwin() )
+// => stags.Maybe.N()
 
-If we hadn't versioned our `otherwise` structures separately to the type, we'd get no initialization errors and instead our code would break in unpredictable ways.  For example `WSL` has it's own `ping` and `\t` doesn't do anything on the linux version.  This is what makes separately versioned placeholders so powerful. 
+winPing( Platform.XP() )
+// => stags.Maybe.Y('ping \t www.google.com')
 
-```js
-import { foldT } from 'stags'
-
-const Example = {
-  name: 'Example'
-  A(value){
-    return { type: 'Example', case: 'A', value }
-  },
-  B(){
-    return { type: 'Example', case: 'B' }
-  },
-  // Example doesn't exist at the time of definition
-  // So the type is referenced lazily.
-  isA: foldT( () => Example ) ({
-      A: () => true,
-      B: () => false
-  })
-}
 ```
 
 ---
