@@ -391,7 +391,7 @@ It's recommended to use `otherwise` with `map` and `chain` to prefill values tha
 
 A helper function for generating folds that are versioned separately to the type definition.  It's useful when you want to avoid specifying each clause in a fold without losing type safety or introducing [other modelling problems](https://github.com/JAForbes/sum-type/issues/13)
 
-Read more about `otherwise` [here](./otherwise.md)
+Read more about `otherwise` [here](https://gitlab.com/JAForbes/static-sum-type/blob/master/docs/otherwise.md)
 
 ```js
 const { Y, N } = stags.Maybe
