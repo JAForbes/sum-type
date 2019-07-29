@@ -253,6 +253,12 @@ const Loaded =
 
 `( a -> Either Y c | N b ) -> Either Y c | N b`
 
+#### `toBoolean`
+
+`Either Y a | N -> boolean`
+
+> ⚠ You should almost always avoid coercing a sum type to a boolean.  If you are checking for `Y`, try `.map`.  If you are checking for `N` try `getOr`.  Booleans have no context, no associated data, but there's almost always associated data in your model so `toBoolean` is much like moving from a lossless format to a lossy format.
+
 #### `maybe`
 
 ```js
@@ -297,6 +303,12 @@ const Selected =
 #### `maybe::chain`
 
 `( a -> Maybe Y b | N ) -> Maybe Y b | N`
+
+#### `toBoolean`
+
+`Maybe Y a | N -> boolean`
+
+> ⚠ You should almost always avoid coercing a sum type to a boolean.  If you are checking for `Y`, try `.map`.  If you are checking for `N` try `getOr`.  Booleans have no context, no associated data, but there's almost always associated data in your model so `toBoolean` is much like moving from a lossless format to a lossy format.
 
 #### Canonical Maybe / Either
 

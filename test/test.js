@@ -573,3 +573,29 @@ test('sameCase, foldSameCase', t => {
 
   t.end()
 })
+
+test('toBoolean', t => {
+  const a = Maybe.Y(100)
+  const b = Maybe.N()
+  const A = Either.Y(100)
+
+  t.equals(
+    Maybe.toBoolean(a),
+    true,
+    'toBoolean Y'
+  )
+
+  t.equals(
+    Maybe.toBoolean(b),
+    false,
+    'toBoolean N'
+  )
+
+  t.throws(
+    () => Maybe.toBoolean(A),
+    '/InstanceShapeInvalid/',
+    'sameCase different types'
+  )
+
+  t.end()
+})
