@@ -2,80 +2,77 @@ import test from 'tape'
 
 import {
   fold
-  , foldCase
-  , mapCase
-  , chainCase
-  , bifoldCase
-  , bimapCase
+  , map
   , tagged
   , maybe
   , either
+  , Maybe
+  , Either
+  , valueCaseInstance
+  , emptyCaseInstance
+  , caseName
+  , otherwise
+  , sameCase
 } from '../lib/index'
 
-class Maybe {
+class ClassMaybe {
   static Just(x) {
-    return {
-      value: x
-      , case: Maybe.Just.name
-      , type: Maybe.name
-    }
+    return valueCaseInstance(
+      ClassMaybe.name,
+      ClassMaybe.Just.name,
+      x
+    )
   }
   static Nothing() {
-    return {
-      case: Maybe.Nothing.name
-      , type: Maybe.name
-    }
+    return emptyCaseInstance(
+      ClassMaybe.name,
+      ClassMaybe.Nothing.name
+    )
   }
 
   static map(f) {
-    return o => fold(Maybe)({
-      Just: a => Maybe.Just(f(a))
-      , Nothing: () => Maybe.Nothing()
+    return o => fold(ClassMaybe)({
+      Just: a => ClassMaybe.Just(f(a))
+      , Nothing: () => ClassMaybe.Nothing()
     })(o)
   }
 }
 
 class Loadable {
   static Loaded(x) {
-    return {
-      value: x
-      , case: Loadable.Loaded.name
-      , type: Loadable.name
-      , toString() {
-        return 'Loaded(' + x + ')'
-      }
-    }
+    return valueCaseInstance(
+      Loadable.name,
+      Loadable.Loaded.name,
+      x
+    )
   }
   static Loading() {
-    return {
-      of: Loadable.Loading.name
-      , type: Loadable.name
-      , toString() {
-        return 'Loading()'
-      }
-    }
+    return emptyCaseInstance(
+      Loadable.name,
+      Loadable.Loading.name
+    )
   }
 }
 
-var Maybe2 = {
+var ObjMaybe = {
   name: 'Maybe'
   , Just(x) {
-    return {
-      value: x
-      , case: Maybe2.Just.name
-      , type: Maybe2.name
-    }
+    return valueCaseInstance(
+      ObjMaybe.name,
+      ObjMaybe.Just.name,
+      x
+    )
   }
   , Nothing() {
-    return {
-      case: Maybe2.Nothing.name
-      , type: Maybe2.name
-    }
+    return emptyCaseInstance(
+      ObjMaybe.name,
+      ObjMaybe.Nothing.name
+    )
   }
 }
 
 test('stags', function (t) {
-  const foldMaybe = fold(Maybe)
+  const foldMaybe = fold(ClassMaybe)
 
   var maybeToNum = foldMaybe({
     Just: () => 1
@@ -83,13 +80,13 @@ test('stags', function (t) {
   })
 
   t.equals(
-    maybeToNum(Maybe.Just('hi'))
+    maybeToNum(ClassMaybe.Just('hi'))
     , 1
     , 'fold can fold valid types'
   )
 
   t.equals(
-    maybeToNum(Maybe2.Just('hey'))
+    maybeToNum(ClassMaybe.Just('hey'))
     , 1
     , 'fold can fold different types that meet the spec'
   )
@@ -107,11 +104,9 @@ test('stags', function (t) {
   )
 
   t.throws(
-    () => maybeToNum({
-      type: Maybe.name
-      , case: Loadable.Loaded.name
-      , value: 1
-    })
+    () => maybeToNum(
+      valueCaseInstance(ClassMaybe.name, Loadable.Loaded.name, 1)
+    )
     , /InstanceShapeInvalid/
     , 'fold identifies when a instance has the wrong case key'
   )
@@ -134,17 +129,29 @@ test('stags', function (t) {
     , 'fold detects when there are too few many provided'
   )
 
+  t.equals(
+    Maybe.Y( Maybe.Y({ a: 1, b: true }) )+'',
+    'stags.Maybe.Y(stags.Maybe.Y({"a":1,"b":true}))',
+    'toString is useful for nested objects'
+  )
+
+  t.equals(
+    Maybe.Y( 'hello' )+'',
+    'stags.Maybe.Y("hello")',
+    'toString is useful with primative strings'
+  )
+
+  t.equals(
+    Maybe.Y( 1 )+'',
+    'stags.Maybe.Y(1)',
+    'toString is useful with numbers'
+  )
+
   t.end()
 })
 
 test('errors', function (t) {
   const YNMaybe = maybe('Maybe')
-
-  const fromMaybe = (otherwise, f) =>
-    fold(YNMaybe)({
-      Y: f
-      , N: () => otherwise
-    })
 
   t.throws(
     () => fold(YNMaybe)({
@@ -165,13 +172,15 @@ test('errors', function (t) {
   )
 
   t.throws(
-    () => fromMaybe(0, x => x)(null)
+    () => YNMaybe.getOr(0, x => x)(null)
     , /InstanceNull/
     , 'InstanceNull'
   )
 
   t.throws(
-    () => fromMaybe(0, x => x)({ type: 'Maybe', case: 'Unknown' })
+    () => YNMaybe.getOr(0, x => x)(
+      emptyCaseInstance('Maybe', 'Unknown')
+    )
     , /InstanceShapeInvalid/
     , 'InstanceShapeInvalid'
   )
@@ -179,19 +188,19 @@ test('errors', function (t) {
   const { N: L } = either('Either')
 
   t.throws(
-    () => fromMaybe(0, x => x * x)(L(10))
+    () => YNMaybe.getOr(0, x => x * x)(L(10))
     , /InstanceWrongType/
     , 'InstanceWrongType: Either is not Maybe'
   )
 
   t.throws(
-    () => fromMaybe(0, x => x * x)(L({ toString() { return 'hello' } }))
+    () => YNMaybe.getOr(0, x => x * x)(L({ toString() { return 'hello' } }))
     , /InstanceWrongType/
     , 'InstanceWrongType: Object is not maybe'
   )
 
   t.throws(
-    () => fromMaybe(0, x => x * x)(L(null))
+    () => YNMaybe.getOr(0, x => x * x)(L(null))
     , /InstanceWrongType/
     , 'InstanceWrongType: Either of null is not Maybe'
   )
@@ -206,8 +215,8 @@ test('errors', function (t) {
     const T = maybe('Maybe')
     t.throws(
       () => T.chain( () => null ) (T.Y(1))
-      ,/InstanceShapeInvalid:/
-      ,'InstanceShapeInvalid'
+      ,/InstanceNull/
+      ,'InstanceNull'
     )
   }
 
@@ -219,25 +228,51 @@ test('yslashn', function (t) {
 
   const YNMaybe = maybe('Maybe')
 
-  const fromMaybe = (otherwise, f) =>
-    YNMaybe.bifold(
-      () => otherwise, f
-    )
-
   const y = YNMaybe.Y(10)
   const n = YNMaybe.N()
 
   t.equals(
-    fromMaybe(0, x => x * x)(y)
-    , 100
-    ,'fromMaybe with Just'
+    YNMaybe.getOr(0)(y)
+    , 10
+    ,'getOr with Just'
   )
   // => 100
 
   t.equals(
-    fromMaybe(0, x => x * x)(n)
+    YNMaybe.getOr(0)(n)
     , 0
-    ,'fromMaybe with Nothing'
+    ,'getOr with Nothing'
+  )
+
+  t.equals(
+    YNMaybe.bimap(
+      () => 100,
+      () => 200
+    ) (YNMaybe.N()) +''
+    , YNMaybe.N()+''
+    ,'bimap N'
+  )
+
+  t.equals(
+    YNMaybe.bimap(
+      () => 100,
+      () => 200
+    ) (YNMaybe.Y()) +''
+    , YNMaybe.Y(200) +''
+    ,'bimap Y'
+  )
+
+  t.equals(
+    YNMaybe.getWith(0, x => x * x)(y)
+    , 100
+    ,'getWith with Just'
+  )
+  // => 100
+
+  t.equals(
+    YNMaybe.getWith(0, x => x * x)(n)
+    , 0
+    ,'getWith with Nothing'
   )
 
   // Selected = Y a | N
@@ -267,7 +302,7 @@ test('yslashn', function (t) {
     })
 
   t.throws(
-    () => f(loading).case
+    () => caseName(f(loading))
     , /InstanceWrongType/
   )
 
@@ -333,43 +368,54 @@ test('bifold, bimap, map, chain', function (t) {
   )
 
   t.equals(
-    Maybe.map(x => x * x)(Maybe.N()).case
+    caseName(Maybe.map(x => x * x)(Maybe.N()))
     , 'N'
   )
 
   t.deepEquals(
     Maybe.chain(x => Maybe.Y(x))(Maybe.Y(10))
-    , { value: 10, case: 'Y', type: 'Maybe' }
+    , valueCaseInstance('Maybe', 'Y', 10)
   )
 
   t.deepEquals(
     Maybe.chain(() => Maybe.N())(Maybe.Y(10))
-    , { case: 'N', type: 'Maybe' }
+    , emptyCaseInstance('Maybe', 'N')
+  )
+
+  t.deepEquals(
+    Maybe.chain(() => Maybe.Y('does not happen'))(Maybe.N())
+    , emptyCaseInstance('Maybe', 'N')
   )
 
   t.deepEquals(
     Maybe.chain(x => x)(Maybe.N())
-    , { case: 'N', type: 'Maybe' }
+    , emptyCaseInstance('Maybe', 'N')
   )
 
   t.throws(
     () => Maybe.chain(null)
     , /VisitorNotAFunction/
+    ,'Maybe.chain visitor not a function'
   )
 
   t.throws(
     () => Maybe.chain(x => x)(null)
     , /InstanceNull/
+    ,'Maybe.chain instance null'
   )
 
   t.throws(
     () => Maybe.chain(x => x)(Either.N(2))
     , /InstanceWrongType/
+    , 'Maybe.chain InstanceWrongType'
   )
 
   t.throws(
-    () => Maybe.chain(x => x)({ type: 'Maybe', case:'Bad' })
+    () => Maybe.chain(x => x)(
+      emptyCaseInstance('Maybe', 'Bad')
+    )
     , /InstanceShapeInvalid/
+    , 'Maybe.chain InstanceShapeInvalid'
   )
 
   t.end()
@@ -377,38 +423,56 @@ test('bifold, bimap, map, chain', function (t) {
 })
 
 
-test('foldCase, mapCase, chainCase', function (t) {
+test('otherwise = fold, map, chain', function (t) {
   const Maybe = maybe('Maybe')
   const Loaded = maybe('Loaded')
 
+  const _ = otherwise(['Y', 'N'])
+
+  const foldY = (otherwise, f) => Maybe.fold({
+    ..._(() => otherwise),
+    Y: f
+  })
+
+  const foldN = (otherwise, f) => Maybe.fold({
+    ..._(() => otherwise),
+    N: f
+  })
+
+  const chainY = f => Ma => Maybe.fold({
+    ..._( () => Ma ),
+    Y: f
+  }) (Ma)
+
   t.equals(
-    foldCase(Maybe.Y())(0, x => x * x)(Maybe.Y(10))
+    foldY(0, x => x * x)(Maybe.Y(10))
     , 100
+    ,'foldY'
   )
 
   t.equals(
-    foldCase(Maybe.N())('No', () => 'Yes')(Maybe.N())
+    foldN('No', () => 'Yes')(Maybe.N())
     , 'Yes'
+    ,'foldN'
   )
 
 
   t.equals(
-    foldCase(Maybe.Y())('No', x => x)(Maybe.N())
+    foldY('No', x => x)(Maybe.N())
     , 'No'
+    ,'foldY with N'
   )
 
   t.deepEquals(
-    chainCase
-      (Maybe.Y())
-      (x => Maybe.Y(x))
+    chainY
+      ( x => Maybe.Y(x) )
       (Maybe.Y('Yes'))
     , Maybe.Y('Yes')
     ,'chainCase happy path'
   )
 
   t.deepEquals(
-    chainCase
-      (Maybe.Y())
+    chainY
       (x => Maybe.Y(x))
       (Maybe.N())
     , Maybe.N()
@@ -416,44 +480,41 @@ test('foldCase, mapCase, chainCase', function (t) {
   )
 
   t.equals(
-    bimapCase(Maybe.Y())(() => 'No', () => 'Yes')(Maybe.Y()).case
-    , 'Y'
+    map (Maybe) ({
+      ..._( () => 'No' ),
+      Y: () => 'Yes'
+    }) 
+    ( Maybe.Y() )
+    + ''
+    , 'Maybe.Y("Yes")'
   )
 
+  t.equals(
+    map (Maybe) ({
+      ..._( () => 'No' ),
+      Y: () => 'Yes'
+    }) 
+    ( Maybe.N() )
+    + ''
+    , 'Maybe.N()'
+  )
 
   t.equals(
-    bimapCase(Maybe.Y())(() => 'No', () => 'Yes')(Maybe.N()).case
+    caseName(Maybe.map(x => x * x)(Maybe.N()))
     , 'N'
   )
 
-  t.equals(
-    mapCase(Maybe.Y())(() => 'Yes')(Maybe.Y()).case
-    , 'Y'
-  )
+  const validFold = {
+    N: () => 'No',
+    Y: () => 'Yes'
+  }
 
-  t.equals(
-    mapCase(Maybe.Y())(x => x)(Maybe.N()).case
-    , 'N'
-  )
-
-  t.equals(
-    Maybe.map(x => x * x)(Maybe.N()).case
-    , 'N'
-  )
-
-    ;[
-      [() => mapCase(Maybe.Y())(null), /VisitorNotAFunction/]
-      , [() => mapCase(Maybe.Y())(x => x)(null), /InstanceNull/]
-      , [() => mapCase(Maybe.Y())(x => x)(Loaded.N()), /InstanceWrongType/]
-    ]
-      .concat(
-        [() => mapCase(Maybe)
-          , () => mapCase(function () { })
-          , () => mapCase(null)
-        ]
-          .map(f => [f, /InvalidCase/])
-      )
-      .forEach(([f, pattern]) => t.throws(f, pattern, f + ''))
+  ;
+  [ [() => map(Maybe)(null), /CasesShapeInvalid/]
+  , [() => map(Maybe)(validFold)(null), /InstanceShapeInvalid/]
+  , [() => map(Maybe)(validFold)(Loaded.N()), /InstanceShapeInvalid/]
+  ]
+  .forEach(([f, pattern]) => t.throws(f, pattern, f + ''))
 
   t.end()
 
@@ -482,6 +543,32 @@ test('tagged', t => {
   t.equals(
     JSON.stringify({ b1, b2, b3 })
     , JSON.stringify({})
+  )
+
+  t.end()
+})
+
+test('sameCase, foldSameCase', t => {
+  const a = Maybe.Y(100)
+  const b = Maybe.Y(200)
+  const A = Either.Y(100)
+
+  t.equals(
+    sameCase(Maybe)(a,b),
+    true,
+    'sameCase affirmative'
+  )
+
+  t.equals(
+    sameCase(Maybe)(a,b),
+    true,
+    'sameCase negative'
+  )
+
+  t.throws(
+    () => sameCase(Either)(A,b),
+    '/InstanceShapeInvalid/',
+    'sameCase different types'
   )
 
   t.end()
