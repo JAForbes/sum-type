@@ -147,6 +147,12 @@ test('stags', function (t) {
     'toString is useful with numbers'
   )
 
+  t.equals(
+    Either.N( new Error('Oh noes!') )+'',
+    'stags.Either.N(new Error("Oh noes!"))',
+    'toString is useful with Errors'
+  )
+
   t.end()
 })
 
@@ -595,6 +601,38 @@ test('toBoolean', t => {
     () => Maybe.toBoolean(A),
     '/InstanceShapeInvalid/',
     'sameCase different types'
+  )
+
+  t.end()
+})
+
+
+test('encase', t => {
+  const maybeJSON = Maybe.encase(JSON.parse)
+  const eitherJSON = Either.encase(JSON.parse)
+
+  t.equals(
+    maybeJSON(JSON.stringify({ yes: 1 }))+'',
+    Maybe.Y({ yes: 1 })+'',
+    'encase Maybe Y'
+  )
+  
+  t.equals(
+    maybeJSON('<a>No</a>')+'',
+    Maybe.N()+'',
+    'encase Maybe N'
+  )
+
+  t.equals(
+    eitherJSON(JSON.stringify({ yes: 1 }))+'',
+    Either.Y({ yes: 1 })+'',
+    'encase Maybe Y'
+  )
+  
+  t.equals(
+    eitherJSON('<a>No</a>')+'',
+    'stags.Either.N(new SyntaxError("Unexpected token < in JSON at position 0"))',
+    'encase Either N'
   )
 
   t.end()

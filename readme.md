@@ -259,6 +259,12 @@ const Loaded =
 
 > ⚠ You should almost always avoid coercing a sum type to a boolean.  If you are checking for `Y`, try `.map`.  If you are checking for `N` try `getOr`.  Booleans have no context, no associated data, but there's almost always associated data in your model so `toBoolean` is much like moving from a lossless format to a lossy format.
 
+#### `either::encase`
+
+`( a -> b ) -> Either Y b | N Error`
+
+Takes a potentially unsafe function and decorates it to return an Either where non thrown values are encased in `Either.Y` and thrown values are encased in `Either.N`.
+
 #### `maybe`
 
 ```js
@@ -309,6 +315,13 @@ const Selected =
 `Maybe Y a | N -> boolean`
 
 > ⚠ You should almost always avoid coercing a sum type to a boolean.  If you are checking for `Y`, try `.map`.  If you are checking for `N` try `getOr`.  Booleans have no context, no associated data, but there's almost always associated data in your model so `toBoolean` is much like moving from a lossless format to a lossy format.
+
+
+#### `maybe::encase`
+
+`( a -> b ) -> Maybe Y b | N Error`
+
+Takes a potentially unsafe function and decorates it to return an Maybe where non thrown values are encased in `Maybe.Y` and thrown values are represented as `Maybe.N()`.  If the specific error value is relevant try `Either.encase` instead as it will return your error object in an `Either.N` structure.
 
 #### Canonical Maybe / Either
 
