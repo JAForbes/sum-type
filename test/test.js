@@ -359,9 +359,8 @@ test('yslashn', function (t) {
 
 test('bifold, bimap, map, chain', function (t) {
   const Maybe = maybe('Maybe')
-  const Either = maybe('Either')
+  const Either = either('Either')
 
-  
   t.equals(typeof Maybe.map, 'function', 'ylashn has a map')
   t.equals(typeof Maybe.bifold, 'function', 'ylashn has a bifold')
   t.equals(typeof Maybe.bimap, 'function', 'ylashn has a bimap')
@@ -396,6 +395,48 @@ test('bifold, bimap, map, chain', function (t) {
   t.deepEquals(
     Maybe.chain(x => x)(Maybe.N())
     , emptyCaseInstance('Maybe', 'N')
+  )
+
+  t.equals(
+    Maybe.map( x => x * 100 ) ( Maybe.Y(10000) )+''
+    ,Maybe.Y(10000 * 100)+''
+    ,'Maybe map positive'
+  )
+
+  t.equals(
+    Maybe.map( x => x * 100 ) ( Maybe.N() )+''
+    ,Maybe.N()+'',
+    'Maybe map negative'
+  )
+  
+  t.equals(
+    (Either.map( x => x * 100 ) ( Either.Y(10000) ))+''
+    ,Either.Y(10000 * 100)+''
+    ,'Either map positive'
+  )
+
+  t.equals(
+    (Either.map( x => x * 100 ) ( Either.N(10000) ))+''
+    ,Either.N(10000)+'',
+    'Either map negative'
+  )
+
+  t.equals(
+    (Either.chain( x => Either.Y(x * 100) ) ( Either.Y(10000) ))+''
+    ,Either.Y(10000 * 100)+'',
+    'Either chain positive'
+  )
+
+  t.throws(
+    () => (Either.chain( x => x * 100 ) ( Either.Y(10000) ))+'',
+    /InstanceWrongType/,
+    'Either chain bad return type'
+  )
+
+  t.equals(
+    (Either.chain( x => x * 100 ) ( Either.N(10000) ))+''
+    ,Either.N(10000)+'',
+    'Either chain negative'
   )
 
   t.throws(
