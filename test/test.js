@@ -703,3 +703,67 @@ test('encase', t => {
 
   t.end()
 })
+
+
+test('all / any', t => {
+  var a = Maybe.Y(3)
+  var b = Maybe.Y(2)
+  var c = Maybe.N()
+
+  var A = Either.Y(3)
+  var B = Either.Y(2)
+  var C = Either.N('Error')
+
+  t.equals(
+    Maybe.all([a,b])+'',
+    Maybe.Y([a,b].map( x => x.value ))+'',
+    'Maybe#all affirmative'
+  )
+
+  t.equals(
+    Maybe.all([a,b,c])+'',
+    Maybe.N()+'',
+    'Maybe#all negative'
+  )
+
+  t.equals(
+    Either.all([A,B])+'',
+    Either.Y([A,B].map( x => x.value ))+'',
+    'Either#all affirmative'
+  )
+
+  t.equals(
+    Either.all([A,B,C])+'',
+    C+'',
+    'Either#all negative'
+  )
+
+  
+  t.equals(
+    Maybe.any([a,b,c])+'',
+    Maybe.Y([a,b].map( x => x.value ))+'',
+    'Maybe#any affirmative'
+  )
+
+  t.equals(
+    Maybe.any([c, c, c])+'',
+    Maybe.N()+'',
+    'Maybe#any negative'
+  )
+
+  t.equals(
+    Either.any([A,B,C])+'',
+    Either.Y([A,B].map( x => x.value ))+'',
+    'Either#any affirmative'
+  )
+
+  t.equals(
+    Either.any([C,C,C])+'',
+    C+'',
+    'Either#any negative'
+  )
+
+  
+
+  t.end()
+})
