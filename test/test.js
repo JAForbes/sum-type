@@ -354,6 +354,31 @@ test('yslashn', function (t) {
     , 25
   )
 
+  t.equals(
+    Selected.fromNullable(null)+'',
+    Selected.N()+'',
+    'Maybe.fromNullable N'
+  )
+
+  
+  t.equals(
+    Selected.fromNullable(1)+'',
+    Selected.Y(1)+'',
+    'Maybe.fromNullable Y'
+  )
+
+  t.equals(
+    Loaded.fromNullable(null)+'',
+    Loaded.N(null)+'',
+    'Either.fromNullable N'
+  )
+  
+  t.equals(
+    Loaded.fromNullable(1)+'',
+    Loaded.Y(1)+'',
+    'Either.fromNullable Y'
+  )
+
   t.end()
 })
 
