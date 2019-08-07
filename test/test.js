@@ -13,6 +13,8 @@ import {
   , caseName
   , otherwise
   , sameCase
+  , run
+  , pipe
 } from '../lib/index'
 
 class ClassMaybe {
@@ -763,7 +765,40 @@ test('all / any', t => {
     'Either#any negative'
   )
 
-  
+  t.end()
+})
 
+test('run / pipe', t => {
+  t.throws(
+    () => run(),
+    /non-empty spread of functions/,
+    'Empty run throws'
+  )
+
+  t.throws(
+    () => pipe(),
+    /non-empty spread of functions/,
+    'Empty pipe throws'
+  )
+
+  t.equals(
+    run(
+      null,
+      Maybe.fromNullable,
+      Maybe.getOr('It worked')
+    ),
+    'It worked',
+    'run works'
+  )
+
+  
+  t.equals(
+    pipe(
+      Maybe.fromNullable,
+      Maybe.getOr('It worked')
+    ) (null),
+    'It worked',
+    'pipe works'
+  )
   t.end()
 })
