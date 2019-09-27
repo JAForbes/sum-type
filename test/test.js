@@ -2,8 +2,6 @@ import test from 'tape'
 
 import {
   fold
-  , map
-  , tagged
   , maybe
   , either
   , Maybe
@@ -15,6 +13,10 @@ import {
   , sameCase
   , run
   , pipe
+  , decorate
+  , toString
+  , toJSON
+  , tags
 } from '../lib/index'
 
 class ClassMaybe {
@@ -213,6 +215,40 @@ test('errors', function (t) {
     , 'InstanceWrongType: Either of null is not Maybe'
   )
 
+  const { Y, N } = Either
+
+  t.equals(
+    toString(Either.ys([Y(1), Y(2), N(2)]))
+    ,toString([1, 2])
+    ,'Either.ys'
+  )
+
+  
+  t.equals(
+    toString(Either.ns([Y(1), Y(2), N(2), N(3)]))
+    ,toString([2, 3])
+    ,'Either.ns'
+  )
+
+  t.equals(
+    (Either.concatWith ( a => b => a + b ) ( Y(1) ) ( Y(2) ))+''
+    ,Y(3)+''
+    ,'concatWith Y Y'
+  )
+
+  t.equals(
+    (Either.concatWith ( a => b => a + b ) ( Y(1) ) ( N(2) ))+''
+    ,N(2)+''
+    ,'concatWith Y N'
+  )
+
+  
+  t.equals(
+    (Either.concatWith ( a => b => a + b ) ( N(1) ) ( N(2) ))+''
+    ,N(1)+''
+    ,'concatWith N N'
+  )
+
   t.throws(
     () => fold(null)
     ,/NotAType/
@@ -341,11 +377,11 @@ test('yslashn', function (t) {
   )
 
   const Credit =
-    tagged('Credit')({
-      Recharge: []
-      , Normal: ['n']
-      , Insufficient: []
-    })
+    tags('Credit', [
+      'Recharge'
+      , 'Normal'
+      , 'Insufficient'
+    ])
 
   t.equals(
     fold(Credit)({
@@ -384,7 +420,7 @@ test('yslashn', function (t) {
   t.end()
 })
 
-test('bifold, bimap, map, chain', function (t) {
+test('bifold, bimap, map, chain, tagBy', function (t) {
   const Maybe = maybe('Maybe')
   const Either = either('Either')
 
@@ -464,6 +500,18 @@ test('bifold, bimap, map, chain', function (t) {
     (Either.chain( x => x * 100 ) ( Either.N(10000) ))+''
     ,Either.N(10000)+'',
     'Either chain negative'
+  )
+
+  t.equals(
+    (Either.tagBy('negative', x => x >= 0) (-100))+''
+    ,Either.N('negative')+''
+    ,'Either tagBy negative'
+  )
+
+  t.equals(
+    (Either.tagBy('negative', x => x >= 0) (100))+''
+    ,Either.Y(100)+''
+    ,'Either tagBy positive'
   )
 
   t.throws(
@@ -554,72 +602,51 @@ test('otherwise = fold, map, chain', function (t) {
   )
 
   t.equals(
-    map (Maybe) ({
-      ..._( () => 'No' ),
-      Y: () => 'Yes'
-    }) 
+    Maybe.map(
+      () => 'Yes'
+    ) 
     ( Maybe.Y() )
     + ''
     , 'Maybe.Y("Yes")'
+    , 'Maybe map positive'
   )
 
   t.equals(
-    map (Maybe) ({
-      ..._( () => 'No' ),
-      Y: () => 'Yes'
-    }) 
+    Maybe.map(
+      () => 'Yes'
+    ) 
     ( Maybe.N() )
     + ''
     , 'Maybe.N()'
+    , 'Maybe map negative'
   )
 
   t.equals(
     caseName(Maybe.map(x => x * x)(Maybe.N()))
     , 'N'
+    , 'caseName Maybe N'
   )
 
+  const validVisitor = 
+    () => 'Yes'
+  
   const validFold = {
-    N: () => 'No',
-    Y: () => 'Yes'
+    Y: () => 'Yes',
+    N: () => 'No'
   }
 
   ;
-  [ [() => map(Maybe)(null), /CasesShapeInvalid/]
-  , [() => map(Maybe)(validFold)(null), /InstanceShapeInvalid/]
-  , [() => map(Maybe)(validFold)(Loaded.N()), /InstanceShapeInvalid/]
+  [ [() => Maybe.map(null), /VisitorNotAFunction/]
+  , [() => Maybe.map(validVisitor)(null), /InstanceShapeInvalid/]
+  , [() => Maybe.map(validVisitor)(Loaded.N()), /InstanceShapeInvalid/]
+  , [() => fold(Maybe)(null), /CasesShapeInvalid/]
+  , [() => fold(Maybe)(validFold)(null), /InstanceNull/]
+  , [() => fold(Maybe)(validFold)(Loaded.N), /InstanceWrongType/]
   ]
   .forEach(([f, pattern]) => t.throws(f, pattern, f + ''))
 
   t.end()
 
-})
-
-test('tagged', t => {
-  const T = tagged('T')({
-    A: ['a'],
-    B: []
-  })
-
-  t.throws(
-    () => T.A()
-    , /A expects {a} but received: undefined/
-  )
-
-  t.throws(
-    () => T.A({})
-    , /A is missing expected values: a/
-  )
-
-  const b1 = T.B(1, 2, 3).value
-  const b2 = T.B({}).value
-  const b3 = T.B().value
-
-  t.equals(
-    JSON.stringify({ b1, b2, b3 })
-    , JSON.stringify({})
-  )
-
-  t.end()
 })
 
 test('sameCase, foldSameCase', t => {
@@ -736,7 +763,7 @@ test('all / any', t => {
 
   t.equals(
     Either.all([A,B,C])+'',
-    C+'',
+    Either.N([C.value])+'',
     'Either#all negative'
   )
 
@@ -799,6 +826,167 @@ test('run / pipe', t => {
     ) (null),
     'It worked',
     'pipe works'
+  )
+  t.end()
+})
+
+test('decorate', t => {
+
+  {
+    const oldChainN = Either.chainN
+    const newChainN = decorate(Either).chainN
+
+    t.equals(
+      oldChainN
+      , newChainN
+      , 'Decorate only decorates one time'
+    )
+  }
+
+  {
+    t.equals(
+      Either.isY( Either.N() ),
+      false,
+      'isY with N'
+    )
+
+    t.equals(
+      Either.isN( Either.N() ),
+      true,
+      'isN with N'
+    )
+  }
+
+  {
+    const good = {}
+    const bad = {}
+
+    t.equals(
+      (Either.mapY( () => bad ) (Either.N(good) )).value,
+      good,
+      'mapY with N'
+    )
+
+    t.equals(
+      (Either.mapN( () => good ) ( Either.N(bad) )).value,
+      good,
+      'mapN with N'
+    )
+  }
+
+  {
+    const good = {}
+    const bad = {}
+
+    t.equals(
+      (Either.chainY( () => Either.Y(bad) ) (Either.N(good) )).value,
+      good,
+      'chainY with N'
+    )
+
+    t.equals(
+      (Either.chainN( () => Either.Y(good) ) ( Either.N(bad) )).value,
+      good,
+      'chainN with N'
+    )
+  }
+
+  {
+    const good = {}
+    const bad = {}
+
+    t.equals(
+      Either.getYOr( good ) (Either.N(bad) ),
+      good,
+      'getYOr with N'
+    )
+
+    t.equals(
+      Either.getNOr( bad ) ( Either.N(good) ),
+      good,
+      'getNOr with N'
+    )
+  }
+
+
+  {
+    const good = {}
+    const bad = {}
+
+    t.equals(
+      Either.getYWith( good, x => x ) (Either.N(bad) ),
+      good,
+      'getYWith with N'
+    )
+
+    t.equals(
+      Either.getNWith(  bad, x => x ) ( Either.N(good) ),
+      good,
+      'getNWith with N'
+    )
+  }
+
+  t.end()
+})
+
+
+test('annotate', t => {
+  t.equals(toString({}), '{}', 'empty object')
+
+  t.equals(toString([]), '[]', 'empty array')
+
+  t.equals(
+    toString(new Date('2012-01-01T00:00:00.000Z'))
+    , 'new Date("2012-01-01T00:00:00.000Z")'
+    , 'Date'
+  )
+
+  t.equals(
+    toJSON(1),
+    1,
+    'toJSON(1)'
+  )
+
+  t.equals(
+    toJSON(Either.Y(1)),
+    1,
+    'toJSON(Either.Y(1))'
+  )
+
+  t.equals(
+    toJSON(Maybe.N()),
+    null,
+    'toJSON(Maybe.N())'
+  )
+
+  t.equals(
+    toString(toJSON({ a: 1 })),
+    '{"a":1}',
+    'toJSON({"a":1})'
+  )
+
+  t.equals(
+    toString(toJSON([1,2,3])),
+    '[1, 2, 3]',
+    'toJSON([1, 2, 3])'
+  )
+
+  t.end()
+})
+
+test('tags', t => {
+  const State = tags('State', ['None', 'V1'])
+
+  t.equals(
+    State.V1(1)+''
+    ,'State.V1(1)'
+    , 'tags value constructor'
+  )
+
+  t.equals(
+    State.None()+''
+    ,'State.None()'
+    , 'tags null constructor'
   )
   t.end()
 })
