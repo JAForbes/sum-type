@@ -1,6 +1,6 @@
 {
   "name": "stags",
-  "version": "1.0.0-rc24",
+  "version": "1.0.0-rc30",
   "description": "An underlying format for algebraic types that can be used directly or composed with other libraries.",
   "main": "dist/stags.min.js",
   "unpkg": "dist/stags.min.js",
@@ -13,14 +13,15 @@
   "scripts": {
     "test": "npm run test:dist && npm run test:test && npm run test:check-coverage && npm run test:report-coverage",
     "test:dist": "npm run dist",
-    "test:test": "nyc --reporter=lcov tape -r esm \"./test/*.js\" | tap-spec",
+    "test:test": "nyc --reporter=lcov --require esm tape \"./test/*.js\" | tap-spec",
     "test:check-coverage": "nyc check-coverage --statements 100 --branches 100 --functions 100 --lines 100",
     "test:report-coverage": "nyc report",
     "dist:fold": "rollup -c ./rollup.config.js",
     "dist": "concurrently npm:dist:*",
     "release": "git push && npm version minor && npm publish",
     "preversion": "npm test",
-    "predist": "rm -fr dist && mkdir dist"
+    "predist": "rm -fr dist && mkdir dist",
+    "prepublish": "npm run dist"
   },
   "keywords": [
     "fp",
