@@ -7,12 +7,12 @@ A helper function for generating folds that are versioned separately to the type
 ```js
 
 const { Y, N } = stags.Maybe
-const Platform = stags.tagged ('Platform') ({
-    ModernWindows: [],
-    XP: [],
-    Linux: [],
-    Darwin: []
-})
+const Platform = stags.tags ('Platform') ([
+    'ModernWindows',
+    'XP',
+    'Linux',
+    'Darwin'
+])
 
 // defined separately to detect changes in intent
 const rest = stags.otherwise([
@@ -47,16 +47,16 @@ winPing( Platform.XP() )
 At a later date, you may add support for WSL.  Which will likely break earlier assumptions because it's both linux _and_ windows.
 
 ```js
-const Platform = stags.tagged ('Platform') ({
-    ModernWindows: [],
-    XP: [],
-    WSL: [], // NEW!
-    Linux: [],
-    Darwin: []
-})
+const Platform = stags.tags ('Platform') ([
+    'ModernWindows',
+    'XP',
+    'WSL',
+    'Linux',
+    'Darwin'
+])
 ```
 
-Now `stags` will helpfully throw a `MissingCases` error for all the usages of our original `otherwise` functions that no longer discriminate the union.
+Now `stags` will helpfully throw a `MissingTags` error for all the usages of our original `otherwise` functions that no longer discriminate the union.
 
 We can now create a new otherwise for that assumption:
 
@@ -116,12 +116,12 @@ When we've updated all the references, `stags` will stop throwing errors on init
 
 ```js
 const { Y, N } = stags.Maybe
-const Platform = stags.tagged ('Platform') ({
-    ModernWindows: [],
-    XP: [],
-    Linux: [],
-    Darwin: []
-})
+const Platform = stags.tags ('Platform') ([
+    'ModernWindows',
+    'XP',
+    'Linux',
+    'Darwin'
+])
 
 const rest = stags.otherwise([ // renamed
     'ModernWindows',

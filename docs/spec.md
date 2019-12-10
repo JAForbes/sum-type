@@ -1,76 +1,72 @@
 ## Specification
 
-#### What's a "Type"
+#### What is a "Type"
 
-A type is a struct with a name property and as many keys as there are cases.
+A type is an object with a property: `type` a list of tag names: `tags` and a `specs` object.
 
-Each case on the type must have a `name` property that matches it's key.
 
 ```
-{ name :: TitlecaseString
-, [a] :: any
-, [b] :: any
+{ type :: String
+, tags :: String[]
+, specs :: StrMap<any>
 }
 ```
 
 Here is an example of a valid `Maybe` type
 
 ```js
-{ name: 'Maybe'
-, Just: null
-, Nothing: null
+{ type: 'Maybe'
+, tags: ['Y', 'N']
+, specs: {}
 }
 ```
 
-Keep in mind lowercase properties other than `name` are ignored. If you want your type to have static functions or other data you can safely do so as long as the property is a `LowercaseString`
-You can safely add static methods or properties to your type structure without interfing with `stags` provided they do not start with a capital letter.
+#### What is an "Instance"
 
-> 💡 Any keys in a call to `getOwnPropertyNames(Type)` where `key[0] == key[0].toUpperCase()` will be treated as a case.
+An instance is an object with a `type`, `tag` and an optional `value` property.
 
-Because `.name` is auto generated for functions and classes, the following forms are spec compliant.
-
-```js
-const Maybe = {
-    name: 'Maybe'
-    Just(){} // Maybe.Just.name == 'Just'
-    Nothing(){} //Maybe.Nothing.name == 'Nothing'
-}
-```
-
-```js
-class Maybe {
-  static Just() {} // Maybe.Just.name == 'Just'
-  static Nothing() {} // Maybe.Nothing.name == 'Nothing'
-}
-```
-
-#### What is a "Case"
+The `tag` property must correspond to a matching item in the type's `tags` list.
 
 ```
-{ type :: TitlecaseString
-, case :: TitlecaseString
+{ type :: String
+, tag :: String
 , value? :: a
 }
 ```
 
-- A `Case` is a struct with a `type`, `case` and an optional `value` property.
-- The type and case property must be an `TitlecaseString`.
-- The `case` property must correspond to a matching key on a type object.
-- The matching type object must include a property that matches the cases `case` property.
+An instance _can_ have a `value` property. But it is optional. The `value` property can be of any type.
 
-A case _can_ have a `value` property. But it is optional. The `value` property can be of any type.
+#### What is a "Spec"?
 
-> 💡 The above specification is compatible with Javascript classes because `class` has an automatically generated property `name`.
+A type has a key value map of specifications, that tell's functions that a type supports some functionality.
 
-#### Show me some examples of some valid cases.
+Here is an example of some valid usage of `specs`.
 
 ```js
-{ case: 'Case1'
-, type: Type1.name //references above
+{ type: 'Maybe'
+, tags: ['Y', 'N']
+, specs: {
+  'bifunctor': ['Y', 'N'],
+  'functor': ['Y'],
+  'monoid': 'N'
 }
+}
+```
 
-{ case: 'Case2'
-, type: 'Type1' // has same name as above which is also OK
-, value: 'this is a value'
-}
+Your functions can then inspect `type.specs` to check if it should support the required functionality for your function.
+
+> stags always namespaces it's specification names with the `stags/` prefix to separate stags built in functionality from user land functionality.
+
+Specs allow the community to define their own type classes and associated functions, and users can share these specs without relying on the core stags library.
+
+```js
+const stags = require('stags')
+const functor = require('some-lib')
+const Maybe = functor(stags.either('Maybe'))
+
+'somelib/functor' in Maybe.specs
+//=> true
+
+typeof Maybe.map
+// true
 ```

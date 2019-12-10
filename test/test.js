@@ -2,81 +2,46 @@ import test from 'tape'
 
 import {
   fold
-  , maybe
-  , either
-  , Maybe
+  , valueInstance
+  , emptyInstance
+  , Y
   , Either
-  , valueCaseInstance
-  , emptyCaseInstance
-  , caseName
+
+  , either
+  , maybe
+  , tagName
   , otherwise
-  , sameCase
   , run
   , pipe
   , decorate
   , toString
   , toJSON
   , tags
+  , tagged
+  , sameCase
 } from '../lib/index'
 
-class ClassMaybe {
-  static Just(x) {
-    return valueCaseInstance(
-      ClassMaybe.name,
-      ClassMaybe.Just.name,
-      x
-    )
-  }
-  static Nothing() {
-    return emptyCaseInstance(
-      ClassMaybe.name,
-      ClassMaybe.Nothing.name
-    )
-  }
-
-  static map(f) {
-    return o => fold(ClassMaybe)({
-      Just: a => ClassMaybe.Just(f(a))
-      , Nothing: () => ClassMaybe.Nothing()
-    })(o)
-  }
-}
-
-class Loadable {
-  static Loaded(x) {
-    return valueCaseInstance(
-      Loadable.name,
-      Loadable.Loaded.name,
-      x
-    )
-  }
-  static Loading() {
-    return emptyCaseInstance(
-      Loadable.name,
-      Loadable.Loading.name
-    )
-  }
-}
-
 var ObjMaybe = {
-  name: 'Maybe'
+  type: 'Maybe'
+  , tags: ['Just', 'Nothing']
+  , specs: {}
   , Just(x) {
-    return valueCaseInstance(
-      ObjMaybe.name,
+    return valueInstance(
+      ObjMaybe.type,
       ObjMaybe.Just.name,
       x
     )
   }
   , Nothing() {
-    return emptyCaseInstance(
-      ObjMaybe.name,
+    return emptyInstance(
+      ObjMaybe.type,
       ObjMaybe.Nothing.name
     )
   }
 }
 
 test('stags', function (t) {
-  const foldMaybe = fold(ClassMaybe)
+  const foldMaybe = fold(ObjMaybe)
 
   var maybeToNum = foldMaybe({
     Just: () => 1
@@ -84,19 +49,19 @@ test('stags', function (t) {
   })
 
   t.equals(
-    maybeToNum(ClassMaybe.Just('hi'))
+    maybeToNum(ObjMaybe.Just('hi'))
     , 1
     , 'fold can fold valid types'
   )
 
   t.equals(
-    maybeToNum(ClassMaybe.Just('hey'))
+    maybeToNum(ObjMaybe.Just('hey'))
     , 1
     , 'fold can fold different types that meet the spec'
   )
 
   t.throws(
-    () => maybeToNum(Loadable.Loaded('whatever'))
+    () => maybeToNum(Y('whatever'))
     , /InstanceWrongType/
     , 'fold detects when instance of the wrong type'
   )
@@ -109,18 +74,18 @@ test('stags', function (t) {
 
   t.throws(
     () => maybeToNum(
-      valueCaseInstance(ClassMaybe.name, Loadable.Loaded.name, 1)
+      valueInstance('Maybe', 'badkey', 1)
     )
     , /InstanceShapeInvalid/
-    , 'fold identifies when a instance has the wrong case key'
+    , 'fold identifies when a instance has the wrong tag key'
   )
 
   t.throws(
     () => foldMaybe({
       Just: () => 1
     })
-    , /MissingCases/
-    , 'fold detects when there are too few cases provided'
+    , /MissingTags/
+    , 'fold detects when there are too few tags provided'
   )
 
   t.throws(
@@ -129,25 +94,53 @@ test('stags', function (t) {
       , Nothing: () => 1
       , Left: () => 1
     })
-    , /ExtraCases/
+    , /ExtraTags/
     , 'fold detects when there are too few many provided'
   )
 
   t.equals(
-    Maybe.Y( Maybe.Y({ a: 1, b: true }) )+'',
-    'stags.Maybe.Y(stags.Maybe.Y({"a":1,"b":true}))',
+    Either.Y(undefined)+'',
+    'stags.Either.Y()',
+    'stags with a value of undefined are rendered as ()'
+  )
+
+
+  t.equals(
+    toJSON(Either.Y(1))
+    ,1
+    ,'toJSON extracts the value'
+  )
+  
+  t.equals(
+    toJSON(Either.N())
+    ,null
+    ,'toJSON converts N to null'
+  )
+
+  {
+    class MyClass {}
+    t.equals(
+      Either.Y( new MyClass() )+'',
+      'stags.Either.Y(new MyClass())',
+      'Renders custom object types'
+    )
+  }
+
+  t.equals(
+    Either.Y( Either.Y({ a: 1, b: true }) )+'',
+    'stags.Either.Y(stags.Either.Y({"a":1,"b":true}))',
     'toString is useful for nested objects'
   )
 
   t.equals(
-    Maybe.Y( 'hello' )+'',
-    'stags.Maybe.Y("hello")',
+    Either.Y( 'hello' )+'',
+    'stags.Either.Y("hello")',
     'toString is useful with primative strings'
   )
 
   t.equals(
-    Maybe.Y( 1 )+'',
-    'stags.Maybe.Y(1)',
+    Either.Y( 1 )+'',
+    'stags.Either.Y(1)',
     'toString is useful with numbers'
   )
 
@@ -163,33 +156,44 @@ test('stags', function (t) {
 test('errors', function (t) {
   const YNMaybe = maybe('Maybe')
 
+  {
+    const Wow = either('Wow')
+    delete Wow.specs
+    t.throws(
+      () => {
+        fold(Wow)
+      }
+      , /NotAType/
+      , 'MissingSpec'
+    )
+  }
   t.throws(
     () => fold(YNMaybe)({
       Y: () => ''
       , N: () => ''
       , A: () => ''
     })
-    , /ExtraCases/
-    ,'ExtraCases'
+    , /ExtraTags/
+    ,'ExtraTags'
   )
 
   t.throws(
     () => fold(YNMaybe)({
       Y: () => ''
     })
-    , /MissingCases/
-    , 'MissingCases'
+    , /MissingTags/
+    , 'MissingTags'
   )
 
   t.throws(
     () => YNMaybe.getOr(0, x => x)(null)
-    , /InstanceNull/
-    , 'InstanceNull'
+    , /InstanceShapeInvalid/
+    , 'InstanceShapeInvalid'
   )
 
   t.throws(
     () => YNMaybe.getOr(0, x => x)(
-      emptyCaseInstance('Maybe', 'Unknown')
+      emptyInstance('Maybe', 'Unknown')
     )
     , /InstanceShapeInvalid/
     , 'InstanceShapeInvalid'
@@ -199,20 +203,20 @@ test('errors', function (t) {
 
   t.throws(
     () => YNMaybe.getOr(0, x => x * x)(L(10))
-    , /InstanceWrongType/
-    , 'InstanceWrongType: Either is not Maybe'
+    , /InstanceShapeInvalid/
+    , 'InstanceShapeInvalid'
   )
 
   t.throws(
     () => YNMaybe.getOr(0, x => x * x)(L({ toString() { return 'hello' } }))
-    , /InstanceWrongType/
-    , 'InstanceWrongType: Object is not maybe'
+    , /InstanceShapeInvalid/
+    , 'InstanceShapeInvalid'
   )
 
   t.throws(
     () => YNMaybe.getOr(0, x => x * x)(L(null))
-    , /InstanceWrongType/
-    , 'InstanceWrongType: Either of null is not Maybe'
+    , /InstanceShapeInvalid/
+    , 'InstanceShapeInvalid'
   )
 
   const { Y, N } = Either
@@ -222,7 +226,6 @@ test('errors', function (t) {
     ,toString([1, 2])
     ,'Either.ys'
   )
-
   
   t.equals(
     toString(Either.ns([Y(1), Y(2), N(2), N(3)]))
@@ -231,7 +234,7 @@ test('errors', function (t) {
   )
 
   t.equals(
-    (Either.concatWith ( a => b => a + b ) ( Y(1) ) ( Y(2) ))+''
+    (Either.concatWith ( a => b => a + b ) ( Y(1) ) ( Y(2) ) )+''
     ,Y(3)+''
     ,'concatWith Y Y'
   )
@@ -241,7 +244,6 @@ test('errors', function (t) {
     ,N(2)+''
     ,'concatWith Y N'
   )
-
   
   t.equals(
     (Either.concatWith ( a => b => a + b ) ( N(1) ) ( N(2) ))+''
@@ -256,7 +258,7 @@ test('errors', function (t) {
   )
 
   {
-    const T = maybe('Maybe')
+    const T = either('Maybe')
     t.throws(
       () => T.chain( () => null ) (T.Y(1))
       ,/InstanceNull/
@@ -346,7 +348,7 @@ test('yslashn', function (t) {
     })
 
   t.throws(
-    () => caseName(f(loading))
+    () => tagName(f(loading))
     , /InstanceWrongType/
   )
 
@@ -436,28 +438,28 @@ test('bifold, bimap, map, chain, tagBy', function (t) {
   )
 
   t.equals(
-    caseName(Maybe.map(x => x * x)(Maybe.N()))
+    tagName(Maybe.map(x => x * x)(Maybe.N()))
     , 'N'
   )
 
   t.deepEquals(
     Maybe.chain(x => Maybe.Y(x))(Maybe.Y(10))
-    , valueCaseInstance('Maybe', 'Y', 10)
+    , valueInstance('Maybe', 'Y', 10)
   )
 
   t.deepEquals(
     Maybe.chain(() => Maybe.N())(Maybe.Y(10))
-    , emptyCaseInstance('Maybe', 'N')
+    , emptyInstance('Maybe', 'N')
   )
 
   t.deepEquals(
     Maybe.chain(() => Maybe.Y('does not happen'))(Maybe.N())
-    , emptyCaseInstance('Maybe', 'N')
+    , emptyInstance('Maybe', 'N')
   )
 
   t.deepEquals(
     Maybe.chain(x => x)(Maybe.N())
-    , emptyCaseInstance('Maybe', 'N')
+    , emptyInstance('Maybe', 'N')
   )
 
   t.equals(
@@ -534,7 +536,7 @@ test('bifold, bimap, map, chain, tagBy', function (t) {
 
   t.throws(
     () => Maybe.chain(x => x)(
-      emptyCaseInstance('Maybe', 'Bad')
+      emptyInstance('Maybe', 'Bad')
     )
     , /InstanceShapeInvalid/
     , 'Maybe.chain InstanceShapeInvalid'
@@ -590,7 +592,7 @@ test('otherwise = fold, map, chain', function (t) {
       ( x => Maybe.Y(x) )
       (Maybe.Y('Yes'))
     , Maybe.Y('Yes')
-    ,'chainCase happy path'
+    ,'chainTag happy path'
   )
 
   t.deepEquals(
@@ -598,7 +600,7 @@ test('otherwise = fold, map, chain', function (t) {
       (x => Maybe.Y(x))
       (Maybe.N())
     , Maybe.N()
-    ,'chainCase unhappy path'
+    ,'chainTag unhappy path'
   )
 
   t.equals(
@@ -622,9 +624,9 @@ test('otherwise = fold, map, chain', function (t) {
   )
 
   t.equals(
-    caseName(Maybe.map(x => x * x)(Maybe.N()))
+    tagName(Maybe.map(x => x * x)(Maybe.N()))
     , 'N'
-    , 'caseName Maybe N'
+    , 'tagName Maybe N'
   )
 
   const validVisitor = 
@@ -639,7 +641,7 @@ test('otherwise = fold, map, chain', function (t) {
   [ [() => Maybe.map(null), /VisitorNotAFunction/]
   , [() => Maybe.map(validVisitor)(null), /InstanceShapeInvalid/]
   , [() => Maybe.map(validVisitor)(Loaded.N()), /InstanceShapeInvalid/]
-  , [() => fold(Maybe)(null), /CasesShapeInvalid/]
+  , [() => fold(Maybe)(null), /TagsShapeInvalid/]
   , [() => fold(Maybe)(validFold)(null), /InstanceNull/]
   , [() => fold(Maybe)(validFold)(Loaded.N), /InstanceWrongType/]
   ]
@@ -649,33 +651,8 @@ test('otherwise = fold, map, chain', function (t) {
 
 })
 
-test('sameCase, foldSameCase', t => {
-  const a = Maybe.Y(100)
-  const b = Maybe.Y(200)
-  const A = Either.Y(100)
-
-  t.equals(
-    sameCase(Maybe)(a,b),
-    true,
-    'sameCase affirmative'
-  )
-
-  t.equals(
-    sameCase(Maybe)(a,b),
-    true,
-    'sameCase negative'
-  )
-
-  t.throws(
-    () => sameCase(Either)(A,b),
-    '/InstanceShapeInvalid/',
-    'sameCase different types'
-  )
-
-  t.end()
-})
-
 test('toBoolean', t => {
+  const Maybe = maybe('Maybe')
   const a = Maybe.Y(100)
   const b = Maybe.N()
   const A = Either.Y(100)
@@ -695,7 +672,7 @@ test('toBoolean', t => {
   t.throws(
     () => Maybe.toBoolean(A),
     '/InstanceShapeInvalid/',
-    'sameCase different types'
+    'sameTag different types'
   )
 
   t.end()
@@ -703,6 +680,7 @@ test('toBoolean', t => {
 
 
 test('encase', t => {
+  const Maybe = maybe('Maybe')
   const maybeJSON = Maybe.encase(JSON.parse)
   const eitherJSON = Either.encase(JSON.parse)
 
@@ -735,6 +713,7 @@ test('encase', t => {
 
 
 test('all / any', t => {
+  const Maybe = maybe('Maybe')
   var a = Maybe.Y(3)
   var b = Maybe.Y(2)
   var c = Maybe.N()
@@ -796,6 +775,7 @@ test('all / any', t => {
 })
 
 test('run / pipe', t => {
+  const Maybe = maybe('Maybe')
   t.throws(
     () => run(),
     /non-empty spread of functions/,
@@ -931,6 +911,7 @@ test('decorate', t => {
 
 
 test('annotate', t => {
+  const Maybe = maybe('Maybe')
   t.equals(toString({}), '{}', 'empty object')
 
   t.equals(toString([]), '[]', 'empty array')
@@ -987,6 +968,44 @@ test('tags', t => {
     State.None()+''
     ,'State.None()'
     , 'tags null constructor'
+  )
+  t.end()
+})
+
+test('temporary migration', t => {
+  const State = tagged('State')({None: [], V1: [] })
+
+  t.equals(
+    State.V1(1)+''
+    ,'State.V1(1)'
+    , 'tags value constructor'
+  )
+
+  t.equals(
+    State.None()+''
+    ,'State.None()'
+    , 'tags null constructor'
+  )
+
+  t.equals(
+    sameCase(State.None(), State.None())
+    ,true
+    ,'same case Y'
+  )
+
+  
+  t.equals(
+    sameCase(State.V1(), State.None())
+    ,false
+    ,'same case N'
+  )
+
+  const old = { type: 'stags.Either', case: 'Y', value: 1 }
+
+  t.equals(
+    Either.map( x => x + 1 ) (old) + ''
+    ,Either.Y(2)+''
+    ,'Temporarily accept old instance formats'
   )
   t.end()
 })
