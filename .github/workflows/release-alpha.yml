@@ -2,6 +2,9 @@ name: Next
 
 on:
   workflow_dispatch:
+  push:
+    branches: 
+      - jf/v1-alpha
 
 jobs:
   test:
