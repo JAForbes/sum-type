@@ -1,6 +1,6 @@
 {
   "name": "sum-type",
-  "version": "1.0.0-next.0",
+  "version": "1.0.0-next.1",
   "description": "A simple library for complex logic",
   "main": "dist/sum-type.cjs",
   "module": "lib/index.js",
