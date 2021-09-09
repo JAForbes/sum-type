@@ -203,7 +203,7 @@ of a sum-type constructor in a `redux-store`, `localStorage` or even a `json` co
 
 #### Ecosystem
 
-Each module listed here adheres to the sum-type specification. That specification is defined at [docs/spec.md](https://github.com/JAForbes/sum-type/blob/jf/v1-alpha/docs/spec.md).
+Each module listed here adheres to the sum-type specification. That specification is defined at [docs/spec.md](https://github.com/JAForbes/sum-type/blob/jf/main/docs/spec.md).
 
 - [superouter](https://github.com/JAForbes/superouter/) A Router that both exposes and internally uses sum-type to model route definitions, validation and more.
 
@@ -419,7 +419,7 @@ It's recommended to use `otherwise` with `map` and `chain` to prefill values tha
 
 A helper function for generating folds that are versioned separately to the type definition.  It's useful when you want to avoid specifying each clause in a fold without losing type safety or introducing [other modelling problems](https://github.com/JAForbes/sum-type/issues/13)
 
-Read more about `otherwise` [here](https://github.com/JAForbes/sum-type/blob/jf/v1-alpha/docs/otherwise.md)
+Read more about `otherwise` [here](https://github.com/JAForbes/sum-type/blob/jf/main/docs/otherwise.md)
 
 ```js
 const { Y, N } = T.Maybe
