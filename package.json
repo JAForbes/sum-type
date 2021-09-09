@@ -20,7 +20,9 @@
     "union-type",
     "daggy",
     "algebraic",
-    "types"
+    "types",
+    "stags",
+    "static-sum-type"
   ],
   "author": "JAForbes",
   "license": "MIT",
