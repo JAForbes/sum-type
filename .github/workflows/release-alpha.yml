@@ -14,6 +14,9 @@ jobs:
     strategy:
       matrix:
         node-version: [14.x]
+    environment:
+      name: npm
+      url: https://www.npmjs.com/package/sum-type/v/next
 
     steps:
     - uses: actions/checkout@v2
