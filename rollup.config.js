@@ -7,7 +7,7 @@ export default [
         output: {
             file: './dist/sum-type.umd.js',
             format: 'umd',
-            name: 'stags',
+            name: 'SumType',
             sourcemap: 'external'
         },
     
@@ -17,7 +17,7 @@ export default [
         output: {
             file: './dist/sum-type.cjs',
             format: 'cjs',
-            name: 'stags',
+            name: 'SumType',
             sourcemap: 'external'
         },
     
@@ -30,7 +30,7 @@ export default [
         output: {
             file: './dist/sum-type.umd.min.js',
             format: 'umd',
-            name: 'stags',
+            name: 'SumType',
             sourcemap: 'external'
         },
     },
