@@ -6,8 +6,8 @@ A helper function for generating folds that are versioned separately to the type
 
 ```js
 
-const { Y, N } = stags.Maybe
-const Platform = stags.tags ('Platform') ([
+const { Y, N } = T.Maybe
+const Platform = T.tags ('Platform') ([
     'ModernWindows',
     'XP',
     'Linux',
@@ -15,19 +15,19 @@ const Platform = stags.tags ('Platform') ([
 ])
 
 // defined separately to detect changes in intent
-const rest = stags.otherwise([
+const rest = T.otherwise([
     'ModernWindows',
     'XP',
     'Linux',
     'Darwin'
 ])
 
-const windows = stags.otherwise([
+const windows = T.otherwise([
     'ModernWindows',
     'XP'
 ])
 
-const foldWindows = f => stags.map(Platform) ({
+const foldWindows = f => T.map(Platform) ({
     ... rest(N),
     ... windows( () => Y(f()) )
 })
@@ -37,17 +37,17 @@ const winPing =
         ( () => 'ping \\t www.google.com' )
 
 winPing( Platform.Darwin() )
-// => stags.Maybe.N()
+// => T.Maybe.N()
 
 winPing( Platform.XP() )
-// => stags.Maybe.Y('ping \t www.google.com')
+// => T.Maybe.Y('ping \t www.google.com')
 
 ```
 
 At a later date, you may add support for WSL.  Which will likely break earlier assumptions because it's both linux _and_ windows.
 
 ```js
-const Platform = stags.tags ('Platform') ([
+const Platform = T.tags ('Platform') ([
     'ModernWindows',
     'XP',
     'WSL',
@@ -56,26 +56,26 @@ const Platform = stags.tags ('Platform') ([
 ])
 ```
 
-Now `stags` will helpfully throw a `MissingTags` error for all the usages of our original `otherwise` functions that no longer discriminate the union.
+Now `sumType` will helpfully throw a `MissingTags` error for all the usages of our original `otherwise` functions that no longer discriminate the union.
 
 We can now create a new otherwise for that assumption:
 
 ```js
 
 
-const windows = stags.otherwise([ //OLD
+const windows = T.otherwise([ //OLD
     'ModernWindows',
     'XP'
 ])
 
-const rest = stags.otherwise([ //OLD
+const rest = T.otherwise([ //OLD
     'ModernWindows',
     'XP',
     'Linux',
     'Darwin'
 ])
 
-const rest2 = stags.otherwise([ // NEW!
+const rest2 = T.otherwise([ // NEW!
     'ModernWindows',
     'XP',
     'WSL', // NEW
@@ -83,17 +83,17 @@ const rest2 = stags.otherwise([ // NEW!
     'Darwin',
 ])
 
-const windowsGUI = stags.otherwise([ // NEW
+const windowsGUI = T.otherwise([ // NEW
     'ModernWindows',
     'XP',
 ])
 
-const foldWindowsGUI = f => stags.map(Platform) ({ // NEW
+const foldWindowsGUI = f => T.map(Platform) ({ // NEW
     ... rest2(N),
     ... windowsGUI( () => Y(f()) )
 })
 
-const foldWindows = f => stags.map(Platform) ({ // OLD
+const foldWindows = f => T.map(Platform) ({ // OLD
     ... rest(N),
     ... windows( () => Y(f()) )
 })
@@ -112,18 +112,18 @@ const winPing2 =
         ( () => 'ping \\t www.google.com' )
 ```
 
-When we've updated all the references, `stags` will stop throwing errors on initialization.  You can then delete the old definitions and update the new definitions to have the old names.  Leaving us with:
+When we've updated all the references, `sumType` will stop throwing errors on initialization.  You can then delete the old definitions and update the new definitions to have the old names.  Leaving us with:
 
 ```js
-const { Y, N } = stags.Maybe
-const Platform = stags.tags ('Platform') ([
+const { Y, N } = T.Maybe
+const Platform = T.tags ('Platform') ([
     'ModernWindows',
     'XP',
     'Linux',
     'Darwin'
 ])
 
-const rest = stags.otherwise([ // renamed
+const rest = T.otherwise([ // renamed
     'ModernWindows',
     'XP',
     'WSL',
@@ -131,12 +131,12 @@ const rest = stags.otherwise([ // renamed
     'Darwin',
 ])
 
-const windowsGUI = stags.otherwise([
+const windowsGUI = T.otherwise([
     'ModernWindows',
     'XP',
 ])
 
-const foldWindowsGUI = f => stags.map(Platform) ({
+const foldWindowsGUI = f => T.map(Platform) ({
     ... rest2(N),
     ... windowsGUI( () => Y(f()) )
 })

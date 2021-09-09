@@ -2,13 +2,13 @@
 
 #### What is a "Type"
 
-A type is an object with a property: `type` a list of tag names: `tags` and a `specs` object.
+A type is an object with a property: `type` a list of tag names: `tags` and a `traits` object.
 
 
 ```
 { type :: String
 , tags :: String[]
-, specs :: StrMap<any>
+, traits :: StrMap<any>
 }
 ```
 
@@ -17,7 +17,7 @@ Here is an example of a valid `Maybe` type
 ```js
 { type: 'Maybe'
 , tags: ['Y', 'N']
-, specs: {}
+, traits: {}
 }
 ```
 
@@ -36,16 +36,16 @@ The `tag` property must correspond to a matching item in the type's `tags` list.
 
 An instance _can_ have a `value` property. But it is optional. The `value` property can be of any type.
 
-#### What is a "Spec"?
+#### What is a "Trait"?
 
-A type has a key value map of specifications, that tell's functions that a type supports some functionality.
+A type has a key value map of traits, that tell's trait specific functions that a type supports some functionality.
 
-Here is an example of some valid usage of `specs`.
+Here is an example of some valid usage of `traits`.
 
 ```js
 { type: 'Maybe'
 , tags: ['Y', 'N']
-, specs: {
+, traits: {
   'bifunctor': ['Y', 'N'],
   'functor': ['Y'],
   'monoid': 'N'
@@ -53,18 +53,18 @@ Here is an example of some valid usage of `specs`.
 }
 ```
 
-Your functions can then inspect `type.specs` to check if it should support the required functionality for your function.
+Your functions can then inspect `type.traits` to check if it should support the required functionality for your function.
 
-> stags always namespaces it's specification names with the `stags/` prefix to separate stags built in functionality from user land functionality.
+> `sum-type` always namespaces it's trait names with the `sum-type/` prefix to separate built in traits from userland traits.
 
-Specs allow the community to define their own type classes and associated functions, and users can share these specs without relying on the core stags library.
+Traits allow the community to define their own type classes and associated functions, and users can share these traits without relying on the core `sum-type` library.
 
 ```js
-const stags = require('stags')
+const T = require('sum-type')
 const functor = require('some-lib')
-const Maybe = functor(stags.either('Maybe'))
+const Maybe = functor(T.either('Maybe'))
 
-'somelib/functor' in Maybe.specs
+'somelib/functor' in Maybe.traits
 //=> true
 
 typeof Maybe.map

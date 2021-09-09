@@ -24,7 +24,7 @@ import {
 var ObjMaybe = {
   type: 'Maybe'
   , tags: ['Just', 'Nothing']
-  , specs: {}
+  , traits: {}
   , Just(x) {
     return valueInstance(
       ObjMaybe.type,
@@ -40,7 +40,7 @@ var ObjMaybe = {
   }
 }
 
-test('stags', function (t) {
+test('sum-type', function (t) {
   const foldMaybe = fold(ObjMaybe)
 
   var maybeToNum = foldMaybe({
@@ -57,7 +57,7 @@ test('stags', function (t) {
   t.equals(
     maybeToNum(ObjMaybe.Just('hey'))
     , 1
-    , 'fold can fold different types that meet the spec'
+    , 'fold can fold different types'
   )
 
   t.throws(
@@ -158,13 +158,13 @@ test('errors', function (t) {
 
   {
     const Wow = either('Wow')
-    delete Wow.specs
+    delete Wow.traits
     t.throws(
       () => {
         fold(Wow)
       }
       , /NotAType/
-      , 'MissingSpec'
+      , 'MissingTrait'
     )
   }
   t.throws(
@@ -704,7 +704,7 @@ test('encase', t => {
   
   t.equals(
     eitherJSON('<a>No</a>')+'',
-    'stags.Either.N(new SyntaxError("Unexpected token < in JSON at position 0"))',
+    'T.Either.N(new SyntaxError("Unexpected token < in JSON at position 0"))',
     'encase Either N'
   )
 
@@ -1000,7 +1000,7 @@ test('temporary migration', t => {
     ,'same case N'
   )
 
-  const old = { type: 'stags.Either', case: 'Y', value: 1 }
+  const old = { type: 'T.Either', case: 'Y', value: 1 }
 
   t.equals(
     Either.map( x => x + 1 ) (old) + ''

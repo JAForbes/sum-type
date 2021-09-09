@@ -7,7 +7,7 @@ It's all well and good to have well typed, well defined unions that model our bu
 
 With other libraries, `instanceof` and reference equality is relevant, so we tend to need to rebuild the world from scratch on initialization.
 
-But because stags has such a simple deserialization strategy (`JSON.parse`), it's rare to need to check all conditions immediately. Instead we can react to events and update our tree gradually based on context. 
+But because `sum-type` has such a simple deserialization strategy (`JSON.parse`), it's rare to need to check all conditions immediately. Instead we can react to events and update our tree gradually based on context. 
 
 An example could be a nested structure of `Selected.Y(Loaded.Y(Modified.Y(Saved.Y(x))))`.  At the start of our data's story we can initialize with the empty Selected state: `Selected.N()`.  We do not need to set up the entire tree, as when the data isn't selected, it _can't_ be loaded.  And if it's not loaded, we aren't concerned if it's modified or saved yet.
 
@@ -44,7 +44,7 @@ The event is the point where we convert from untrusted to trusted data for a par
 
 ---
 
-If you do have all the state on initialization and are creating a new stags structure from scratch I tend to have a function called `infer` that accepts `any` and returns a well defined stag tree.
+If you do have all the state on initialization and are creating a new `sum-type` structure from scratch I tend to have a function called `infer` that accepts `any` and returns a well defined stag tree.
 
 ```js
 // any -> Selected Loaded Modified Saved a

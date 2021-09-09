@@ -8,9 +8,9 @@ export default {
         terser()
     ],
     output: {
-        file: './dist/stags.min.js',
+        file: './dist/sum-type.min.js',
         format: 'umd',
-        name: 'stags',
+        name: 'SumType',
         sourcemap: 'external'
     },
 
