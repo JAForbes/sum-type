@@ -12,7 +12,7 @@
 
 [Live Demo](https://flems.io/#0=N4IgZglgNgpgziAXAbVAOwIYFsZJAOgAsAXLKEAGhAGMB7NYmBvEAXwvW10QICsEqdBk2J4A9GIAEAVzQAHANYBzfHSxi40rAFpiATzkwAAmhgAPYgB00sYpIAqkgLySAylvsGY160Lh2AGVoMABMYEOdJa0kYh3wYCGJCGAAnAApLECDQ8MyASh80PzsoYLCIl2jY7PL8AE0MkAAJGChSyQB1WhSoEPzC4slS0Ig0JUiqmJrw-AA5NIBWBYK0X3p-SRSmMJSJtFjJaZD8ACMIMFpejP2D2LNnAD5JAAMa0aVESQASYDNWAFJnpNbhRJPcnE9XmVwp8fn8gTcYis1mgNsQUhhURcUlg9gcjvgsBg5NdbndHmD8MRaABVOSGFIAYQwcBgaRWBxWAG5rMhNttUmlJOjMXBsVghcNypI8jLJBIIZIAORHT5NACiAQCAHlOtqAEoBAAiSusoK2aB2QpFWO6EqGZXectlCqeKsdY0+S3+prQ5oF6WFGNtOMlHvGspdYkVKu1AEEjQBJWYAcS9Cx91gAutZ8Nj1RhqIQheCniFaNQtCJ8AB3FKJNnPAA8cgecNYTbEreeeTylBotCwcmgqTwJwwJ1a-dZsGoxAg6zwAAZEEvtAAmADsiAALAs2BwQJgcHhVHABAPhMweGws1QoKMFAgUJwTzxNDp9IZ8FpjlhRvg-D9tIPR4CQxByHAiASLIigqGoGhaLoXhGAAjPgS4YdopgWPg65iCEED+Ihn5eD+WB-gBQFUF+3AgHA1D1nIoisFmrBAA)
 
-#### Quick Start
+## Quick Start
 
 ```bash
 npm install sum-type@next
@@ -53,7 +53,25 @@ const transform =
 
 [Live Demo](https://flems.io/#0=N4IgZglgNgpgziAXAbVAOwIYFsZJAOgAsAXLKEAGhAGMB7NYmBvEAXwvW10QICsEqdBk2J4A9GIAEAVzQAHANYBzfHSxi40rAFpiATzkwAAmhgAPYgB00sYpIAqkgLySAylvsGY160Lh2AGVoMABMYEOdJa0kYh3wYCGJCGAAnAApLECDQ8MyASh80PzsoYLCIl2jY7PL8AE0MkAAJGChSyQB1WhSoEPzC4slS0Ig0JUiqmJrw-AA5NIBWBYK0X3p-SRSmMJSJtFjJaZD8ACMIMFpejP2D2LNnAD5JAAMa0aVESQASYDNWAFJnpNbhRJPcnE9XmVwp8fn8gTcYis1mgNsQUhhURcUlg9gcjvgsBg5NdbndHmD8MRaABVOSGFIAYQwcBgaRWBxWAG5rMhNttUmlJOjMXBsVghcNypI8jLJBIIZIAORHT5NACiAQCAHlOtqAEoBAAiSusoK2aB2QpFWO6EqGZXectlCqeKsdY0+S3+prQ5oF6WFGNtOMlHvGspdYkVKu1AEEjQBJWYAcS9Cx91gAutZ8Nj1RhqIQheCniFaNQtCJ8AB3FKJNnPAA8cgecNYTbEreeeTylBotCwcmgqTwJwwJ1a-dZsGoxAg6zwAAZEEvtAAmADsiAALAs2BwQJgcHhVHABAPhMweGws1QoKMFAgUJwTzxNDp9IZ8FpjlhRvg-D9tIPR4CQxByHAiASLIigqGoGhaLoXhGAAjPgS4YdopgWPg65iCEED+Ihn5eD+WB-gBQFUF+3AgHA1D1nIoisFmrBAA)
 
-#### What is it
+## Usage
+
+### Recommended
+
+Recommended usage is to simply `npm install sum-type@next` and `import * as T from 'sum-type`
+
+### Browser / Playground
+
+Checkout all the distributions here: https://unpkg.com/sum-type@next/dist/
+
+### Common.js
+
+If you `require('sum-type')` it will use the .cjs distribution out of the box
+
+### ESM
+
+ESM is the native format for this library.  Simply `import * as T from 'sum-type'`
+
+## What is it
 
 Freedom from booleans.
 
@@ -174,7 +192,7 @@ f( Data.Saved('cool') )
 
 There's loads of other helpful utilities, and `sum-type` will guide you with helpful error messages if you make a mistake.  That's one of our design goals!
 
-### Helpful Errors
+## Helpful Errors
 
 If we pass the wrong data structure into our composition, we will get a specific, helpful error message explaining what your type looked like
 and what that particular method was expecting.
@@ -193,7 +211,7 @@ fold (Type) ({ Y: () => 'hi', N: () => 'bye' }) ( Type.Y() )
 a `sum-type`.  All the error types are documented in the [Errors section](#errors)
 
 
-#### Specification
+## Specification
 
 `sum-type` differentiates itself from other sum type library by documenting the internal structure used for types and instances of types.  This allows you to create your
 own constructors/transformers in userland.  You can store the exact output
@@ -201,13 +219,13 @@ of a sum-type constructor in a `redux-store`, `localStorage` or even a `json` co
 
 `sum-type` does not care where your data came from, just that it adheres to a particular structure.
 
-#### Ecosystem
+## Ecosystem
 
 Each module listed here adheres to the sum-type specification. That specification is defined at [docs/spec.md](https://github.com/JAForbes/sum-type/blob/jf/main/docs/spec.md).
 
 - [superouter](https://github.com/JAForbes/superouter/) A Router that both exposes and internally uses sum-type to model route definitions, validation and more.
 
-#### Project Goals and Motivations
+## Project Goals and Motivations
 
 - Serializable
 - 0 Dependencies
@@ -215,7 +233,7 @@ Each module listed here adheres to the sum-type specification. That specificatio
 - Avoid pitfalls found in other sum type libraries
 - Helpful Error Messages designed for makers
 
-#### How does sum-type differ from other libraries in the ecosystem?
+## How does sum-type differ from other libraries in the ecosystem?
 
 `sum-type` removes the following features because we believe they lead to brittle codebases.
 
@@ -232,11 +250,11 @@ Each module listed here adheres to the sum-type specification. That specificatio
 `sum-type` is technically 0KB, it's an idea. You can use sum-type in your codebase without ever running `npm install`.  But this library is only 4kb gzipped, so even the non-idea part is pretty small.
 
 
-### API
+## API
 
 These docs are a bit stale as sum-type goes through some API churn.
 
-#### either
+## either
 
 ```js
 import { either } from 'sum-type'
@@ -245,55 +263,55 @@ const Loaded =
     either('Loaded')
 ```
 
-#### `either::Y`
+### `either::Y`
 
 `a -> Either Y a | N b`
 
-#### `either::N`
+### `either::N`
 
 `b -> Either Y a | N b`
 
-#### `either::map`
+### `either::map`
 
 `( a -> c ) -> Either Y c | N b`
 
-#### `either::bimap`
+### `either::bimap`
 
 `(( a -> c ), ( b -> d )) -> Either Y c | N d`
 
-#### `either::bifold`
+### `either::bifold`
 
 `(( a -> c ), ( b -> c )) -> Either Y a | N b -> c`
 
-#### `either::getWith`
+### `either::getWith`
 
 `( c , ( b -> c )) -> Either Y a | N b -> c`
 
-#### `either::getOr`
+### `either::getOr`
 
 `c -> Either Y a | N b -> c`
 
-#### `either::fold`
+### `either::fold`
 
 `Type -> { Y: a -> c, N: b -> c } -> tag -> c`
 
-#### `either::chain`
+### `either::chain`
 
 `( a -> Either Y c | N b ) -> Either Y c | N b`
 
-#### `toBoolean`
+### `toBoolean`
 
 `Either Y a | N -> boolean`
 
 > ⚠ You should almost always avoid coercing a sum type to a boolean.  If you are checking for `Y`, try `.map`.  If you are checking for `N` try `getOr`.  Booleans have no context, no associated data, but there's almost always associated data in your model so `toBoolean` is much like moving from a lossless format to a lossy format.
 
-#### `either::encase`
+### `either::encase`
 
 `( a -> b ) -> Either Y b | N Error`
 
 Takes a potentially unsafe function and decorates it to return an Either where non thrown values are encased in `Either.Y` and thrown values are encased in `Either.N`.
 
-#### `maybe`
+### `maybe`
 
 ```js
 import { maybe } from 'sum-type'
@@ -302,56 +320,56 @@ const Selected =
     maybe('Selected')
 ```
 
-#### `maybe::Y`
+### `maybe::Y`
 
 `a -> Maybe Y a | N`
 
-#### `maybe::N`
+### `maybe::N`
 
 `() -> Maybe Y a | N`
 
-#### `maybe::map`
+### `maybe::map`
 
 `( a -> c ) -> Maybe Y c | N`
 
-#### `maybe::bimap`
+### `maybe::bimap`
 
 `(( () -> b ), ( a -> b )) -> Maybe Y b | N`
 
-#### `maybe::bifold`
+### `maybe::bifold`
 
 `(( () -> b ), ( a -> b )) -> Maybe Y a | N -> b`
 
-#### `maybe::getWith`
+### `maybe::getWith`
 
 `( b , ( a -> b )) -> Maybe Y a | N -> b`
 
-#### `maybe::getOr`
+### `maybe::getOr`
 
 `b -> Maybe Y a | N -> b`
 
-#### `maybe::fold`
+### `maybe::fold`
 
 `Type -> { Y: a -> b, N: () -> b } -> tag -> b`
 
-#### `maybe::chain`
+### `maybe::chain`
 
 `( a -> Maybe Y b | N ) -> Maybe Y b | N`
 
-#### `toBoolean`
+### `toBoolean`
 
 `Maybe Y a | N -> boolean`
 
 > ⚠ You should almost always avoid coercing a sum type to a boolean.  If you are checking for `Y`, try `.map`.  If you are checking for `N` try `getOr`.  Booleans have no context, no associated data, but there's almost always associated data in your model so `toBoolean` is much like moving from a lossless format to a lossy format.
 
 
-#### `maybe::encase`
+### `maybe::encase`
 
 `( a -> b ) -> Maybe Y b | N Error`
 
 Takes a potentially unsafe function and decorates it to return an Maybe where non thrown values are encased in `Maybe.Y` and thrown values are represented as `Maybe.N()`.  If the specific error value is relevant try `Either.encase` instead as it will return your error object in an `Either.N` structure.
 
-#### Canonical Either
+### Canonical Either
 
 In the future some functions will return optional values.  This library encourages you to define your own but this library exports a pregenerated Either type that can be used canonically as the "real" Either which can be helpful when doing natural transformations and conversions between types and safe and unsafe data.
 
@@ -370,7 +388,7 @@ f(no)
 // => 0
 ```
 
-#### `tags`
+### `tags`
 
 ```js
 import { tags } from 'sum-type'
@@ -392,18 +410,18 @@ const line = Geom.Line([p1, p2])
 const poly = Geom.Poly([p1, p2, [p3]])
 ```
 
-#### `fold`
+### `fold`
 
 `Type -> { [tag]: a -> b } -> tag -> b`
 
-#### `mapAll`
+### `mapAll`
 
 `Type -> { [tag]: a -> b } -> tag -> Type b`
 
 
 > ⚠ Both `map` and `chain` will skip executing tags when their instance has no `.value` property (usually determined by their type constructor).
 
-#### `chainAll`
+### `chainAll`
 
 `Type -> { [tag]: a -> Type b } -> tag -> Type b`
 
@@ -413,7 +431,7 @@ But when using `map` and `chain` you are still required to pass in a handler for
 
 It's recommended to use `otherwise` with `map` and `chain` to prefill values that are not relevant to the fold.
 
-#### otherwise
+### otherwise
 
 `string[] -> f -> { [key:string]: f }`
 
@@ -467,25 +485,25 @@ winPing( Platform.XP() )
 
 These functions are likely to change at any moment.
 
-#### `tagName`
+### `tagName`
 
 `tagName` -> `tagName:string`
 
 Extract the name of a tag from an instance of a type.
 
-#### `getTags`
+### `getTags`
 
 `T` -> `(tag:string)[]`
 
 Returns a list of the `tag`'s for a given type `T`.
 
-### Errors
+## Errors
 
 Below is the source code definition for the internal errors this library throws. 
 
 ```js
 const StaticSumTypeError =
-    tags('StaticSumTypeError', {
+    tags('StaticSumTypeError', [
         , 'ExtraTags' // {extraKeys}
         , 'MissingTags' // {missingKeys}
         , 'InstanceNull' // {T}
@@ -494,7 +512,7 @@ const StaticSumTypeError =
         , 'tag' // {context}
         , 'VisitorNotAFunction' // {context, visitor}
         , 'NotAType' // {context, T}
-    })
+    ])
 ```
 
  Error                  | Throws ... 
