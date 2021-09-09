@@ -14,6 +14,16 @@ export default [
     },
     {
         input: './lib/index.js',
+        output: {
+            file: './dist/sum-type.cjs',
+            format: 'cjs',
+            name: 'stags',
+            sourcemap: 'external'
+        },
+    
+    },
+    {
+        input: './lib/index.js',
         plugins: [
             terser()
         ],

@@ -2,8 +2,9 @@
   "name": "sum-type",
   "version": "1.0.0-rc31",
   "description": "A simple library for complex logic",
-  "main": "lib/index.js",
+  "main": "dist/sum-type.cjs",
   "module": "lib/index.js",
+  "unpkg": "dist/sum-type.umd.min.js",
   "type": "module",
   "files": [
     "dist",
