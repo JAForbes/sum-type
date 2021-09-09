@@ -19,7 +19,7 @@ import {
   , tags
   , tagged
   , sameCase
-} from '../lib/index'
+} from '../lib/index.js'
 
 var ObjMaybe = {
   type: 'Maybe'
@@ -100,7 +100,7 @@ test('sum-type', function (t) {
 
   t.equals(
     Either.Y(undefined)+'',
-    'stags.Either.Y()',
+    'T.Either.Y()',
     'stags with a value of undefined are rendered as ()'
   )
 
@@ -121,32 +121,32 @@ test('sum-type', function (t) {
     class MyClass {}
     t.equals(
       Either.Y( new MyClass() )+'',
-      'stags.Either.Y(new MyClass())',
+      'T.Either.Y(new MyClass())',
       'Renders custom object types'
     )
   }
 
   t.equals(
     Either.Y( Either.Y({ a: 1, b: true }) )+'',
-    'stags.Either.Y(stags.Either.Y({"a":1,"b":true}))',
+    'T.Either.Y(T.Either.Y({"a":1,"b":true}))',
     'toString is useful for nested objects'
   )
 
   t.equals(
     Either.Y( 'hello' )+'',
-    'stags.Either.Y("hello")',
+    'T.Either.Y("hello")',
     'toString is useful with primative strings'
   )
 
   t.equals(
     Either.Y( 1 )+'',
-    'stags.Either.Y(1)',
+    'T.Either.Y(1)',
     'toString is useful with numbers'
   )
 
   t.equals(
     Either.N( new Error('Oh noes!') )+'',
-    'stags.Either.N(new Error("Oh noes!"))',
+    'T.Either.N(new Error("Oh noes!"))',
     'toString is useful with Errors'
   )
 
