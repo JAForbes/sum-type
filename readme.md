@@ -19,11 +19,13 @@ npm install sum-type@next
 ```
 
 ```js
-import { either } from "sum-type";
+// unpkg.com/sum-type@next
+// let T = SumType
 
-// Create specific types for specific scenarios.
+import * as T from 'sum-type'
+
 const Loaded = 
-    either("Loaded")
+    T.either("Loaded")
 
 const loaded = 
     Loaded.Y("Hello World")
@@ -41,17 +43,15 @@ const transform =
     Loaded.map(
         x => x.toUpperCase()
     )
-
-
-render( transform( loaded ) )
-//=> 'Loaded: HELLO WORLD'
-
-render( transform( loading ) )
-//=> 'Loading: 55%'
-
-transform( render( loading ) )
-//=> 'LOADING: 55%'
+;
+[ render( transform( loaded ) ) //=> 'Loaded: HELLO WORLD'
+, render( transform( loading ) ) //=> 'Loading: 55%'
+, render( transform( loading ) ) //=> 'LOADING: 55%'
+]
+.forEach( x => document.write(`<p>${x}</p>`))
 ```
+
+[Live Demo](https://flems.io/#0=N4IgZglgNgpgziAXAbVAOwIYFsZJAOgAsAXLKEAGhAGMB7NYmBvEAXwvW10QICsEqdBk2J4A9GIAEAVzQAHANYBzfHSxi40rAFpiATzkwAAmhgAPYgB00sYpIAqkgLySAylvsGY160Lh2AGVoMABMYEOdJa0kYh3wYCGJCGAAnAApLECDQ8MyASh80PzsoYLCIl2jY7PL8AE0MkAAJGChSyQB1WhSoEPzC4slS0Ig0JUiqmJrw-AA5NIBWBYK0X3p-SRSmMJSJtFjJaZD8ACMIMFpejP2D2LNnAD5JAAMa0aVESQASYDNWAFJnpNbhRJPcnE9XmVwp8fn8gTcYis1mgNsQUhhURcUlg9gcjvgsBg5NdbndHmD8MRaABVOSGFIAYQwcBgaRWBxWAG5rMhNttUmlJOjMXBsVghcNypI8jLJBIIZIAORHT5NACiAQCAHlOtqAEoBAAiSusoK2aB2QpFWO6EqGZXectlCqeKsdY0+S3+prQ5oF6WFGNtOMlHvGspdYkVKu1AEEjQBJWYAcS9Cx91gAutZ8Nj1RhqIQheCniFaNQtCJ8AB3FKJNnPAA8cgecNYTbEreeeTylBotCwcmgqTwJwwJ1a-dZsGoxAg6zwAAZEEvtAAmADsiAALAs2BwQJgcHhVHABAPhMweGws1QoKMFAgUJwTzxNDp9IZ8FpjlhRvg-D9tIPR4CQxByHAiASLIigqGoGhaLoXhGAAjPgS4YdopgWPg65iCEED+Ihn5eD+WB-gBQFUF+3AgHA1D1nIoisFmrBAA)
 
 #### What is it
 
