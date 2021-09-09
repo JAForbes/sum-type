@@ -6,6 +6,7 @@
   "module": "lib/index.js",
   "unpkg": "dist/sum-type.umd.min.js",
   "type": "module",
+  "repository": "git@github.com:JAForbes/sum-type.git",
   "files": [
     "dist",
     "lib",
