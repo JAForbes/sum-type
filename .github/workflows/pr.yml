@@ -30,6 +30,7 @@ jobs:
     - run: stat $(npm bin)/pr-release
     - run: ls -la $(npm bin)/pr-release
     - run: cat $(npm bin)/pr-release
+    - run: which node
     - run: /usr/bin/node --version
     - run: node node_modules/pr-release/bin.js
     - run: node $(npm bin)/pr-release
