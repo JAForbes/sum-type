@@ -30,6 +30,10 @@ jobs:
     - run: stat $(npm bin)/pr-release
     - run: ls -la $(npm bin)/pr-release
     - run: cat $(npm bin)/pr-release
+    - run: /usr/bin/node --version
+    - run: node node_modules/pr-release/bin.js
+    - run: node $(npm bin)/pr-release
+    - run: $(npm bin)/pr-release
     - run: npx pr-release pr --verbose --target main --source next --compact
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
