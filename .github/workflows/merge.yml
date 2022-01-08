@@ -33,6 +33,7 @@ jobs:
     - run: npm install pr-release -D
     - run: stat $(npm bin)/pr-release
     - run: ls -la $(npm bin)/pr-release
+    - run: cat $(npm bin)/pr-release
     # - run: $(npm bin)/pr-release --verbose
     # - run: $(npm bin)/pr-release merge --target main --source next --commit --force --clean --changelog --compact --verbose
       # env:
