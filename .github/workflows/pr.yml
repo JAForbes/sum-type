@@ -31,7 +31,7 @@ jobs:
     - run: ls -la $(npm bin)/pr-release
     - run: cat $(npm bin)/pr-release
     - run: which node
-    - run: /usr/bin/node --version
+    - run: /usr/bin/env node --version
     - run: node node_modules/pr-release/bin.js
     - run: node $(npm bin)/pr-release
     - run: $(npm bin)/pr-release
