@@ -31,10 +31,12 @@ jobs:
     - run: npm ci
     - run: npm run build --if-present
     - run: npm install pr-release -D
-    - run: $(npm bin)/pr-release --verbose
-    - run: $(npm bin)/pr-release merge --target main --source next --commit --force --clean --changelog --compact --verbose
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - run: stat $(npm bin)/pr-release
+    - run: ls -la $(npm bin)/pr-release
+    # - run: $(npm bin)/pr-release --verbose
+    # - run: $(npm bin)/pr-release merge --target main --source next --commit --force --clean --changelog --compact --verbose
+      # env:
+      #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - run: npm version prerelease --preid=next
 
