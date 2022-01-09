@@ -11,6 +11,7 @@ concurrency: prr:pre-release
 jobs:
   pr:
 
+    environment: NPM
     runs-on: ubuntu-latest
 
     strategy:
