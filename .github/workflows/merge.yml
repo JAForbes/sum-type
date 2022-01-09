@@ -42,7 +42,6 @@ jobs:
         NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
     - run: npm whoami
 
-    - run: npm version prerelease --preid=next
     - run: npm publish --tag=next
       name: Publish
 
