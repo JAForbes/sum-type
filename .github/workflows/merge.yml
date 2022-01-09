@@ -11,6 +11,7 @@ concurrency: prr:deploy
 jobs:
   merge:
 
+    environment: NPM
     runs-on: ubuntu-latest
 
     strategy:
