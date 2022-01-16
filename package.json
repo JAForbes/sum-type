@@ -1,36 +1,36 @@
 {
-  "name": "sum-type",
-  "version": "1.0.0-next.1",
-  "description": "A simple library for complex logic",
-  "main": "dist/sum-type.cjs",
-  "module": "lib/index.js",
-  "unpkg": "dist/sum-type.umd.min.js",
-  "type": "module",
-  "repository": "git@github.com:JAForbes/sum-type.git",
-  "files": [
-    "dist",
-    "lib",
-    "lib/**"
-  ],
-  "scripts": {
-    "test": "tape test/*",
-    "build": "rollup -c"
-  },
-  "keywords": [
-    "fp",
-    "sum-type",
-    "union-type",
-    "daggy",
-    "algebraic",
-    "types",
-    "stags",
-    "static-sum-type"
-  ],
-  "author": "JAForbes",
-  "license": "MIT",
-  "devDependencies": {
-    "rollup": "^2.56.3",
-    "rollup-plugin-terser": "^7.0.2",
-    "tape": "^5.3.1"
-  }
+	"name": "sum-type",
+	"version": "1.0.0-next.1",
+	"description": "A simple library for complex logic",
+	"main": "dist/sum-type.cjs",
+	"module": "lib/index.js",
+	"unpkg": "dist/sum-type.umd.min.js",
+	"type": "module",
+	"repository": "git@github.com:JAForbes/sum-type.git",
+	"files": [
+		"dist",
+		"lib",
+		"lib/**"
+	],
+	"scripts": {
+		"test": "tape test/*",
+		"build": "rollup -c"
+	},
+	"keywords": [
+		"fp",
+		"sum-type",
+		"union-type",
+		"daggy",
+		"algebraic",
+		"types",
+		"stags",
+		"static-sum-type"
+	],
+	"author": "JAForbes",
+	"license": "MIT",
+	"devDependencies": {
+		"rollup": "^2.56.3",
+		"rollup-plugin-terser": "^7.0.2",
+		"tape": "^5.3.1"
+	}
 }
