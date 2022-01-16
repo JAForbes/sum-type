@@ -21,7 +21,7 @@ import {
 	, sameCase
 } from '../lib/index.js'
 
-var ObjMaybe = {
+let ObjMaybe = {
 	type: 'Maybe'
 	, tags: ['Just', 'Nothing']
 	, traits: {}
@@ -43,7 +43,7 @@ var ObjMaybe = {
 test('sum-type', function (t) {
 	const foldMaybe = fold(ObjMaybe)
 
-	var maybeToNum = foldMaybe({
+	let maybeToNum = foldMaybe({
 		Just: () => 1
 		, Nothing: () => 0
 	})
@@ -234,19 +234,19 @@ test('errors', function (t) {
 	)
 
 	t.equals(
-		(Either.concatWith ( a => b => a + b ) ( Y(1) ) ( Y(2) ) )+''
+		Either.concatWith ( a => b => a + b ) ( Y(1) ) ( Y(2) ) +''
 		,Y(3)+''
 		,'concatWith Y Y'
 	)
 
 	t.equals(
-		(Either.concatWith ( a => b => a + b ) ( Y(1) ) ( N(2) ))+''
+		Either.concatWith ( a => b => a + b ) ( Y(1) ) ( N(2) )+''
 		,N(2)+''
 		,'concatWith Y N'
 	)
 	
 	t.equals(
-		(Either.concatWith ( a => b => a + b ) ( N(1) ) ( N(2) ))+''
+		Either.concatWith ( a => b => a + b ) ( N(1) ) ( N(2) )+''
 		,N(1)+''
 		,'concatWith N N'
 	)
@@ -475,43 +475,43 @@ test('bifold, bimap, map, chain, tagBy', function (t) {
 	)
 	
 	t.equals(
-		(Either.map( x => x * 100 ) ( Either.Y(10000) ))+''
+		Either.map( x => x * 100 ) ( Either.Y(10000) )+''
 		,Either.Y(10000 * 100)+''
 		,'Either map positive'
 	)
 
 	t.equals(
-		(Either.map( x => x * 100 ) ( Either.N(10000) ))+''
+		Either.map( x => x * 100 ) ( Either.N(10000) )+''
 		,Either.N(10000)+'',
 		'Either map negative'
 	)
 
 	t.equals(
-		(Either.chain( x => Either.Y(x * 100) ) ( Either.Y(10000) ))+''
+		Either.chain( x => Either.Y(x * 100) ) ( Either.Y(10000) )+''
 		,Either.Y(10000 * 100)+'',
 		'Either chain positive'
 	)
 
 	t.throws(
-		() => (Either.chain( x => x * 100 ) ( Either.Y(10000) ))+'',
+		() => Either.chain( x => x * 100 ) ( Either.Y(10000) )+'',
 		/InstanceWrongType/,
 		'Either chain bad return type'
 	)
 
 	t.equals(
-		(Either.chain( x => x * 100 ) ( Either.N(10000) ))+''
+		Either.chain( x => x * 100 ) ( Either.N(10000) )+''
 		,Either.N(10000)+'',
 		'Either chain negative'
 	)
 
 	t.equals(
-		(Either.tagBy('negative', x => x >= 0) (-100))+''
+		Either.tagBy('negative', x => x >= 0) (-100)+''
 		,Either.N('negative')+''
 		,'Either tagBy negative'
 	)
 
 	t.equals(
-		(Either.tagBy('negative', x => x >= 0) (100))+''
+		Either.tagBy('negative', x => x >= 0) (100)+''
 		,Either.Y(100)+''
 		,'Either tagBy positive'
 	)
@@ -554,18 +554,18 @@ test('otherwise = fold, map, chain', function (t) {
 	const _ = otherwise(['Y', 'N'])
 
 	const foldY = (otherwise, f) => Maybe.fold({
-		..._(() => otherwise),
-		Y: f
+		..._(() => otherwise)
+		,Y: f
 	})
 
 	const foldN = (otherwise, f) => Maybe.fold({
-		..._(() => otherwise),
-		N: f
+		..._(() => otherwise)
+		,N: f
 	})
 
 	const chainY = f => Ma => Maybe.fold({
-		..._( () => Ma ),
-		Y: f
+		..._( () => Ma )
+		,Y: f
 	}) (Ma)
 
 	t.equals(
@@ -633,8 +633,8 @@ test('otherwise = fold, map, chain', function (t) {
 		() => 'Yes'
 	
 	const validFold = {
-		Y: () => 'Yes',
-		N: () => 'No'
+		Y: () => 'Yes'
+		,N: () => 'No'
 	}
 
 	;
@@ -714,13 +714,13 @@ test('encase', t => {
 
 test('all / any', t => {
 	const Maybe = maybe('Maybe')
-	var a = Maybe.Y(3)
-	var b = Maybe.Y(2)
-	var c = Maybe.N()
+	let a = Maybe.Y(3)
+	let b = Maybe.Y(2)
+	let c = Maybe.N()
 
-	var A = Either.Y(3)
-	var B = Either.Y(2)
-	var C = Either.N('Error')
+	let A = Either.Y(3)
+	let B = Either.Y(2)
+	let C = Either.N('Error')
 
 	t.equals(
 		Maybe.all([a,b])+'',
@@ -842,13 +842,13 @@ test('decorate', t => {
 		const bad = {}
 
 		t.equals(
-			(Either.mapY( () => bad ) (Either.N(good) )).value,
+			Either.mapY( () => bad ) (Either.N(good) ).value,
 			good,
 			'mapY with N'
 		)
 
 		t.equals(
-			(Either.mapN( () => good ) ( Either.N(bad) )).value,
+			Either.mapN( () => good ) ( Either.N(bad) ).value,
 			good,
 			'mapN with N'
 		)
@@ -859,13 +859,13 @@ test('decorate', t => {
 		const bad = {}
 
 		t.equals(
-			(Either.chainY( () => Either.Y(bad) ) (Either.N(good) )).value,
+			Either.chainY( () => Either.Y(bad) ) (Either.N(good) ).value,
 			good,
 			'chainY with N'
 		)
 
 		t.equals(
-			(Either.chainN( () => Either.Y(good) ) ( Either.N(bad) )).value,
+			Either.chainN( () => Either.Y(good) ) ( Either.N(bad) ).value,
 			good,
 			'chainN with N'
 		)
