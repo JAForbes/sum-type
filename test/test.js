@@ -17,8 +17,6 @@ import {
 	, toString
 	, toJSON
 	, tags
-	, tagged
-	, sameCase
 } from '../lib/index.js'
 
 let ObjMaybe = {
@@ -100,8 +98,8 @@ test('sum-type', function (t) {
 
 	t.equals(
 		Either.Y(undefined)+'',
-		'T.Either.Y()',
-		'stags with a value of undefined are rendered as ()'
+		'sumType.Either.Y()',
+		'types with a value of undefined are rendered as ()'
 	)
 
 
@@ -121,32 +119,32 @@ test('sum-type', function (t) {
 		class MyClass {}
 		t.equals(
 			Either.Y( new MyClass() )+'',
-			'T.Either.Y(new MyClass())',
+			'sumType.Either.Y(new MyClass())',
 			'Renders custom object types'
 		)
 	}
 
 	t.equals(
 		Either.Y( Either.Y({ a: 1, b: true }) )+'',
-		'T.Either.Y(T.Either.Y({"a":1,"b":true}))',
+		'sumType.Either.Y(T.Either.Y({"a":1,"b":true}))',
 		'toString is useful for nested objects'
 	)
 
 	t.equals(
 		Either.Y( 'hello' )+'',
-		'T.Either.Y("hello")',
+		'sumType.Either.Y("hello")',
 		'toString is useful with primative strings'
 	)
 
 	t.equals(
 		Either.Y( 1 )+'',
-		'T.Either.Y(1)',
+		'sumType.Either.Y(1)',
 		'toString is useful with numbers'
 	)
 
 	t.equals(
 		Either.N( new Error('Oh noes!') )+'',
-		'T.Either.N(new Error("Oh noes!"))',
+		'sumType.Either.N(new Error("Oh noes!"))',
 		'toString is useful with Errors'
 	)
 
@@ -704,7 +702,7 @@ test('encase', t => {
 	
 	t.equals(
 		eitherJSON('<a>No</a>')+'',
-		'T.Either.N(new SyntaxError("Unexpected token < in JSON at position 0"))',
+		'sumType.Either.N(new SyntaxError("Unexpected token < in JSON at position 0"))',
 		'encase Either N'
 	)
 
@@ -968,44 +966,6 @@ test('tags', t => {
 		State.None()+''
 		,'State.None()'
 		, 'tags null constructor'
-	)
-	t.end()
-})
-
-test('temporary migration', t => {
-	const State = tagged('State')({None: [], V1: [] })
-
-	t.equals(
-		State.V1(1)+''
-		,'State.V1(1)'
-		, 'tags value constructor'
-	)
-
-	t.equals(
-		State.None()+''
-		,'State.None()'
-		, 'tags null constructor'
-	)
-
-	t.equals(
-		sameCase(State.None(), State.None())
-		,true
-		,'same case Y'
-	)
-
-	
-	t.equals(
-		sameCase(State.V1(), State.None())
-		,false
-		,'same case N'
-	)
-
-	const old = { type: 'T.Either', case: 'Y', value: 1 }
-
-	t.equals(
-		Either.map( x => x + 1 ) (old) + ''
-		,Either.Y(2)+''
-		,'Temporarily accept old instance formats'
 	)
 	t.end()
 })
