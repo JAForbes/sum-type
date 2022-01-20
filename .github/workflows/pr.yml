@@ -39,5 +39,5 @@ jobs:
       name: Setup NPM Auth
       env:
         NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-    - run: npm publish --tag=unstable
+    - run: npm publish --tag=unstable || true
       name: Publish

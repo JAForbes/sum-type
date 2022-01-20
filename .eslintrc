@@ -1,0 +1,68 @@
+{
+	"env": {
+		"browser": true,
+		"commonjs": true,
+		"node": true
+	},
+	"parserOptions": {
+		"sourceType": "module",
+		"ecmaVersion": 2022,
+		"ecmaFeatures": {
+			"experimentalObjectRestSpread": true
+		}
+	},
+	"rules": {
+		"no-var": 1,
+		"no-undef": 2,
+		"no-unused-vars": [
+			"error",
+			{
+				"argsIgnorePattern": "_"
+			}
+		],
+		"comma-style": [
+			"warn",
+			"first"
+		],
+		"operator-linebreak": [
+			"warn",
+			"before",
+			{
+				"overrides": {
+					"=": "after"
+				}
+			}
+		],
+		"no-const-assign": [
+			"warn"
+		],
+		"no-dupe-keys": [
+			"warn"
+		],
+		"no-cond-assign": [
+			"warn"
+		],
+		"no-extra-parens": [
+			"warn"
+		],
+		"no-sparse-arrays": [
+			"error"
+		],
+		"array-callback-return": [
+			"error"
+		],
+		"callback-return": [
+			"error"
+		],
+		"max-depth": [
+			"warn",
+			4
+		],
+		"consistent-return": 2,
+		"no-fallthrough": "error",
+		"linebreak-style": [
+			"error",
+			"unix"
+		]
+	}
+}
