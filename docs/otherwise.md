@@ -8,33 +8,33 @@ A helper function for generating folds that are versioned separately to the type
 
 const { Y, N } = T.Maybe
 const Platform = T.tags ('Platform') ([
-    'ModernWindows',
-    'XP',
-    'Linux',
-    'Darwin'
+	'ModernWindows',
+	'XP',
+	'Linux',
+	'Darwin'
 ])
 
 // defined separately to detect changes in intent
 const rest = T.otherwise([
-    'ModernWindows',
-    'XP',
-    'Linux',
-    'Darwin'
+	'ModernWindows',
+	'XP',
+	'Linux',
+	'Darwin'
 ])
 
 const windows = T.otherwise([
-    'ModernWindows',
-    'XP'
+	'ModernWindows',
+	'XP'
 ])
 
 const foldWindows = f => T.map(Platform) ({
-    ... rest(N),
-    ... windows( () => Y(f()) )
+	... rest(N),
+	... windows( () => Y(f()) )
 })
 
 const winPing = 
-    foldWindows
-        ( () => 'ping \\t www.google.com' )
+	foldWindows
+		( () => 'ping \\t www.google.com' )
 
 winPing( Platform.Darwin() )
 // => T.Maybe.N()
@@ -48,11 +48,11 @@ At a later date, you may add support for WSL.  Which will likely break earlier a
 
 ```js
 const Platform = T.tags ('Platform') ([
-    'ModernWindows',
-    'XP',
-    'WSL',
-    'Linux',
-    'Darwin'
+	'ModernWindows',
+	'XP',
+	'WSL',
+	'Linux',
+	'Darwin'
 ])
 ```
 
@@ -64,38 +64,38 @@ We can now create a new otherwise for that assumption:
 
 
 const windows = T.otherwise([ //OLD
-    'ModernWindows',
-    'XP'
+	'ModernWindows',
+	'XP'
 ])
 
 const rest = T.otherwise([ //OLD
-    'ModernWindows',
-    'XP',
-    'Linux',
-    'Darwin'
+	'ModernWindows',
+	'XP',
+	'Linux',
+	'Darwin'
 ])
 
 const rest2 = T.otherwise([ // NEW!
-    'ModernWindows',
-    'XP',
-    'WSL', // NEW
-    'Linux',
-    'Darwin',
+	'ModernWindows',
+	'XP',
+	'WSL', // NEW
+	'Linux',
+	'Darwin',
 ])
 
 const windowsGUI = T.otherwise([ // NEW
-    'ModernWindows',
-    'XP',
+	'ModernWindows',
+	'XP',
 ])
 
 const foldWindowsGUI = f => T.map(Platform) ({ // NEW
-    ... rest2(N),
-    ... windowsGUI( () => Y(f()) )
+	... rest2(N),
+	... windowsGUI( () => Y(f()) )
 })
 
 const foldWindows = f => T.map(Platform) ({ // OLD
-    ... rest(N),
-    ... windows( () => Y(f()) )
+	... rest(N),
+	... windows( () => Y(f()) )
 })
 
 ```
@@ -104,12 +104,12 @@ Our original `ping` function is using our old function, let's revisit our assump
 
 ```js
 const winPing = 
-    foldWindows
-        ( () => 'ping \\t www.google.com' )
+	foldWindows
+		( () => 'ping \\t www.google.com' )
 
 const winPing2 =
-    foldWindowsGUI
-        ( () => 'ping \\t www.google.com' )
+	foldWindowsGUI
+		( () => 'ping \\t www.google.com' )
 ```
 
 When we've updated all the references, `sumType` will stop throwing errors on initialization.  You can then delete the old definitions and update the new definitions to have the old names.  Leaving us with:
@@ -117,33 +117,33 @@ When we've updated all the references, `sumType` will stop throwing errors on in
 ```js
 const { Y, N } = T.Maybe
 const Platform = T.tags ('Platform') ([
-    'ModernWindows',
-    'XP',
-    'Linux',
-    'Darwin'
+	'ModernWindows',
+	'XP',
+	'Linux',
+	'Darwin'
 ])
 
 const rest = T.otherwise([ // renamed
-    'ModernWindows',
-    'XP',
-    'WSL',
-    'Linux',
-    'Darwin',
+	'ModernWindows',
+	'XP',
+	'WSL',
+	'Linux',
+	'Darwin',
 ])
 
 const windowsGUI = T.otherwise([
-    'ModernWindows',
-    'XP',
+	'ModernWindows',
+	'XP',
 ])
 
 const foldWindowsGUI = f => T.map(Platform) ({
-    ... rest2(N),
-    ... windowsGUI( () => Y(f()) )
+	... rest2(N),
+	... windowsGUI( () => Y(f()) )
 })
 
 const winPing =
-    foldWindowsGUI
-        ( () => 'ping \\t www.google.com' )
+	foldWindowsGUI
+		( () => 'ping \\t www.google.com' )
 
 ```
 

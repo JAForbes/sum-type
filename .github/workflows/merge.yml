@@ -33,7 +33,9 @@ jobs:
     - run: npm run build --if-present
     - run: npx pr-release merge --target main --source next --commit --force --clean --changelog --compact
       env:
-        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - run: npm version prerelease --preid=next
 
     # The following will publish the release to npm
     - run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/.npmrc
@@ -41,7 +43,6 @@ jobs:
       env:
         NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
     - run: npm whoami
-
     - run: npm publish --tag=next
       name: Publish
 

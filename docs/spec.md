@@ -46,9 +46,9 @@ Here is an example of some valid usage of `traits`.
 { type: 'Maybe'
 , tags: ['Y', 'N']
 , traits: {
-  'bifunctor': ['Y', 'N'],
-  'functor': ['Y'],
-  'monoid': 'N'
+	'bifunctor': ['Y', 'N'],
+	'functor': ['Y'],
+	'monoid': 'N'
 }
 }
 ```

@@ -28,9 +28,9 @@ Or a helper for updating an existing record:
 
 ```js
 const update = Selected.map(
-    Loaded.map(
-        Modified.bifold(Modified.Y, Modified.Y)
-    )
+		Loaded.map(
+				Modified.bifold(Modified.Y, Modified.Y)
+		)
 )
 
 var a = create({ name: 'Hello' })
@@ -49,25 +49,25 @@ If you do have all the state on initialization and are creating a new `sum-type`
 ```js
 // any -> Selected Loaded Modified Saved a
 function infer(state, x){
-  const A = state.selected ? Selected.Y : Selected.N
-  const B = state.selected 
-    ? state.loaded
-      ? Loaded.Y
-      : Loaded.N
-    : identity
-  const C = B == identity 
-    ? identity 
-    : state.modified != null 
-      ? Modified.Y 
-      : Modified.N
+	const A = state.selected ? Selected.Y : Selected.N
+	const B = state.selected 
+		? state.loaded
+			? Loaded.Y
+			: Loaded.N
+		: identity
+	const C = B == identity 
+		? identity 
+		: state.modified != null 
+			? Modified.Y 
+			: Modified.N
 
-  const D = C == identity
-    ? identity
-    : state.saved != null
-      ? Saved.Y
-      : Saved.N
+	const D = C == identity
+		? identity
+		: state.saved != null
+			? Saved.Y
+			: Saved.N
 
-  return A(B(C(D(x))))
+	return A(B(C(D(x))))
 }
 ```
 
