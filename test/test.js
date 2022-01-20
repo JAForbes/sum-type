@@ -126,7 +126,7 @@ test('sum-type', function (t) {
 
 	t.equals(
 		Either.Y( Either.Y({ a: 1, b: true }) )+'',
-		'sumType.Either.Y(T.Either.Y({"a":1,"b":true}))',
+		'sumType.Either.Y(sumType.Either.Y({"a":1,"b":true}))',
 		'toString is useful for nested objects'
 	)
 
