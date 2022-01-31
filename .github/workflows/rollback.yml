@@ -28,4 +28,4 @@ jobs:
     - run: npm run build --if-present
     - run: npx pr-release rollback --verbose --target main --source next --verbose --ignore 'package*' --ignore changelog.md
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
