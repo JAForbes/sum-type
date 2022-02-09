@@ -41,7 +41,7 @@ jobs:
       env:
         NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
     - run: npm whoami
-    - run: npm publish --tag=next
+    - run: npm publish
       name: Publish
 
 
