@@ -1,4 +1,10 @@
 
+# Release v1.0.4
+
+### Patch Changes
+
+#### [Publish sum-type v1 (@JAForbes)](https://github.com/JAForbes/sum-type/pull/53)
+
 # Release v1.0.3
 
 ### Patch Changes
