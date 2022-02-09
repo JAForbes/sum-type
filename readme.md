@@ -15,11 +15,11 @@
 ## Quick Start
 
 ```bash
-npm install sum-type@next
+npm install sum-type
 ```
 
 ```js
-// unpkg.com/sum-type@next
+// unpkg.com/sum-type
 // let T = SumType
 
 import * as T from 'sum-type'
@@ -57,11 +57,11 @@ const transform =
 
 ### Recommended
 
-Recommended usage is to simply `npm install sum-type@next` and `import * as T from 'sum-type`
+Recommended usage is to simply `npm install sum-type` and `import * as T from 'sum-type`
 
 ### Browser / Playground
 
-Checkout all the distributions here: https://unpkg.com/sum-type@next/dist/
+Checkout all the distributions here: https://unpkg.com/sum-type/dist/
 
 ### Common.js
 
