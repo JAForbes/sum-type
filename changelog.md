@@ -1,4 +1,10 @@
 
+# Release v1.0.5
+
+### Patch Changes
+
+#### [Remove @next from docs (@JAForbes)](https://github.com/JAForbes/sum-type/pull/55)
+
 # Release v1.0.4
 
 ### Patch Changes
