@@ -1,4 +1,12 @@
 
+# Release v1.0.3
+
+### Patch Changes
+
+#### [Remove unneeded pre-release command (@JAForbes)](https://github.com/JAForbes/sum-type/pull/51)
+
+Already handled by pr-release merge.
+
 # Release v1.0.2
 
 ### Patch Changes
