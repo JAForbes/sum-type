@@ -1,8 +1,0 @@
-{
-	"prettier.disableLanguages": [
-		"javascript",
-		"markdown"
-	],
-	"editor.insertSpaces": false,
-	// "javascript.format.enable": false
-}
