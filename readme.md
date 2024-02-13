@@ -347,9 +347,9 @@ Resource.getLoaded(instance, defaultValue, getter)
 |---|---|---|---|
 | `Resource.Loaded({ id: 'hello', title: 'cool' })` | `-` | `-` | `{ id: 'hello', title: 'cool' }` |
 | `Resource.Loading(55)` | `-` | `-` | `null` |
-| `Resource.Loaded({ id: 'hello', title: 'cool' })` | `'hello` | `-` | `null` |
+| `Resource.Loaded({ id: 'hello', title: 'cool' })` | `'hello'` | `-` | `null` |
 | `Resource.Loading(55)` | `'hello'` | `-` | `'hello'` |
-| `Resource.Loaded({ id: 'hello', title: 'cool' })` | `'hello` | `x => x.title` | `'cool'` |
+| `Resource.Loaded({ id: 'hello', title: 'cool' })` | `'hello'` | `x => x.title` | `'cool'` |
 | `Resource.Loading(55)` | `'hello'` | `x => x.title` | `'hello'` |
 
 If you just want to get the `instance` `value` if it is the given `tag` do not supply `defaultValue` or `getter`.  It will return `null` if the instance is any other case.
@@ -676,3 +676,9 @@ const myFunction = (a: T.Instance<typeof ExampleInternal>) => { ... }
 
 export default { ...ExampleInternal, myFunction }
 ```
+
+### Why can't I call a constructor with no arguments?
+
+80% of this library is type definitions.  We could add the ability for some function signatures to be parameterless, but it just adds to the complexity of the library for a tiny syntax cost.
+
+We tend to use `Record<string, never>` for these cases to enforce an empty object is passed in.  But you could use `null`, or `undefined`.  But you need to pass exactly 1 argument into your constructor.

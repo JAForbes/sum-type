@@ -263,8 +263,13 @@ export function either<Name extends string, Yes, No>(
 	return api as EitherApi<Name, Yes, No>
 }
 
-// alias
-export { either as maybe }
+
+export function maybe<Name extends string, Yes>(
+	name: Name,
+	yes: (_: Yes) => any
+) {
+	return either(name, yes) as any as EitherApi<Name, Yes, Record<string, never>> 
+}
 
 export function Resource<Name extends string, Value extends any>(name: Name) {
 	const Resource = type(name, {
