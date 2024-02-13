@@ -523,15 +523,35 @@ JSONValue.bifold(
 
 ### `eitherType.get`
 
-Equivalent to calling `.getY` (See `get[Tag]`)
+Equivalent to calling `.getY` (See [`get[Tag]`](#typegettag-))
 
 ### `eitherType.map`
 
-Equivalent to calling `.mapY` (See `map[Tag]`)
+Equivalent to calling `.mapY` (See [`map[Tag]`](#typemaptag))
 
 ### `eitherType.flatMap`
 
-Equivalent to calling `.flatMapY` (See `flatMap[Tag]`)
+Equivalent to calling `.flatMapY` (See [`flatMap[Tag]`](#typeflatmaptag))
+
+### `either.encase`
+
+Useful for wrapping an unsafe function that may throw into an Either type:
+
+The following two examples are equivalent:
+
+```typescript
+function parseJSON(s: string): JSONValue {
+    try {
+        return JSONValue.Y(JSON.parse(s))
+    } catch (e) {
+        return JSONValue.N(e as Error)
+    }
+}
+```
+
+```typescript
+const parseJSON = JSONValue.encase((s: string) => JSON.parse(s))
+```
 
 ## Resource
 
@@ -592,3 +612,19 @@ Finally, at [harth](harth.io) in the interest of having a smaller and [(Rich Hic
 We had cases where code wasn't running because the definition of an auto-curried function changed and the callsite simply silently failed with no type error.
 
 We provide type helpers like `type.Instance` and `type.Value` to make it simple to re-export these utils as data last operations without losing any type information.
+
+### How do I add custom methods to my supertype
+
+A good pattern is to create a separate module file for your type, spread all your methods and the type into a new object, and typescript will automatically create the appropriate composite type.
+
+```typescript
+const ExampleInternal = T.type('Example', {
+    A: (_: { id: string; title: string }) => _,
+    B: (_: Error) => _,
+    C: (_: any) => _,
+})
+
+const myFunction = (a: T.Instance<typeof ExampleInternal>) => { ... }
+
+export default { ...ExampleInternal, myFunction }
+```
