@@ -1,21 +1,30 @@
 {
 	"name": "sum-type",
-	"version": "1.0.5",
+	"version": "2.0.0-next.0",
 	"description": "A simple library for complex logic",
-	"main": "dist/sum-type.cjs",
-	"module": "lib/index.js",
-	"unpkg": "dist/sum-type.umd.min.js",
 	"type": "module",
+	"main": "./dist/sum-type.esm.js",
+	"types": "./dist/index.ts",
+	"module": "./dist/sum-type.esm.js",
+	"unpkg": "./dist/sum-type.esm.js",
+	"scripts": {
+		"test": "npx tsc ./test/index.ts --noEmit --esModuleInterop && node --import tsx --test test/*.ts",
+		"dev": "node --watch --import tsx --test test/*.ts",
+		"build:bundle": "esbuild lib/index.ts --bundle --format=esm --sourcemap  --allow-overwrite --outfile=./dist/sum-type.esm.js",
+		"build:types": "npx tsc ./test/index.ts --noEmit && npx tsc",
+		"build:clear": "rm -fr ./dist",
+		"build": "npm run build:clear && npm run build:bundle && npm run build:types",
+		"prepublishOnly": "npm version prerelease --preid=next && npm run build"
+	},
+	"publishConfig": {
+		"tag": "next"
+	},
 	"repository": "git@github.com:JAForbes/sum-type.git",
 	"files": [
 		"dist",
 		"lib",
 		"lib/**"
 	],
-	"scripts": {
-		"test": "tape test/*",
-		"build": "rollup -c"
-	},
 	"keywords": [
 		"fp",
 		"sum-type",
@@ -29,9 +38,16 @@
 	"author": "JAForbes",
 	"license": "MIT",
 	"devDependencies": {
-		"eslint": "^8.7.0",
-		"rollup": "^2.56.3",
-		"rollup-plugin-terser": "^7.0.2",
-		"tape": "^5.3.1"
+		"@types/mithril": "^2.0.12",
+		"@typescript-eslint/eslint-plugin": "^6.21.0",
+		"@typescript-eslint/parser": "^6.21.0",
+		"esbuild": "^0.20.0",
+		"eslint": "^8.56.0",
+		"prettier": "3.2.5",
+		"tsx": "^4.7.0",
+		"typescript": "^5.0.4"
+	},
+	"dependencies": {
+		"@types/node": "^20.11.17"
 	}
 }
