@@ -25,16 +25,16 @@ const loaded =
 const loading = 
     Loaded.N(55)
 
-const render = Loaded.def( x =>
+const render = Loaded.def( loaded =>
     Loaded.bifold(
-        x
-        , x => `Loading: ${x}%`
-        , x => `Loaded: ${x}`
+        loaded
+        , y => `Loading: ${y}%`
+        , n => `Loaded: ${n}`
     ))
 
-const transform = Loaded.def( x => 
+const transform = Loaded.def( loaded => 
     Loaded.mapY(
-        x, x => x.toUpperCase()
+        loaded, x => x.toUpperCase()
     ))
 
 assert.deepEqual(Loaded.mapN( loading, x => x+'%' ), {...Loaded.N(55), value: '55%' })
@@ -128,8 +128,8 @@ const data = Data.Modified(x)
 When we want to transform the value of data we can use any number of useful helpers. Like `map[Tag]`, `flatMap[Tag]`, `get[Tag]` or where `[Tag]` is any one of your tag names. E.g. `mapLoading`.
 
 ```typescript
-const f = (x: S.Instance<typeof Data>) => Data.mapLoading(
-    x,
+const f = (loading: S.Instance<typeof Data>) => Data.mapLoading(
+    loading,
 	x => x * 2
 )
 
@@ -154,8 +154,8 @@ const NoData = Data.otherwise(['Selected', 'Loading'])
 const f = 
 	Data.match({
 		... NoData( () => 'Nothing' )
-		,   Saved: x => 'Saved: ' + x.id
-		,   Modified: x => 'Modified: ' + x.id
+		,   Saved: saved => 'Saved: ' + saved.id
+		,   Modified: modified => 'Modified: ' + modified.id
 	})
 
 f( Data.Loading() )
@@ -316,7 +316,7 @@ We can then spread that structure into a call to `.match` and typescript will kn
 ```typescript
 const getTitle = Resource.match(instance, {
     ...NotLoaded(() => null),
-    Loaded: x => x.title
+    Loaded: loaded => loaded.title
 })
 ```
 
@@ -328,7 +328,7 @@ const _ = Resource.otherwise()
 
 const getTitle = Resource.match(instance, {
     ..._(() => null),
-    Loaded: x => x.title
+    Loaded: loaded => loaded.title
 })
 ```
 
@@ -383,7 +383,7 @@ instance.tag === 'Loaded' ? instance.value.title : 'No Title'
 ```
 
 ```typescript
-Resource.getLoaded(instance, 'No Title', x => x.title)
+Resource.getLoaded(instance, 'No Title', loaded => loaded.title)
 ```
 
 ### `type.def`
@@ -393,21 +393,21 @@ Useful for defining a reusable function that accepts an instance of your type as
 The following two examples are equivalent
 
 ```typescript
-const render = (x: T.Instance<typeof Loaded> ) =>
+const render = (loaded: T.Instance<typeof Loaded> ) =>
     Loaded.bifold(
-        x
-        , x => `Loading: ${x}%`
-        , x => `Loaded: ${x}`
+        loaded
+        , y => `Loading: ${y}%`
+        , n => `Loaded: ${n}`
     )
 
 ```
 
 ```typescript
-const render = Loaded.def( x =>
+const render = Loaded.def( loaded =>
     Loaded.bifold(
-        x
-        , x => `Loading: ${x}%`
-        , x => `Loaded: ${x}`
+        loaded
+        , y => `Loading: ${y}%`
+        , n => `Loaded: ${n}`
     ))
 ```
 
@@ -419,10 +419,10 @@ const render = Loaded.def( x =>
 const loaded = Resource.Loaded({ id: '1', title: 'cool' })
 const loading = Resource.Loading(55)
 
-Resource.mapLoaded(loaded, x => x.title)
+Resource.mapLoaded(loaded, loaded => loaded.title)
 // => { type: 'Resource', tag: 'Loaded', value: 'cool' 
 
-Resource.mapLoaded(loading, x => x.title)
+Resource.mapLoaded(loading, loaded => loaded.title)
 // => { type: 'Resource', tag: 'Loaded', value: { id: '1', title: 'cool' } }
 ```
 
