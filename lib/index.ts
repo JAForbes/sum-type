@@ -22,7 +22,7 @@ export type CoreAPI<N extends string, D extends Definition> = {
 		instance: InternalInstance<N, D, keyof D>,
 		options: MatchOptions<D, T>,
 	) => T
-	lift: <T>(
+	def: <T>(
 		fn: (x: InternalInstance<N, D, keyof D>) => T,
 	) => (x: InternalInstance<N, D, keyof D>) => T
 }
@@ -103,7 +103,7 @@ function match(instance: any, options: any): any {
 	return options[instance.tag](instance.value)
 }
 
-function lift(fn: any): any {
+function def(fn: any): any {
 	return (x: any) => fn(x)
 }
 
@@ -122,7 +122,7 @@ export function type<N extends string, D extends Definition>(
 		patterns: {},
 		definition,
 		match,
-		lift,
+		def,
 		otherwise: (tagNames = tags) => otherwise(tagNames),
 	}
 

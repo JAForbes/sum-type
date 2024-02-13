@@ -8,7 +8,7 @@
 	"module": "./dist/sum-type.esm.js",
 	"unpkg": "./dist/sum-type.esm.js",
 	"scripts": {
-		"test": "npx tsc ./test/index.ts --noEmit && node --import tsx --test test/*.ts",
+		"test": "node --import tsx --test test/*.ts",
 		"dev": "node --watch --import tsx --test test/*.ts",
 		"build:bundle": "esbuild lib/index.ts --bundle --format=esm --sourcemap  --allow-overwrite --outfile=./dist/sum-type.esm.js",
 		"build:types": "npx tsc ./test/index.ts --noEmit --esModuleInterop && npx tsc",

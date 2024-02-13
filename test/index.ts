@@ -390,12 +390,12 @@ test('readme', () => {
 })
 
 
-test('lift', () => {
+test('def', () => {
 	type File = { file_id: string, file_url: string, file_ext: string, file_upname: string }
 
 	const FileResource = T.Resource<'FileResource', File>('FileResource')
 
-	const fn = FileResource.lift( x => {
+	const fn = FileResource.def( x => {
 		return x.tag
 	})
 

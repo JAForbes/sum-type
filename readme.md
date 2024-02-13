@@ -25,14 +25,14 @@ const loaded =
 const loading = 
     Loaded.N(55)
 
-const render = Loaded.lift( x =>
+const render = Loaded.def( x =>
     Loaded.bifold(
         x
         , x => `Loading: ${x}%`
         , x => `Loaded: ${x}`
     ))
 
-const transform = Loaded.lift( x => 
+const transform = Loaded.def( x => 
     Loaded.mapY(
         x, x => x.toUpperCase()
     ))
@@ -386,7 +386,7 @@ instance.tag === 'Loaded' ? instance.value.title : 'No Title'
 Resource.getLoaded(instance, 'No Title', x => x.title)
 ```
 
-### `type.lift`
+### `type.def`
 
 Useful for defining a reusable function that accepts an instance of your type as an argument.  Note you can do this manually with type utilities like `Instance` but doing it this way is may be preferable as the type of the parameter is inferred for you.
 
@@ -403,7 +403,7 @@ const render = (x: T.Instance<typeof Loaded> ) =>
 ```
 
 ```typescript
-const render = Loaded.lift( x =>
+const render = Loaded.def( x =>
     Loaded.bifold(
         x
         , x => `Loading: ${x}%`
@@ -641,7 +641,7 @@ type Single = T.Instance<typeof ExampleResource.Loaded>
 // | { type: 'ExampleResource', tag: 'Loaded', value: { id: string, title: string } }
 ```
 
-Can be useful for annotating custom functions.  But note `type.lift` can be more convenient as the `Instance` type is automatically inferred for you.
+Can be useful for annotating custom functions.  But note `type.def` can be more convenient as the `Instance` type is automatically inferred for you.
 
 ## FAQ
 
