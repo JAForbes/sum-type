@@ -1,6 +1,6 @@
 {
 	"name": "sum-type",
-	"version": "2.0.0-next.1",
+	"version": "2.0.0-next.2",
 	"description": "A simple library for complex logic",
 	"type": "module",
 	"main": "./dist/sum-type.esm.js",
