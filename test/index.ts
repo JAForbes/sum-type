@@ -1,5 +1,5 @@
 import test from 'node:test'
-import * as assert from 'node:assert'
+import assert from 'node:assert'
 
 import * as T from '../lib/index.js'
 
@@ -387,4 +387,20 @@ test('readme', () => {
 			'Loading: 55%',
 		]
 	)
+})
+
+
+test('lift', () => {
+	type File = { file_id: string, file_url: string, file_ext: string, file_upname: string }
+
+	const FileResource = T.Resource<'FileResource', File>('FileResource')
+
+	const fn = FileResource.lift( x => {
+		return x.tag
+	})
+
+	const tag = fn(FileResource.Loading({ progress: 55 }))
+
+	assert.equal(tag, 'Loading')
+	
 })

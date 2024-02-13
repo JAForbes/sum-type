@@ -22,6 +22,9 @@ export type CoreAPI<N extends string, D extends Definition> = {
 		instance: InternalInstance<N, D, keyof D>,
 		options: MatchOptions<D, T>,
 	) => T
+	lift: <T>(
+		fn: (x: InternalInstance<N, D, keyof D>) => T,
+	) => (x: InternalInstance<N, D, keyof D>) => T
 }
 export type API<N extends string, D extends Definition> = CoreAPI<N, D> &
 	Constructors<N, D> &
@@ -85,16 +88,9 @@ export type EitherApi<Name extends string, Yes, No> = API<
 	// 	'Y' | 'N'
 	// >
 
-	map: API<
-		Name,
-		{ Y: (_: Yes) => any; N: (_: No) => any }
-	>["mapY"]
-	
+	map: API<Name, { Y: (_: Yes) => any; N: (_: No) => any }>['mapY']
 
-	flatMap: API<
-		Name,
-		{ Y: (_: Yes) => any; N: (_: No) => any }
-	>["flatMapY"]
+	flatMap: API<Name, { Y: (_: Yes) => any; N: (_: No) => any }>['flatMapY']
 }
 
 type InternalInstance<
@@ -105,6 +101,10 @@ type InternalInstance<
 
 function match(instance: any, options: any): any {
 	return options[instance.tag](instance.value)
+}
+
+function lift(fn: any): any {
+	return (x: any) => fn(x)
 }
 
 function otherwise(tags: string[]) {
@@ -122,6 +122,7 @@ export function type<N extends string, D extends Definition>(
 		patterns: {},
 		definition,
 		match,
+		lift,
 		otherwise: (tagNames = tags) => otherwise(tagNames),
 	}
 
@@ -189,14 +190,16 @@ export type UseMap<N extends string, D extends Definition> = {
 	[Key in keyof D as MapTemplate<Key extends string ? Key : never>]: <T>(
 		value: InternalInstance<N, D, keyof D>,
 		visitor: (value: InternalValue<D[Key]>) => T,
-	) => Instance<API<N, Omit<D, Key> & Record<Key,(_:T) => any>>>
+	) => Instance<API<N, Omit<D, Key> & Record<Key, (_: T) => any>>>
 }
 
 export type UseFlatMap<N extends string, D extends Definition> = {
 	[Key in keyof D as FlatMapTemplate<Key extends string ? Key : never>]: <T>(
 		value: InternalInstance<N, D, keyof D>,
-		visitor: (value: InternalValue<D[Key]>) => Instance<API<N, Omit<D, Key> & Record<Key,(_:T) => any>>>,
-	) => Instance<API<N, Omit<D, Key> & Record<Key,(_:T) => any>>>
+		visitor: (
+			value: InternalValue<D[Key]>,
+		) => Instance<API<N, Omit<D, Key> & Record<Key, (_: T) => any>>>,
+	) => Instance<API<N, Omit<D, Key> & Record<Key, (_: T) => any>>>
 }
 
 export type UseGet<N extends string, D extends Definition> = {
@@ -211,13 +214,13 @@ export type UseGetDefault<N extends string, D extends Definition> = {
 	[Key in keyof D as GetTemplate<Key extends string ? Key : never>]: <T>(
 		value: InternalInstance<N, D, keyof D>,
 		fallback: T,
-	) => T | InternalInstance<N, D, keyof D>["value"]
+	) => T | InternalInstance<N, D, keyof D>['value']
 }
 
 export type UseGetNull<N extends string, D extends Definition> = {
 	[Key in keyof D as GetTemplate<Key extends string ? Key : never>]: (
 		value: InternalInstance<N, D, keyof D>,
-	) => null | InternalInstance<N, D, keyof D>["value"]
+	) => null | InternalInstance<N, D, keyof D>['value']
 }
 
 type InternalValue<I extends (v: any) => any> = Parameters<I>[0]
@@ -255,7 +258,6 @@ export function either<Name extends string, Yes, No>(
 			Y: yesFunction,
 			N: noFunction,
 		})
-
 	;(api as any).map = api.mapY
 	;(api as any).flatMap = api.flatMapY
 	return api as EitherApi<Name, Yes, No>
@@ -264,8 +266,7 @@ export function either<Name extends string, Yes, No>(
 // alias
 export { either as maybe }
 
-
-export function Resource<Name extends string, Value extends any>(name: Name){
+export function Resource<Name extends string, Value extends any>(name: Name) {
 	const Resource = type(name, {
 		Loading: (_: { progress?: number }) => _,
 		Loaded: (_: Value) => _,

@@ -25,17 +25,17 @@ const loaded =
 const loading = 
     Loaded.N(55)
 
-const render = (x: T.Instance<typeof Loaded>) =>
+const render = Loaded.lift( x =>
     Loaded.bifold(
         x
         , x => `Loading: ${x}%`
         , x => `Loaded: ${x}`
-    )
+    ))
 
-const transform = (x: T.Instance<typeof Loaded>) =>
+const transform = Loaded.lift( x => 
     Loaded.mapY(
         x, x => x.toUpperCase()
-    )
+    ))
 
 assert.deepEqual(Loaded.mapN( loading, x => x+'%' ), {...Loaded.N(55), value: '55%' })
 
@@ -245,7 +245,7 @@ switch (instance.tag) {
         return 2
     }
     'Loaded': {
-        3
+        return 3
     }
 }
 ```
@@ -386,7 +386,30 @@ instance.tag === 'Loaded' ? instance.value.title : 'No Title'
 Resource.getLoaded(instance, 'No Title', x => x.title)
 ```
 
-### `type.encase`
+### `type.lift`
+
+Useful for defining a reusable function that accepts an instance of your type as an argument.  Note you can do this manually with type utilities like `Instance` but doing it this way is may be preferable as the type of the parameter is inferred for you.
+
+The following two examples are equivalent
+
+```typescript
+const render = (x: T.Instance<typeof Loaded> ) =>
+    Loaded.bifold(
+        x
+        , x => `Loading: ${x}%`
+        , x => `Loaded: ${x}`
+    )
+
+```
+
+```typescript
+const render = Loaded.lift( x =>
+    Loaded.bifold(
+        x
+        , x => `Loading: ${x}%`
+        , x => `Loaded: ${x}`
+    ))
+```
 
 ### `type.map[Tag]`
 
@@ -593,11 +616,36 @@ Like any other subtype you automatically get generated methods for each tag, e.g
 
 ### `Value`
 
+Returns the type of the value of a supertype or subtype depending on what you pass in as a generic:
+
+```typescript
+type All = T.Value<typeof ExampleResource>
+// { value: { id: string, title: string } } | { progress?: number } | {} | Error
+
+type Single = T.Value<typeof ExampleResource.Loaded>
+// { value: { id: string, title: string } }
+```
+
 ### `Instance`
+
+Returns the type of the instance of a supertype or subtype depending on what you pass in as a generic:
+
+```typescript
+type All = T.Instance<typeof ExampleResource>
+// | { type: 'ExampleResource', tag: 'Loaded', value: { id: string, title: string } }
+// | { type: 'ExampleResource', tag: 'Loading', value: { progress?: number } }
+// | { type: 'ExampleResource', tag: 'Empty', value: {} }
+// | { type: 'ExampleResource', tag: 'Error', value: Error }
+
+type Single = T.Instance<typeof ExampleResource.Loaded>
+// | { type: 'ExampleResource', tag: 'Loaded', value: { id: string, title: string } }
+```
+
+Can be useful for annotating custom functions.  But note `type.lift` can be more convenient as the `Instance` type is automatically inferred for you.
 
 ## FAQ
 
-### Why is Either's subtypes named `Y|N` instead of `Right|Left`
+### Why are Either's subtypes named `Y|N` instead of `Right|Left`
 
 It's a night short and sweet convention and while `Right|Left` allows you to model things that aren't necessarily failable operations, generally that is what they are used for so we name it accordingly. 
 
