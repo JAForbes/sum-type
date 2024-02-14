@@ -28,8 +28,8 @@ const loading =
 const render = Loaded.def( loaded =>
     Loaded.bifold(
         loaded
-        , y => `Loading: ${y}%`
-        , n => `Loaded: ${n}`
+        , n => `Loading: ${n}%`
+        , y => `Loaded: ${y}`
     ))
 
 const transform = Loaded.def( loaded => 
@@ -396,8 +396,8 @@ The following two examples are equivalent
 const render = (loaded: T.Instance<typeof Loaded> ) =>
     Loaded.bifold(
         loaded
-        , y => `Loading: ${y}%`
-        , n => `Loaded: ${n}`
+        , n => `Loading: ${n}%`
+        , y => `Loaded: ${y}`
     )
 
 ```
@@ -406,8 +406,8 @@ const render = (loaded: T.Instance<typeof Loaded> ) =>
 const render = Loaded.def( loaded =>
     Loaded.bifold(
         loaded
-        , y => `Loading: ${y}%`
-        , n => `Loaded: ${n}`
+        , n => `Loading: ${n}%`
+        , y => `Loaded: ${y}`
     ))
 ```
 
