@@ -225,11 +225,17 @@ export type UseGetNull<N extends string, D extends Definition> = {
 
 type InternalValue<I extends (v: any) => any> = Parameters<I>[0]
 
-export type Instance<A extends CoreAPI<any, any>> = InternalInstance<
-	A['type'],
-	A['definition'],
-	keyof A['definition']
->
+export type Instance<A> = 
+	A extends CoreAPI<any, any>
+	? InternalInstance<
+		A['type'],
+		A['definition'],
+		keyof A['definition']
+	>
+	// constructor
+	: A extends (x:any) => any
+		? ReturnType<A>
+	: never
 
 export function either<Name extends string, Yes, No>(
 	name: Name,
