@@ -151,7 +151,7 @@ export function type<N extends string, D extends Definition>(
 export type Value<A> =
 	A extends API<any, any>
 		? Instance<A>['value']
-		: A extends Instance<any>
+		: A extends { type: string, tag: string, value: any }
 			? A['value']
 			: A extends (x: any) => any
 				? Parameters<A>[0]
@@ -160,7 +160,7 @@ export type Value<A> =
 export type Tag<A> =
 	A extends API<any, any>
 		? Instance<A>['tag']
-		: A extends Instance<any>
+		: A extends { tag: string }
 			? A['tag']
 			: never
 
@@ -233,7 +233,7 @@ export type Instance<A> =
 		keyof A['definition']
 	>
 	// constructor
-	: A extends (x:any) => any
+	: A extends (x:any) => { value: any }
 		? ReturnType<A>
 	: never
 
