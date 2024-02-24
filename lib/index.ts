@@ -151,7 +151,7 @@ export function type<N extends string, D extends Definition>(
 export type Value<A> =
 	A extends API<any, any>
 		? Instance<A>['value']
-		: A extends { type: string, tag: string, value: any }
+		: A extends { type: string; tag: string; value: any }
 			? A['value']
 			: A extends (x: any) => any
 				? Parameters<A>[0]
@@ -209,33 +209,28 @@ export type UseGet<N extends string, D extends Definition> = {
 		visitor: (value: InternalValue<D[Key]>) => T,
 	) => T
 }
-
 export type UseGetDefault<N extends string, D extends Definition> = {
 	[Key in keyof D as GetTemplate<Key extends string ? Key : never>]: <T>(
 		value: InternalInstance<N, D, keyof D>,
 		fallback: T,
-	) => T | InternalInstance<N, D, keyof D>['value']
+	) => T | InternalInstance<N, D, Key>['value']
 }
-
 export type UseGetNull<N extends string, D extends Definition> = {
 	[Key in keyof D as GetTemplate<Key extends string ? Key : never>]: (
 		value: InternalInstance<N, D, keyof D>,
-	) => null | InternalInstance<N, D, keyof D>['value']
+	) => null | InternalInstance<N, D, Key>['value']
 }
+
 
 type InternalValue<I extends (v: any) => any> = Parameters<I>[0]
 
-export type Instance<A> = 
+export type Instance<A> =
 	A extends CoreAPI<any, any>
-	? InternalInstance<
-		A['type'],
-		A['definition'],
-		keyof A['definition']
-	>
-	// constructor
-	: A extends (x:any) => { value: any }
-		? ReturnType<A>
-	: never
+		? InternalInstance<A['type'], A['definition'], keyof A['definition']>
+		: // constructor
+			A extends (x: any) => { value: any }
+			? ReturnType<A>
+			: never
 
 export function either<Name extends string, Yes, No>(
 	name: Name,
@@ -269,12 +264,11 @@ export function either<Name extends string, Yes, No>(
 	return api as EitherApi<Name, Yes, No>
 }
 
-
 export function maybe<Name extends string, Yes>(
 	name: Name,
-	yes: (_: Yes) => any
+	yes: (_: Yes) => any,
 ) {
-	return either(name, yes) as any as EitherApi<Name, Yes, Record<string, never>> 
+	return either(name, yes) as any as EitherApi<Name, Yes, Record<string, never>>
 }
 
 export function Resource<Name extends string, Value extends any>(name: Name) {
