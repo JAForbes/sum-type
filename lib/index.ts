@@ -271,6 +271,14 @@ export function maybe<Name extends string, Yes>(
 	return either(name, yes) as any as EitherApi<Name, Yes, Record<string, never>>
 }
 
+// we manually type this because it makes it simpler to provide some
+// helpful utilities
+export type ResourceInstance<Name extends string, Value> = 
+	{ type: Name, tag: 'Loaded', value: Value }
+	| { type: Name, tag: 'Loading', value: { progress?: number } }
+	| { type: Name, tag: 'Error', value: Error }
+	| { type: Name, tag: 'Empty', value: Record<string, never> }
+
 export function Resource<Name extends string, Value extends any>(name: Name) {
 	const Resource = type(name, {
 		Loading: (_: { progress?: number }) => _,
@@ -279,5 +287,25 @@ export function Resource<Name extends string, Value extends any>(name: Name) {
 		Empty: (_: Record<string, never>) => _,
 	})
 
-	return Resource
+	type Instance = ResourceInstance<Name, Value>
+
+
+	// its possible to do this dynamically with combinators, but this is a lot less work for the compiler
+	function assertLoaded( instance: Instance ) : { type: Name, tag: 'Loaded', value: Value } {
+		return instance as any
+	}
+
+	function assertLoading( instance: Instance ) : { type: Name, tag: 'Loading', value: { progress?: number } } {
+		return instance as any
+	}
+
+	function assertError( instance: Instance ) : { type: Name, tag: 'Error', value: Error } {
+		return instance as any
+	}
+
+	function assertEmpty( instance: Instance ) : { type: Name, tag: 'Empty', value: Record<string, never> } {
+		return instance as any
+	}
+
+	return { ...Resource, assertLoaded, assertLoading, assertError, assertEmpty }
 }
