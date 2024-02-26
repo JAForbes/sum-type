@@ -279,12 +279,9 @@ export type ResourceInstance<Name extends string, Value> =
 	| { type: Name, tag: 'Error', value: Error }
 	| { type: Name, tag: 'Empty', value: Record<string, never> }
 
-export type ExtractResourceLoaded<
-	Name extends string
-	, Value
-	, Instance extends ResourceInstance<Name, Value>
-> = { type: Instance["type"], tag: Instance["tag"], value: Value }
-	
+export type ResourceInstanceLoaded<Name extends string, Value> = 
+	{ type: Name, tag: 'Loaded', value: Value }
+
 export function Resource<Name extends string, Value extends any>(name: Name) {
 	const Resource = type(name, {
 		Loading: (_: { progress?: number }) => _,
