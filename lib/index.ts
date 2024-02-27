@@ -1,11 +1,16 @@
 type Definition = Record<string, (v: any) => any>
-export type Constructors<N extends string, D extends Definition> = {
+export type InternalConstructors<N extends string, D extends Definition> = {
 	[R in keyof D]: {
 		(value: Parameters<D[R]>[0]): {
 			type: N
 			tag: R
 			value: Parameters<D[R]>[0]
 		}
+	}
+}
+export type Constructors<N extends string, D extends Definition> = {
+	[R in keyof D]: {
+		(value: Parameters<D[R]>[0]): InternalInstance<N, D, keyof D>
 	}
 }
 export type MatchOptions<D extends Definition, T> = {
@@ -97,7 +102,7 @@ type InternalInstance<
 	N extends string,
 	D extends Definition,
 	K extends keyof D,
-> = ReturnType<Constructors<N, D>[K]>
+> = ReturnType<InternalConstructors<N, D>[K]>
 
 function match(instance: any, options: any): any {
 	return options[instance.tag](instance.value)
