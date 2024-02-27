@@ -290,7 +290,5 @@ export function Resource<Name extends string, Value extends any>(name: Name) {
 		Empty: (_: Record<string, never>) => _,
 	})
 
-	type Instance = ResourceInstance<Name, Value>
-
-	return { ...Resource }
+	return Resource
 }
