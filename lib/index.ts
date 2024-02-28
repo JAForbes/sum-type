@@ -6,11 +6,13 @@ export type InternalConstructors<N extends string, D extends Definition> = {
 			tag: R
 			value: Parameters<D[R]>[0]
 		}
+		name: R
 	}
 }
 export type Constructors<N extends string, D extends Definition> = {
 	[R in keyof D]: {
 		(value: Parameters<D[R]>[0]): InternalInstance<N, D, keyof D>
+		name: R
 	}
 }
 export type MatchOptions<D extends Definition, T> = {
