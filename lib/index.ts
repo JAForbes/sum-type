@@ -102,7 +102,7 @@ export type EitherApi<Name extends string, Yes, No> = API<
 	flatMap: API<Name, { Y: (_: Yes) => any; N: (_: No) => any }>['flatMapY']
 }
 
-type InternalInstance<
+export type InternalInstance<
 	N extends string,
 	D extends Definition,
 	K extends keyof D,
