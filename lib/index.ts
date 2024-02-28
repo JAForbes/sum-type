@@ -7,12 +7,14 @@ export type InternalConstructors<N extends string, D extends Definition> = {
 			value: Parameters<D[R]>[0]
 		}
 		name: R
+		definition: D
 	}
 }
 export type Constructors<N extends string, D extends Definition> = {
 	[R in keyof D]: {
 		(value: Parameters<D[R]>[0]): InternalInstance<N, D, keyof D>
 		name: R
+		definition: D
 	}
 }
 export type MatchOptions<D extends Definition, T> = {
@@ -138,6 +140,9 @@ export function type<N extends string, D extends Definition>(
 			return { type, tag, value }
 		}
 
+		api[tag].name = tag
+		api[tag].definition = definition
+
 		api[`is${tag}`] = (v: any) => v.tag === tag
 		api[`get${tag}`] = (v: any, fallback: any, f: any) => {
 			if (f) {
@@ -151,6 +156,7 @@ export function type<N extends string, D extends Definition>(
 		api[`flatMap${tag}`] = (v: any, f: any) => {
 			return v.tag === tag ? f(v.value) : v ?? null
 		}
+
 	}
 	return api
 }
